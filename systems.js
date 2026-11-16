@@ -32,6 +32,9 @@
     ],
     drillAccount: null,
     drillPartner: null,
+    ontologyChain: 'ANC',
+    selectedBankRowId: 'BR-1',
+    whatIf: { dsoDelta: 0, matCostDelta: 0, oeeLoad: 88 },
     docFormLines: [
       { item: 'Панчохи компресійні КЛ-2 (LOT-2026-TC112)', unit: 'пар', qty: 500, price: 640 },
       { item: 'Гольфи компресійні КЛ-1 (LOT-2026-TC118)', unit: 'пар', qty: 300, price: 420 }
@@ -64,6 +67,8 @@
       title: 'Аналітика та Прогнозування',
       open: true,
       subtypes: [
+        { id: 'ontology-graph', code: 'GRAPH', title: 'Онтологія та Граф зв’язків (Lineage)', tag: 'Supply-to-Cash' },
+        { id: 'whatif-sim', code: 'SIM', title: 'What-If Симулятор (Цифровий двійник)', tag: 'AI Scenarios' },
         { id: 'an-yoy', code: 'YOY', title: 'Порівняння 2025 vs 2026 + Прогноз', tag: 'Prediction +3 міс.' },
         { id: 'an-sku', code: 'ABC', title: 'ABC/XYZ Аналіз SKU та Попит', tag: 'Прогноз замовлень' },
         { id: 'an-chains', code: 'LTV', title: 'Аналітика мереж, DSO та Скоринг', tag: 'Прогноз оплат' },
@@ -754,12 +759,26 @@
         { id: 'VAT-1', num: 'ПН-001842', date: '03.11.2026', partner: 'ТОВ «Аптека АНЦ»', type: 'ПЗ (7%)', base: 4200000, vat: 294000, status: 'Зареєстровано' },
         { id: 'VAT-2', num: 'ПН-001856', date: '08.11.2026', partner: 'ТОВ «Подорожник»', type: 'ПЗ (7%)', base: 3100000, vat: 217000, status: 'Зареєстровано' },
         { id: 'VAT-3', num: 'ПН-994021', date: '10.11.2026', partner: 'Імпорт (МД №100294)', type: 'ПК (20%)', base: 2450000, vat: 490000, status: 'Прийнято' },
-        { id: 'VAT-4', num: 'ПН-001891', date: '14.11.2026', partner: 'ТОВ «ОРТОС»', type: 'ПЗ (7%)', base: 1850000, vat: 129500, status: 'Зареєстровано' }
+        { id: 'VAT-4', num: 'ПН-001891', date: '14.11.2026', partner: 'ТОВ «ОРТОС»', type: 'ПЗ (7%)', base: 1850000, vat: 129500, status: 'Зареєстровано' },
+        { id: 'VAT-5', num: 'ПН-001904', date: '16.11.2026', partner: 'ММ «Добробут»', type: 'ПЗ (7%)', base: 920000, vat: 64400, status: 'Очікує реєстрації ЄРПН' }
       ],
+      kpis: (rows) => {
+        const pz = rows.filter(r => r.type.includes('ПЗ')).reduce((s, r) => s + Number(r.vat), 0);
+        const pk = rows.filter(r => r.type.includes('ПК')).reduce((s, r) => s + Number(r.vat), 0);
+        const popRax = 280000;
+        const seaLimit = pk + popRax - pz;
+        return [
+          { title: 'ΣНаклОтр (Вхідний ПК)', val: fmt(pk) + ' грн' },
+          { title: 'ΣНаклВид (Вихідні ПЗ)', val: fmt(pz) + ' грн' },
+          { title: 'Поповнення СЕА (ΣПопРах)', val: fmt(popRax) + ' грн' },
+          { title: 'Реєстр. ліміт СЕА ПДВ', val: fmt(seaLimit) + ' грн' }
+        ];
+      },
       summary: (rows) => {
         const pz = rows.filter(r => r.type.includes('ПЗ')).reduce((s, r) => s + Number(r.vat), 0);
         const pk = rows.filter(r => r.type.includes('ПК')).reduce((s, r) => s + Number(r.vat), 0);
-        return `<div>ПЗ: <strong>${fmt(pz)}</strong> | ПК: <strong>${fmt(pk)}</strong></div><div class="summary-checksum"><span class="checksum-badge">До сплати: ${fmt(pz - pk)}</span></div>`;
+        const pendingCount = rows.filter(r => String(r.status).includes('Очікує')).length;
+        return `<div>ПЗ: <strong>${fmt(pz)}</strong> | ПК: <strong>${fmt(pk)}</strong> | До сплати: <strong>${fmt(Math.max(0, pz - pk))} грн</strong></div><div class="summary-checksum">${pendingCount > 0 ? `<button class="btn-action-primary" style="padding:4px 10px; font-size:11px;" onclick="window.__registerVatInvoices()">Зареєструвати ПН в ЄРПН (${pendingCount})</button>` : '<span class="checksum-badge">Всі ПН зареєстровано в ЄРПН</span>'}</div>`;
       }
     },
 
@@ -1138,33 +1157,85 @@
 
     'hr-payroll': {
       columns: [
-        { key: 'dept', label: 'Підрозділ', editable: true },
-        { key: 'emp', label: 'Штат', num: true, editable: true },
+        { key: 'name', label: 'ПІБ / Штатна одиниця', editable: true },
+        { key: 'ipn', label: 'РНОКПП (ІПН)', editable: true },
+        { key: 'days', label: 'Табель (дн.)', editable: true },
         { key: 'gross', label: 'Нараховано', num: true, editable: true },
         { key: 'pdfo', label: 'ПДФО (18%)', num: true, computed: true },
         { key: 'vz', label: 'ВЗ (5%)', num: true, computed: true },
         { key: 'esv', label: 'ЄСВ (22%)', num: true, computed: true },
-        { key: 'net', label: 'До виплати', num: true, computed: true }
+        { key: 'net', label: 'До виплати', num: true, computed: true },
+        { key: 'status', label: 'Статус виплати', editable: true }
       ],
       recalcRow: (r) => { r.pdfo = Number(r.gross) * 0.18; r.vz = Number(r.gross) * 0.05; r.esv = Number(r.gross) * 0.22; r.net = Number(r.gross) - r.pdfo - r.vz; },
       rows: [
-        { id: 'HR-1', dept: 'Швейно-в’язальний цех', emp: 84, gross: 2100000, pdfo: 378000, vz: 105000, esv: 462000, net: 1617000 },
-        { id: 'HR-2', dept: 'Склад, Логістика та ВТК', emp: 24, gross: 540000, pdfo: 97200, vz: 27000, esv: 118800, net: 415800 },
-        { id: 'HR-3', dept: 'Відділ продажів та ЕДО', emp: 18, gross: 680000, pdfo: 122400, vz: 34000, esv: 149600, net: 523600 },
-        { id: 'HR-4', dept: 'Адміністрація та Бухгалтерія', emp: 14, gross: 520000, pdfo: 93600, vz: 26000, esv: 114400, net: 400400 }
+        { id: 'HR-1', name: 'Коваленко І. П. (Директор)', ipn: '2849104412', days: '21/21', gross: 120000, pdfo: 21600, vz: 6000, esv: 26400, net: 92400, status: 'Нараховано (до виплати)' },
+        { id: 'HR-2', name: 'Шевченко О. В. (Головбух)', ipn: '3019482215', days: '21/21', gross: 95000, pdfo: 17100, vz: 4750, esv: 20900, net: 73150, status: 'Нараховано (до виплати)' },
+        { id: 'HR-3', name: 'Савченко Д. І. (Комерц. дир.)', ipn: '3104829104', days: '21/21', gross: 110000, pdfo: 19800, vz: 5500, esv: 24200, net: 84700, status: 'Нараховано (до виплати)' },
+        { id: 'HR-4', name: 'Мельник С. М. (Нач. цеху)', ipn: '2958104921', days: '20/21', gross: 75000, pdfo: 13500, vz: 3750, esv: 16500, net: 57750, status: 'Нараховано (до виплати)' },
+        { id: 'HR-5', name: 'Штат цеху Merz CC4 (84 ос.)', ipn: 'Зведена відомість', days: '21/21', gross: 2100000, pdfo: 378000, vz: 105000, esv: 462000, net: 1617000, status: 'Нараховано (до виплати)' },
+        { id: 'HR-6', name: 'Склад, Логістика та ВТК (24 ос.)', ipn: 'Зведена відомість', days: '21/21', gross: 540000, pdfo: 97200, vz: 27000, esv: 118800, net: 415800, status: 'Нараховано (до виплати)' },
+        { id: 'HR-7', name: 'Відділ продажів та ЕДО (18 ос.)', ipn: 'Зведена відомість', days: '21/21', gross: 680000, pdfo: 122400, vz: 34000, esv: 149600, net: 523600, status: 'Нараховано (до виплати)' }
       ],
       kpis: (rows) => {
         const gross = rows.reduce((s, r) => s + Number(r.gross), 0);
         const esv = rows.reduce((s, r) => s + Number(r.esv), 0);
         const net = rows.reduce((s, r) => s + Number(r.net), 0);
+        const taxes = rows.reduce((s, r) => s + Number(r.pdfo) + Number(r.vz), 0);
         return [
-          { title: 'Штат працівників', val: rows.reduce((s, r) => s + Number(r.emp), 0) + ' осіб' },
           { title: 'Нараховано ФОП', val: fmt(gross) + ' грн' },
-          { title: 'ЄСВ (22%) на с/в', val: fmt(esv) + ' грн' },
+          { title: 'ПДФО (18%) + ВЗ (5%)', val: fmt(taxes) + ' грн' },
+          { title: 'ЄСВ роботодавця (22%)', val: fmt(esv) + ' грн' },
           { title: 'До виплати на картки', val: fmt(net) + ' грн' }
         ];
       },
-      summary: (rows) => `<div>До виплати: <strong>${fmt(rows.reduce((s, r) => s + Number(r.net), 0))} грн</strong> | ЄСВ (22%): <strong>${fmt(rows.reduce((s, r) => s + Number(r.esv), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">ПДФО + ВЗ + ЄСВ авто</span></div>`
+      summary: (rows) => {
+        const net = rows.reduce((s, r) => s + Number(r.net), 0);
+        const unpaid = rows.some(r => String(r.status).includes('Нараховано'));
+        return `<div>До виплати: <strong>${fmt(net)} грн</strong> | ПДФО+ВЗ+ЄСВ розраховано автоматично</div><div class="summary-checksum">${unpaid ? `<button class="btn-action-primary" style="padding:4px 10px; font-size:11px;" onclick="window.__payPayrollToBank()">Виплатити в банк (Дт 661 Кт 311)</button>` : '<span class="checksum-badge">Відомість виплачено</span>'}</div>`;
+      }
+    },
+
+    'ontology-graph': {
+      columns: [
+        { key: 'stage', label: 'Рівень онтології', editable: false },
+        { key: 'entity', label: 'Об’єкт', editable: false },
+        { key: 'metric', label: 'Ключовий показник', editable: false },
+        { key: 'status', label: 'Стан', editable: false }
+      ],
+      rows: [
+        { id: 'ONT-1', stage: '1. Сировина', entity: 'Пряжа Lycra 70 DEN', metric: 'Запас 11 дн. (Склад №1)', status: 'Увага' },
+        { id: 'ONT-2', stage: '2. Виробництво', entity: 'Merz CC4 #1-4', metric: 'OEE 88.4%', status: 'Норма' },
+        { id: 'ONT-3', stage: '3. Партія', entity: 'LOT-2026-TC112', metric: '4 172 пар (26.4 мм рт. ст.)', status: 'Сертифіковано' },
+        { id: 'ONT-4', stage: '4. Продажі / ЕДО', entity: 'ВН-004182 (АНЦ)', metric: '1 004 000 грн (ПДВ 7%)', status: 'Відвантажено' },
+        { id: 'ONT-5', stage: '5. Казначейство', entity: 'Приват24 (311)', metric: '+1 004 000 грн до звірки', status: 'Очікує звірки' }
+      ],
+      kpis: () => [
+        { title: 'Активних зв’язків графу', val: '142 об’єкти' },
+        { title: 'Наскрізна маржа ланцюга', val: '34.8%' },
+        { title: 'Вузьке місце (Bottleneck)', val: 'Lycra 70 DEN (11 дн.)' },
+        { title: 'Синхронізація Lineage', val: 'Live (Real-Time)' }
+      ],
+      summary: () => `<div>Онтологічний граф підприємства: Сировина &rarr; Верстат &rarr; Партія &rarr; Накладна &rarr; Гроші</div><div class="summary-checksum"><span class="checksum-badge">Digital Twin Active</span></div>`
+    },
+
+    'whatif-sim': {
+      columns: [
+        { key: 'param', label: 'Параметр сценарію', editable: false },
+        { key: 'base', label: 'Базовий план', editable: false },
+        { key: 'sim', label: 'Симуляція', editable: false },
+        { key: 'status', label: 'Вплив', editable: false }
+      ],
+      rows: [
+        { id: 'SIM-1', param: 'Cash Runway (90 дн.)', base: '5 820 000 грн', sim: 'Live', status: 'Активно' }
+      ],
+      kpis: () => [
+        { title: 'Режим симуляції', val: 'Цифровий двійник' },
+        { title: 'Базовий Cash Balance', val: '5 820 000 грн' },
+        { title: 'Базова Чиста маржа', val: '18.4%' },
+        { title: 'Горизонт прогнозу', val: '90 днів' }
+      ],
+      summary: () => `<div>Інтерактивний What-If симулятор управлінських рішень</div><div class="summary-checksum"><span class="checksum-badge">Real-Time Stress Test</span></div>`
     }
   };
 
@@ -1249,7 +1320,37 @@
     }
 
     recomputeAllAccountingReports();
+    saveStateToStorage();
   }
+
+  const STORAGE_KEY = 'opexmetrix_erp_state_v1';
+  function saveStateToStorage() {
+    try {
+      const payload = { datasets: {}, tasks: state.tasks, openTabs: state.openTabs };
+      Object.keys(DATASETS).forEach(k => { payload.datasets[k] = DATASETS[k].rows; });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {}
+  }
+
+  function loadStateFromStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (parsed.datasets) {
+        Object.keys(parsed.datasets).forEach(k => {
+          if (DATASETS[k] && Array.isArray(parsed.datasets[k])) DATASETS[k].rows = parsed.datasets[k];
+        });
+      }
+      if (Array.isArray(parsed.tasks)) state.tasks = parsed.tasks;
+      if (Array.isArray(parsed.openTabs) && parsed.openTabs.length) state.openTabs = parsed.openTabs;
+    } catch (e) {}
+  }
+
+  window.__resetDemoData = function() {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  };
 
   function generateScanSvg(docNum, docType, partner, amount, date) {
     return `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -1951,13 +2052,157 @@
           </div>
         </div>
       `;
+    } else if (state.activeView === 'ontology-graph' && state.viewDisplayMode === 'LIST') {
+      const chains = {
+        ANC: {
+          title: 'Ланцюг: Аптека АНЦ (ВН-004182 → 1 004 000 грн)',
+          nodes: [
+            { step: '1. Сировина', name: 'Пряжа Lycra 70 DEN', sub: 'Запас 11 дн. • Склад №1', view: 'wms-m19', color: '#D97706' },
+            { step: '2. Верстат', name: 'Merz CC4 #1-4', sub: 'OEE 88.4% • План 4 200', view: 'an-prod', color: '#2563EB' },
+            { step: '3. Партія', name: 'LOT-2026-TC112', sub: '4 172 пар • 26.4 мм рт.ст.', view: 'wms-batch', color: '#2563EB' },
+            { step: '4. Накладна', name: 'ВН-004182 (АНЦ)', sub: 'Дт 361 Кт 701 • 1.004M', view: 'sales-orders', color: '#059669' },
+            { step: '5. ЄРПН / ПДВ', name: 'ПН-001842 (7%)', sub: 'ПЗ: 294 000 грн', view: 'vat-decl', color: '#7C3AED' },
+            { step: '6. Банк / Cash', name: 'Приват24 (311)', sub: '+1 004 000 грн → Runway', view: 'bank-recon', color: '#059669' }
+          ]
+        },
+        POD: {
+          title: 'Ланцюг: Подорожник (ВН-004155 → 540 000 грн)',
+          nodes: [
+            { step: '1. Сировина', name: 'Бавовна / Поліамід', sub: 'Запас 24 дн. • Склад №1', view: 'wms-m19', color: '#059669' },
+            { step: '2. Верстат', name: 'Lonati Medical #3', sub: 'OEE 91.2% • Гольфи КЛ-1', view: 'an-prod', color: '#2563EB' },
+            { step: '3. Партія', name: 'LOT-2026-TC118', sub: '2 850 пар • ISO 13485', view: 'wms-batch', color: '#2563EB' },
+            { step: '4. Накладна', name: 'ВН-004155', sub: 'Дт 361 Кт 701 • 540k', view: 'sales-orders', color: '#059669' },
+            { step: '5. ЄРПН / ПДВ', name: 'ПН-001856 (7%)', sub: 'ПЗ: 217 000 грн', view: 'vat-decl', color: '#7C3AED' },
+            { step: '6. Банк / Cash', name: 'Райффайзен (311)', sub: '+540 000 грн → Cash-In', view: 'bank-recon', color: '#059669' }
+          ]
+        },
+        ORT: {
+          title: 'Ланцюг: ОРТОС (ORD-8812 → 685 000 грн)',
+          nodes: [
+            { step: '1. Сировина', name: 'Неопрен 3мм + Ребра', sub: 'Запас 19 дн. • Склад №2', view: 'wms-m19', color: '#059669' },
+            { step: '2. Цех', name: 'Швейний цех №2', sub: 'Корсети / Бандажі', view: 'mes-orders', color: '#2563EB' },
+            { step: '3. Резерв WMS', name: 'Резерв ORD-8812', sub: '850 шт • На погодженні', view: 'wms-reserves', color: '#D97706' },
+            { step: '4. Замовлення', name: 'ORD-8812 (ОРТОС)', sub: '685 000 грн • DSO 38 дн.', view: 'sales-orders', color: '#D97706' },
+            { step: '5. ЄРПН / ПДВ', name: 'ПН-001891 (7%)', sub: 'ПЗ: 129 500 грн', view: 'vat-decl', color: '#7C3AED' },
+            { step: '6. Прогноз Cash', name: 'Очікується 25.11', sub: '+685 000 грн (Ліміт OK)', view: 'an-chains', color: '#2563EB' }
+          ]
+        }
+      };
+      const activeChain = chains[state.ontologyChain] || chains.ANC;
+      viewport.innerHTML = `
+        <div style="padding:20px 24px; display:flex; flex-direction:column; gap:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h3 style="font-size:15px; font-weight:800; color:#0F172A;">Онтологія підприємства (Object Lineage Graph)</h3>
+              <div style="font-size:12px; color:#64748B;">${esc(activeChain.title)} • Клікніть по будь-якому вузлу для переходу в живий реєстр</div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-doc-type ${state.ontologyChain === 'ANC' ? 'active' : ''}" onclick="window.__setOntologyChain('ANC')">АНЦ (ВН-004182)</button>
+              <button class="btn-doc-type ${state.ontologyChain === 'POD' ? 'active' : ''}" onclick="window.__setOntologyChain('POD')">Подорожник</button>
+              <button class="btn-doc-type ${state.ontologyChain === 'ORT' ? 'active' : ''}" onclick="window.__setOntologyChain('ORT')">ОРТОС (ORD-8812)</button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(6, minmax(145px, 1fr)); gap:10px; overflow-x:auto; padding:8px 2px;">
+            ${activeChain.nodes.map((n, i) => `
+              <div onclick="window.__switchToTable('${n.view}')" style="cursor:pointer; background:#F8FAFC; border:1px solid #CBD5E1; border-top:4px solid ${n.color}; border-radius:8px; padding:12px; position:relative; transition:transform 0.12s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                <div style="font-size:10px; font-weight:700; color:#64748B; text-transform:uppercase; margin-bottom:4px;">${esc(n.step)}</div>
+                <div style="font-size:12.5px; font-weight:800; color:#0F172A; margin-bottom:4px;">${esc(n.name)}</div>
+                <div style="font-size:11px; color:#475569; font-family:var(--font-mono);">${esc(n.sub)}</div>
+                ${i < activeChain.nodes.length - 1 ? '<div style="position:absolute; right:-11px; top:50%; transform:translateY(-50%); background:#FFFFFF; border:1px solid #CBD5E1; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#2563EB; z-index:2;">&rarr;</div>' : ''}
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="background:#0F172A; color:#E2E8F0; border-radius:8px; padding:14px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="font-size:11px; color:#94A3B8; text-transform:uppercase; font-weight:700;">Висновок AI-Онтології</div>
+              <div style="font-size:13px; font-weight:600; margin-top:2px;">Вузьке місце ланцюга: <span style="color:#FBBF24;">Запас пряжі Lycra 70 DEN (11 днів)</span>. Рекомендоване замовлення 1 500 кг до 22.11 розблокує +5 400 пар випуску.</div>
+            </div>
+            <button class="btn-action-primary" onclick="window.__switchToTable('whatif-sim')">Запустити What-If Симуляцію &rarr;</button>
+          </div>
+        </div>
+      `;
+    } else if (state.activeView === 'whatif-sim' && state.viewDisplayMode === 'LIST') {
+      const wi = state.whatIf;
+      const baseCash = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end || 0), 0);
+      const baseRev = 28400000;
+      const baseMargin = 18.4;
+      const simRev = baseRev * (wi.oeeLoad / 88);
+      const simMargin = Math.max(2.0, baseMargin - (wi.matCostDelta * 0.42) + ((wi.oeeLoad - 88) * 0.14));
+      const dsoCashImpact = -(wi.dsoDelta * 145000);
+      const matCashImpact = -(wi.matCostDelta * 62000);
+      const oeeCashImpact = (wi.oeeLoad - 88) * 85000;
+      const simCash90 = Math.round(baseCash + dsoCashImpact + matCashImpact + oeeCashImpact);
+      const isGap = simCash90 < 2000000;
+
+      viewport.innerHTML = `
+        <div style="padding:20px 24px; display:flex; flex-direction:column; gap:18px;">
+          <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:18px;">
+            <div style="background:#F8FAFC; border:1px solid var(--border); border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:14px;">
+              <div style="font-size:14px; font-weight:800; color:#0F172A;">Параметри стрес-тесту (Цифровий двійник)</div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:4px;">
+                  <span>Зміна DSO (затримка оплат мережами)</span>
+                  <span style="font-family:var(--font-mono); color:${wi.dsoDelta > 0 ? '#DC2626' : '#059669'};">${wi.dsoDelta > 0 ? '+' : ''}${wi.dsoDelta} дн.</span>
+                </div>
+                <input type="range" min="-10" max="30" step="1" value="${wi.dsoDelta}" style="width:100%;" oninput="window.__updateWhatIf('dsoDelta', this.value)">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:4px;">
+                  <span>Ціна імпортної сировини / Курс EUR</span>
+                  <span style="font-family:var(--font-mono); color:${wi.matCostDelta > 0 ? '#DC2626' : '#059669'};">${wi.matCostDelta > 0 ? '+' : ''}${wi.matCostDelta}%</span>
+                </div>
+                <input type="range" min="-15" max="35" step="1" value="${wi.matCostDelta}" style="width:100%;" oninput="window.__updateWhatIf('matCostDelta', this.value)">
+              </div>
+
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:4px;">
+                  <span>Завантаження цеху Merz CC4 (OEE)</span>
+                  <span style="font-family:var(--font-mono); color:#2563EB;">${wi.oeeLoad}%</span>
+                </div>
+                <input type="range" min="50" max="115" step="1" value="${wi.oeeLoad}" style="width:100%;" oninput="window.__updateWhatIf('oeeLoad', this.value)">
+              </div>
+
+              <div style="display:flex; gap:8px; margin-top:4px;">
+                <button class="btn-action-outline" onclick="window.__updateWhatIf('reset', 0)">Скинути до базового</button>
+                <button class="btn-action-primary" onclick="window.__executeWhatIfAction()">Створити план дій (Задачу)</button>
+              </div>
+            </div>
+
+            <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:10px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; gap:12px;">
+              <div style="font-size:14px; font-weight:800; color:#0F172A;">Прогнозований результат (90 днів)</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="padding:12px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+                  <div style="font-size:11px; color:#64748B; font-weight:600;">Прогнозний Cash Balance</div>
+                  <div style="font-size:20px; font-weight:800; font-family:var(--font-mono); color:${isGap ? '#DC2626' : '#059669'};">${state.noNumbersMode ? '—' : fmt(simCash90) + ' грн'}</div>
+                  <div style="font-size:11px; color:#64748B;">База: ${fmt(baseCash)} грн</div>
+                </div>
+                <div style="padding:12px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px;">
+                  <div style="font-size:11px; color:#64748B; font-weight:600;">Прогнозна Чиста маржа</div>
+                  <div style="font-size:20px; font-weight:800; font-family:var(--font-mono); color:${simMargin < 12 ? '#D97706' : '#2563EB'};">${simMargin.toFixed(1)}%</div>
+                  <div style="font-size:11px; color:#64748B;">База: ${baseMargin}% | Виторг: ${fmt(simRev / 1000000)}M</div>
+                </div>
+              </div>
+              <div style="padding:12px; border-radius:8px; background:${isGap ? '#FEF2F2' : '#ECFDF5'}; border:1px solid ${isGap ? '#FECACA' : '#A7F3D0'}; color:${isGap ? '#991B1B' : '#065F46'}; font-size:12.5px; font-weight:600;">
+                ${isGap
+                  ? 'КРИТИЧНИЙ РИЗИК КАСОВОГО РОЗРИВУ: Затримка оплат та зростання сировини знижують ліквідність нижче безпечного порогу 2.0M грн. Рекомендовано факторинг АНЦ або передоплату 50%.'
+                  : 'СЦЕНАРІЙ СТІЙКИЙ: Залишок грошових коштів покриває 100% операційних витрат, зарплату (ФОП + ЄСВ) та закупівлю Lycra без залучення овердрафту.'}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     } else if (state.activeView === 'bank-recon' && state.viewDisplayMode === 'LIST') {
+      const selRow = filteredRows.find(r => r.id === state.selectedBankRowId) || filteredRows[0];
       viewport.innerHTML = `
         <div class="recon-split">
           <div class="recon-col">
             <div style="font-size:12px; font-weight:700; color:#334155; text-transform:uppercase;">1. Банківська виписка (Приват24 / Райффайзен)</div>
             ${filteredRows.map(r => `
-              <div class="recon-item ${r.status.includes('Звірено') ? 'matched' : ''}">
+              <div class="recon-item ${r.status.includes('Звірено') ? 'matched' : ''}" onclick="window.__selectBankReconRow('${esc(r.id)}')" style="cursor:pointer; ${selRow && selRow.id === r.id ? 'border:2px solid #2563EB; background:#EFF6FF;' : ''}">
                 <div>
                   <div style="font-weight:700; font-size:12.5px;">${esc(r.partner)}</div>
                   <div style="font-size:11px; color:#64748B;">${esc(r.date)} • ${esc(r.purpose)}</div>
@@ -1970,20 +2215,37 @@
             `).join('')}
           </div>
           <div class="recon-col">
-            <div style="font-size:12px; font-weight:700; color:#334155; text-transform:uppercase;">2. AI-Підбір інвойсів та 1-Клік Проведення</div>
-            ${filteredRows.map(r => `
-              <div class="recon-item ${r.status.includes('Звірено') ? 'matched' : ''}">
-                <div>
-                  <div style="font-weight:700; font-size:12.5px;">${esc(r.matchInv)}</div>
-                  <div style="font-size:11px; color:#059669; font-weight:600;">Впевненість моделі: ${fmtPct(r.conf)}</div>
+            <div style="font-size:12px; font-weight:700; color:#334155; text-transform:uppercase;">2. Рознесення платежу по рахунках та інвойсах</div>
+            ${selRow ? `
+              <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:8px; padding:14px; display:flex; flex-direction:column; gap:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-size:13px; font-weight:800; color:#0F172A;">${esc(selRow.partner)}</div>
+                    <div style="font-size:11.5px; color:#64748B;">${esc(selRow.purpose)}</div>
+                  </div>
+                  <div style="font-family:var(--font-mono); font-size:15px; font-weight:800; color:${selRow.amount >= 0 ? '#059669' : '#DC2626'};">${fmt(selRow.amount)} грн</div>
                 </div>
-                <div>
-                  ${r.status.includes('Звірено')
-                    ? '<span class="status-badge status-ok">Проведено</span>'
-                    : `<button class="btn-action-primary" onclick="window.__reconcileBankRow('${esc(r.id)}')">Звірити і Провести &rarr;</button>`}
+
+                <div class="form-group">
+                  <label class="form-label">Кореспондуючий рахунок обліку:</label>
+                  <select id="bank-recon-acc" class="form-control">
+                    <option value="${selRow.amount >= 0 ? '361' : '92'}" selected>${selRow.amount >= 0 ? '361 — Погашення заборгованості покупця (Дт 311 Кт 361)' : '92 — Адміністративні витрати / РКО банку (Дт 92 Кт 311)'}</option>
+                    <option value="681">681 — Аванс одержаний від покупця (Дт 311 Кт 681)</option>
+                    <option value="631">631 — Оплата постачальнику (Дт 631 Кт 311)</option>
+                  </select>
+                </div>
+
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:10px; font-size:12px;">
+                  <strong>Підібраний документ:</strong> ${esc(selRow.matchInv)} (Збіг: ${fmtPct(selRow.conf)})
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                  ${selRow.status.includes('Звірено')
+                    ? '<span class="status-badge status-ok">Вже звірено та проведено в ОСВ</span>'
+                    : `<button class="btn-action-primary" onclick="window.__postSplitBankRecon('${esc(selRow.id)}')">Рознести і Провести в облік &rarr;</button>`}
                 </div>
               </div>
-            `).join('')}
+            ` : ''}
           </div>
         </div>
       `;
@@ -2130,6 +2392,89 @@
     const summaryEl = document.getElementById('table-summary-bar');
     if (summaryEl) summaryEl.innerHTML = dataset.summary ? dataset.summary(filteredRows) : `<div>Рядків: ${filteredRows.length}</div>`;
   }
+
+  window.__setOntologyChain = function(chainKey) {
+    state.ontologyChain = chainKey;
+    renderActiveView();
+  };
+
+  window.__updateWhatIf = function(field, val) {
+    if (field === 'reset') state.whatIf = { dsoDelta: 0, matCostDelta: 0, oeeLoad: 88 };
+    else state.whatIf[field] = parseInt(val, 10) || 0;
+    renderActiveView();
+  };
+
+  window.__executeWhatIfAction = function() {
+    state.tasks.unshift({
+      id: 'TSK-' + Math.floor(200 + Math.random() * 799),
+      title: `What-If План дій (DSO ${state.whatIf.dsoDelta >= 0 ? '+' : ''}${state.whatIf.dsoDelta} дн., Сировина ${state.whatIf.matCostDelta >= 0 ? '+' : ''}${state.whatIf.matCostDelta}%)`,
+      sender: 'AI What-If Симулятор',
+      recipient: 'Коваленко І. П. (CEO)',
+      priority: 'URGENT',
+      date: '16.11.2026 Щойно',
+      view: 'whatif-sim',
+      rowId: 'SIM-1',
+      status: 'ACTIVE',
+      comment: `Затвердити ліміти дебіторки та замовити пряжу Lycra 70 DEN при завантаженні цеху ${state.whatIf.oeeLoad}%.`
+    });
+    saveStateToStorage();
+    renderTasksDrawer();
+    showToast('Сценарій What-If передано в задачі на виконання!');
+  };
+
+  window.__selectBankReconRow = function(rowId) {
+    state.selectedBankRowId = rowId;
+    renderActiveView();
+  };
+
+  window.__postSplitBankRecon = function(rowId) {
+    const r = DATASETS['bank-recon'].rows.find(x => x.id === rowId);
+    const acc = document.getElementById('bank-recon-acc')?.value || (r && r.amount >= 0 ? '361' : '92');
+    if (!r || r.status.includes('Звірено')) return;
+    pushUndo('bank-recon', DATASETS['bank-recon'].rows);
+    r.status = 'Звірено автоматично';
+    postUniversalEntry({
+      doc: 'БВ-RECON',
+      dt: r.amount >= 0 ? '311' : acc,
+      ct: r.amount >= 0 ? acc : '311',
+      amount: Math.abs(r.amount),
+      partner: r.partner,
+      desc: `${r.partner}: ${r.purpose} (Рах. ${acc})`,
+      source: 'Банк-Клієнт Split'
+    });
+    updateAuditRadar();
+    renderActiveView();
+    showToast(`Платіж ${r.partner} рознесено на рахунок ${acc}!`);
+  };
+
+  window.__registerVatInvoices = function() {
+    let count = 0;
+    DATASETS['vat-decl'].rows.forEach(r => {
+      if (String(r.status).includes('Очікує')) {
+        r.status = 'Зареєстровано';
+        count++;
+      }
+    });
+    if (count > 0) {
+      saveStateToStorage();
+      renderActiveView();
+      showToast(`Зареєстровано ${count} ПН в ЄРПН! Ліміт СЕА ПДВ перераховано.`);
+    }
+  };
+
+  window.__payPayrollToBank = function() {
+    const rows = DATASETS['hr-payroll'].rows;
+    const unpaid = rows.filter(r => String(r.status).includes('Нараховано'));
+    if (!unpaid.length) return;
+    const netTot = unpaid.reduce((s, r) => s + Number(r.net || 0), 0);
+    const taxTot = unpaid.reduce((s, r) => s + Number(r.pdfo || 0) + Number(r.vz || 0), 0);
+    const esvTot = unpaid.reduce((s, r) => s + Number(r.esv || 0), 0);
+    unpaid.forEach(r => { r.status = 'Виплачено (Банк OK)'; });
+    postUniversalEntry({ doc: 'ЗП-1126', dt: '661', ct: '311', amount: netTot, partner: 'Співробітники ТОВ «ТД «Алком»', desc: 'Виплата зарплати на картки за листопад 2026', source: 'Зарплатна відомість' });
+    postUniversalEntry({ doc: 'ЗП-ПОД-1126', dt: '641', ct: '311', amount: taxTot + esvTot, partner: 'ДПС України', desc: 'Перерахування ПДФО (18%), ВЗ (5%) та ЄСВ (22%)', source: 'Зарплатна відомість' });
+    renderActiveView();
+    showToast(`Зарплату ${fmt(netTot)} грн та податки ${fmt(taxTot + esvTot)} грн виплачено з банку!`);
+  };
 
   window.__changeGraphMetric = function(metricKey) {
     state.selectedGraphMetric = metricKey;
@@ -2819,6 +3164,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    loadStateFromStorage();
     initLoginGate();
     renderSidebar();
     renderTasksDrawer();
