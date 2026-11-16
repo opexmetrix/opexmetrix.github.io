@@ -1,5 +1,5 @@
 /**
- * OpexMetrix Systems — Odoo-style Enterprise ERP + Analytics & Prediction
+ * OpexMetrix Systems — Enterprise ERP + Analytics & Prediction
  */
 
 (function () {
@@ -70,9 +70,9 @@
       open: true,
       subtypes: [
         { id: 'osv', code: 'ОСВ', title: 'Оборотно-сальдова відомість', tag: 'Синтетичний облік' },
-        { id: 'ledger', code: 'ACDOCA', title: 'Єдиний журнал проводок (Live)', tag: 'Universal Journal' },
-        { id: 'posting-setup', code: 'POST', title: 'Матриця автопроводок (Posting)', tag: 'Business Central / SAP' },
-        { id: 'bank-recon', code: 'RECON', title: 'Звірка банку (Side-by-Side AI)', tag: 'Odoo Bank Match' },
+        { id: 'ledger', code: 'ЖУРНАЛ', title: 'Єдиний журнал проводок (Live)', tag: 'Universal Journal' },
+        { id: 'posting-setup', code: 'POST', title: 'Матриця автопроводок (Posting)', tag: 'Posting Groups' },
+        { id: 'bank-recon', code: 'RECON', title: 'Звірка банку (Side-by-Side AI)', tag: 'Auto Bank Match' },
         { id: 'coa', code: 'COA', title: 'План рахунків (Live залишки)', tag: 'Chart of Accounts' },
         { id: 'fixed-assets', code: 'ОЗ', title: 'Основні засоби та Амортизація', tag: 'Знос 131' },
         { id: 'osv-acc', code: 'ОСВ-Р', title: 'ОСВ по рахунку 361', tag: 'Аналітика мереж' },
@@ -493,7 +493,7 @@
         { title: 'Податкові групи (Tax Grid)', val: '7% / 20% / 0%' },
         { title: 'Розсинхрон Subledger-GL', val: 'Неможливий (0.00)' }
       ],
-      summary: () => `<div>Матриця автоматичного визначення рахунків (Business Central / SAP OBYC)</div><div class="summary-checksum"><span class="checksum-badge">Оператор не обирає Дт/Кт вручну</span></div>`
+      summary: () => `<div>Матриця автоматичного визначення рахунків (Posting Groups)</div><div class="summary-checksum"><span class="checksum-badge">Оператор не обирає Дт/Кт вручну</span></div>`
     },
 
     'bank-recon': {
@@ -521,7 +521,7 @@
           { title: 'Статус виписки', val: 'Синхронізовано' }
         ];
       },
-      summary: () => `<div>Інтерактивна звірка банку (Odoo / Copilot Matching)</div><div class="summary-checksum"><span class="checksum-badge">1-Клік проведення в ОСВ</span></div>`
+      summary: () => `<div>Інтерактивна звірка банку (AI Auto-Matching)</div><div class="summary-checksum"><span class="checksum-badge">1-Клік проведення в ОСВ</span></div>`
     },
 
     'coa': {
@@ -1481,7 +1481,7 @@
 
       <div class="journal-card">
         <div class="journal-card-head">
-          <div><div class="journal-card-title">Єдиний журнал (ACDOCA / Live)</div><div class="journal-card-sub">Подвійний запис без ручного вводу Дт/Кт</div></div>
+          <div><div class="journal-card-title">Єдиний журнал (Live Ledger)</div><div class="journal-card-sub">Подвійний запис без ручного вводу Дт/Кт</div></div>
           <span class="status-badge status-ok">${DATASETS['ledger'].rows.length} записів</span>
         </div>
         <div class="journal-card-val">${state.noNumbersMode ? '—' : fmt(osvDiff)} <span style="font-size:12px; font-weight:500; color:#059669;">розбіжностей</span></div>
@@ -1749,7 +1749,7 @@
     return { domain: DOMAINS[0], subtype: DOMAINS[0].subtypes[0] };
   }
 
-  // ================= ODOO-STYLE LIST / KANBAN + INSPECTOR =================
+  // ================= LIST / KANBAN + INSPECTOR =================
   function renderModuleKPIs(dataset, rows) {
     const strip = document.getElementById('module-kpi-strip');
     if (!strip) return;
@@ -2365,7 +2365,7 @@
 
     if (type === 'SALE') {
       DATASETS['sales-orders'].rows.unshift({ id: docId, date: '16.11.2026', client: partner, items: 24, sum: amt, status: 'Відвантажено' });
-      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Видаткова накладна', partner, channel: 'Вчасно.ЕДО / 1С-міст', sum: amt, status: 'Проведено (Дт 361 Кт 701)' });
+      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Видаткова накладна', partner, channel: 'Вчасно.ЕДО / API', sum: amt, status: 'Проведено (Дт 361 Кт 701)' });
       postUniversalEntry({ doc: docId, dt: '361', ct: '701', amount: amt, partner, desc: `${partner}: ${desc}`, source: 'Авто-проводка' });
     } else if (type === 'PAYMENT') {
       DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Банківська виписка', partner, channel: 'Open Banking API', sum: amt, status: 'Проведено (Дт 311 Кт 361)' });

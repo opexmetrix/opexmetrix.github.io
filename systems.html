@@ -193,7 +193,7 @@
     }
     .sidebar-nav-item:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
     .sidebar-nav-item.active { background: #2563EB; color: #FFFFFF; }
-    /* Odoo Journal Cards & Bank Recon Split View */
+    /* Journal Cards & Bank Recon Split View */
     .journal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
     @media (max-width: 1200px) { .journal-grid { grid-template-columns: repeat(2, 1fr); } }
     .journal-card {
@@ -784,11 +784,11 @@
         </div>
       </section>
 
-      <!-- 1B. ACCOUNTING COCKPIT (ODOO JOURNAL CARDS + SAP/BC KITCHEN) -->
+      <!-- 1B. ACCOUNTING COCKPIT (JOURNAL CARDS & AUTOMATED ACCOUNTING) -->
       <section class="ceo-cockpit" id="acc-cockpit-view">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <h1 style="font-size:19px; font-weight:800; color:#0F172A;">Робочий стіл Бухгалтера — Автоматичний облік (Odoo / SAP / BC)</h1>
+            <h1 style="font-size:19px; font-weight:800; color:#0F172A;">Робочий стіл Бухгалтера — Автоматичний облік</h1>
             <div style="font-size:12px; color:#64748B;">Журнали операцій, авто-звірка банку, матриця проводок (Posting Groups) та всі регламентні звіти</div>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -943,12 +943,12 @@
   <div class="modal-overlay" id="modal-import">
     <div class="modal-box" style="width:600px;">
       <div class="modal-header">
-        <h3>Швидкий імпорт: Банк-Клієнт / 1С XML</h3>
+        <h3>Швидкий імпорт: Банк-Клієнт / XML</h3>
         <button class="btn-close-drawer" id="btn-close-import">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Виписка (1CClientBankExchange / CSV):</label>
+          <label class="form-label">Виписка (ClientBankExchange / CSV):</label>
           <textarea id="import-raw-text" class="form-control" rows="5" style="font-family:var(--font-mono); font-size:11px;">2026-11-16;UA483052990000026004016201124;ТОВ «Аптека АНЦ»;+1004000.00;Оплата згідно договору 402/26 ВН-004182
 2026-11-16;UA123808050000000026009481022;ТОВ «Подорожник»;+540000.00;Оплата за ортопедичні вироби згідно рах. 8819</textarea>
         </div>
