@@ -184,26 +184,15 @@
       display: flex; flex-direction: column; border-right: 1px solid #1E293B;
       flex-shrink: 0; user-select: none;
     }
-    .sidebar-ceo-btn {
-      margin: 10px 12px 4px; padding: 9px 14px;
-      background: linear-gradient(135deg, #1E3A8A, #2563EB);
-      color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
+    .sidebar-nav-item {
+      margin: 2px 8px; padding: 8px 12px;
+      background: transparent; color: #E2E8F0; border: none; border-radius: 6px;
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
       display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); transition: all 0.15s;
+      transition: background 0.12s; text-align: left; width: calc(100% - 16px);
     }
-    .sidebar-ceo-btn:hover { filter: brightness(1.08); }
-    .sidebar-ceo-btn.active { box-shadow: 0 0 0 2px #93C5FD; }
-    .sidebar-acc-btn {
-      margin: 4px 12px 8px; padding: 9px 14px;
-      background: linear-gradient(135deg, #065F46, #059669);
-      color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
-      font-size: 12px; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22); transition: all 0.15s;
-    }
-    .sidebar-acc-btn:hover { filter: brightness(1.08); }
-    .sidebar-acc-btn.active { box-shadow: 0 0 0 2px #6EE7B7; }
+    .sidebar-nav-item:hover { background: rgba(255,255,255,0.06); color: #FFFFFF; }
+    .sidebar-nav-item.active { background: #2563EB; color: #FFFFFF; }
     /* Odoo Journal Cards & Bank Recon Split View */
     .journal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
     @media (max-width: 1200px) { .journal-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -598,23 +587,6 @@
     </div>
 
     <div class="sys-actions">
-      <button id="btn-audit-radar" class="btn-radar-header" title="Аудит-Радар 24/7">
-        <span>Аудит-Радар:</span>
-        <strong id="radar-count">2 ризики</strong>
-      </button>
-
-      <button id="btn-open-import" class="btn-header" title="Миттєвий імпорт Приват24 / 1С">
-        <span>Імпорт Банк / 1С</span>
-      </button>
-
-      <button id="btn-open-automation" class="btn-auto-header">
-        <span>&#9889; Автоматика</span>
-      </button>
-
-      <button id="btn-toggle-numbers" class="btn-header">
-        <strong id="label-num-mode">З цифрами</strong>
-      </button>
-
       <button id="btn-tasks-drawer" class="btn-header">
         <span>Маршрути</span>
         <span id="task-badge-count" class="task-counter-badge">4</span>
@@ -632,14 +604,14 @@
   <!-- ================= MAIN LAYOUT ================= -->
   <div class="sys-layout">
     <aside class="sys-sidebar">
-      <button class="sidebar-ceo-btn" id="btn-sidebar-ceo">
-        <span>Аналітика та Прогнози (CEO)</span>
-        <span>&rarr;</span>
-      </button>
-      <button class="sidebar-acc-btn" id="btn-sidebar-acc">
-        <span>Кухня Бухгалтера (Odoo/SAP)</span>
-        <span>&rarr;</span>
-      </button>
+      <div style="padding: 8px 0 4px; border-bottom: 1px solid #1E293B;">
+        <button class="sidebar-nav-item" id="btn-sidebar-ceo">
+          <span>Огляд та Аналітика</span>
+        </button>
+        <button class="sidebar-nav-item" id="btn-sidebar-acc">
+          <span>Робочий стіл обліку</span>
+        </button>
+      </div>
 
       <div class="sidebar-search">
         <input type="text" id="tree-search" placeholder="Швидкий пошук модуля...">
