@@ -185,7 +185,7 @@
       flex-shrink: 0; user-select: none;
     }
     .sidebar-ceo-btn {
-      margin: 12px 12px 8px; padding: 10px 14px;
+      margin: 10px 12px 4px; padding: 9px 14px;
       background: linear-gradient(135deg, #1E3A8A, #2563EB);
       color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
       font-size: 12px; font-weight: 700; cursor: pointer;
@@ -194,6 +194,38 @@
     }
     .sidebar-ceo-btn:hover { filter: brightness(1.08); }
     .sidebar-ceo-btn.active { box-shadow: 0 0 0 2px #93C5FD; }
+    .sidebar-acc-btn {
+      margin: 4px 12px 8px; padding: 9px 14px;
+      background: linear-gradient(135deg, #065F46, #059669);
+      color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22); transition: all 0.15s;
+    }
+    .sidebar-acc-btn:hover { filter: brightness(1.08); }
+    .sidebar-acc-btn.active { box-shadow: 0 0 0 2px #6EE7B7; }
+    /* Odoo Journal Cards & Bank Recon Split View */
+    .journal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media (max-width: 1200px) { .journal-grid { grid-template-columns: repeat(2, 1fr); } }
+    .journal-card {
+      background: #FFFFFF; border: 1px solid var(--border); border-radius: 10px;
+      padding: 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px;
+      border-top: 3px solid var(--primary);
+    }
+    .journal-card.green { border-top-color: var(--success); }
+    .journal-card.amber { border-top-color: var(--warning); }
+    .journal-card-head { display: flex; justify-content: space-between; align-items: flex-start; }
+    .journal-card-title { font-size: 14px; font-weight: 800; color: var(--text-main); }
+    .journal-card-sub { font-size: 11px; color: var(--text-muted); }
+    .journal-card-val { font-family: var(--font-mono); font-size: 20px; font-weight: 800; color: var(--text-main); }
+    .journal-card-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid #F1F5F9; }
+    .recon-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; height: 100%; overflow: auto; }
+    .recon-col { display: flex; flex-direction: column; gap: 10px; }
+    .recon-item {
+      background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; box-shadow: var(--shadow-sm);
+    }
+    .recon-item.matched { border-left: 4px solid var(--success); background: #F0FDF4; }
     .sidebar-search { padding: 4px 12px 10px; border-bottom: 1px solid #1E293B; }
     .sidebar-search input {
       width: 100%; background: #1E293B; border: 1px solid #334155; color: #FFFFFF;
@@ -604,6 +636,10 @@
         <span>Аналітика та Прогнози (CEO)</span>
         <span>&rarr;</span>
       </button>
+      <button class="sidebar-acc-btn" id="btn-sidebar-acc">
+        <span>Кухня Бухгалтера (Odoo/SAP)</span>
+        <span>&rarr;</span>
+      </button>
 
       <div class="sidebar-search">
         <input type="text" id="tree-search" placeholder="Швидкий пошук модуля...">
@@ -684,6 +720,29 @@
             </div>
             <div class="ceo-panel-body" id="ceo-chains-and-approvals"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- 1B. ACCOUNTING COCKPIT (ODOO JOURNAL CARDS + SAP/BC KITCHEN) -->
+      <section class="ceo-cockpit" id="acc-cockpit-view">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h1 style="font-size:19px; font-weight:800; color:#0F172A;">Робочий стіл Бухгалтера — Автоматичний облік (Odoo / SAP / BC)</h1>
+            <div style="font-size:12px; color:#64748B;">Журнали операцій, авто-звірка банку, матриця проводок (Posting Groups) та всі регламентні звіти</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-action-outline" onclick="window.__switchToTable('posting-setup')">Матриця проводок (Posting Groups)</button>
+            <button class="btn-action-outline" onclick="window.__switchToTable('osv')">ОСВ</button>
+            <button class="btn-action-primary" onclick="window.__openCreateDocModal()">+ Створити документ</button>
+          </div>
+        </div>
+        <div class="journal-grid" id="acc-journal-grid"></div>
+        <div class="ceo-panel">
+          <div class="ceo-panel-header">
+            <span>Усі обов'язкові звіти підприємства (1-Клік відкриття)</span>
+            <span class="status-badge status-ok">Всі суми збалансовані (Дт = Кт)</span>
+          </div>
+          <div class="ceo-panel-body" id="acc-reports-shortcut-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;"></div>
         </div>
       </section>
 

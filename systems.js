@@ -51,11 +51,15 @@
     },
     {
       id: 'GL',
-      title: 'Головна книга та Проводки',
+      title: 'Автоматичний облік та Звіти',
       open: true,
       subtypes: [
         { id: 'osv', code: 'ОСВ', title: 'Оборотно-сальдова відомість', tag: 'Синтетичний облік' },
-        { id: 'ledger', code: 'ЖП', title: 'Журнал проводок (Live)', tag: 'Подвійний запис Дт/Кт' },
+        { id: 'ledger', code: 'ACDOCA', title: 'Єдиний журнал проводок (Live)', tag: 'Universal Journal' },
+        { id: 'posting-setup', code: 'POST', title: 'Матриця автопроводок (Posting)', tag: 'Business Central / SAP' },
+        { id: 'bank-recon', code: 'RECON', title: 'Звірка банку (Side-by-Side AI)', tag: 'Odoo Bank Match' },
+        { id: 'coa', code: 'COA', title: 'План рахунків (Live залишки)', tag: 'Chart of Accounts' },
+        { id: 'fixed-assets', code: 'ОЗ', title: 'Основні засоби та Амортизація', tag: 'Знос 131' },
         { id: 'osv-acc', code: 'ОСВ-Р', title: 'ОСВ по рахунку 361', tag: 'Аналітика мереж' },
         { id: 'card-acc', code: 'КР', title: 'Картка рахунку', tag: 'Хронологія' },
         { id: 'balance', code: 'Ф-1', title: 'Баланс підприємства (Форма №1)', tag: 'НП(С)БО 1' },
@@ -378,6 +382,110 @@
         { title: 'Лідер росту чеку', val: 'ОРТОС (+22.4%)' }
       ],
       summary: () => `<div>Покриття України: <strong>3 554 торгових точок</strong></div><div class="summary-checksum"><span class="checksum-badge">Retention 6 міс: 95.6%</span></div>`
+    },
+
+    'posting-setup': {
+      columns: [
+        { key: 'busGroup', label: 'Бізнес-група (ХТО)', editable: true },
+        { key: 'prodGroup', label: 'Товарна група (ЩО)', editable: true },
+        { key: 'ctrlAcc', label: 'Контр. рахунок', editable: true },
+        { key: 'revAcc', label: 'Дохід (Кт)', editable: true },
+        { key: 'cogsAcc', label: 'Собівартість (Дт)', editable: true },
+        { key: 'vatRate', label: 'Ставка ПДВ %', num: true, editable: true },
+        { key: 'status', label: 'Статус правила', editable: true }
+      ],
+      rows: [
+        { id: 'PS-1', busGroup: 'DOMESTIC (Аптечні мережі)', prodGroup: 'MED_KNIT (Медвироби 7%)', ctrlAcc: '361', revAcc: '701', cogsAcc: '901 / 26', vatRate: 7.0, status: 'Активне (Авто)' },
+        { id: 'PS-2', busGroup: 'DOMESTIC (Клініки/Ортосалони)', prodGroup: 'ORTHO_20 (Взуття/Товари)', ctrlAcc: '361', revAcc: '702', cogsAcc: '902 / 281', vatRate: 20.0, status: 'Активне (Авто)' },
+        { id: 'PS-3', busGroup: 'IMPORT_EU (Постачальники ЄС)', prodGroup: 'RAW_YARN (Сировина Lycra)', ctrlAcc: '632', revAcc: '—', cogsAcc: '201', vatRate: 20.0, status: 'Активне (Авто)' },
+        { id: 'PS-4', busGroup: 'PROD_WIP (Внутрішній цех)', prodGroup: 'WIP_MERZ (Випуск Merz CC4)', ctrlAcc: '23', revAcc: '26', cogsAcc: '23 / 201', vatRate: 0.0, status: 'Активне (Авто)' }
+      ],
+      kpis: (rows) => [
+        { title: 'Активних правил Posting', val: rows.length },
+        { title: 'Автоматизація проводок', val: '100% (Без ручного вибору)' },
+        { title: 'Податкові групи (Tax Grid)', val: '7% / 20% / 0%' },
+        { title: 'Розсинхрон Subledger-GL', val: 'Неможливий (0.00)' }
+      ],
+      summary: () => `<div>Матриця автоматичного визначення рахунків (Business Central / SAP OBYC)</div><div class="summary-checksum"><span class="checksum-badge">Оператор не обирає Дт/Кт вручну</span></div>`
+    },
+
+    'bank-recon': {
+      columns: [
+        { key: 'date', label: 'Дата виписки', editable: true },
+        { key: 'partner', label: 'Контрагент (Приват24 / Райф)', editable: true },
+        { key: 'purpose', label: 'Призначення платежу', editable: true },
+        { key: 'amount', label: 'Сума (грн)', num: true, editable: true },
+        { key: 'matchInv', label: 'AI-Підбір інвойсу', editable: true },
+        { key: 'conf', label: 'Збіг %', num: true, editable: true },
+        { key: 'status', label: 'Статус звірки', editable: true }
+      ],
+      rows: [
+        { id: 'BR-1', date: '16.11.2026', partner: 'ТОВ «Аптека АНЦ»', purpose: 'Оплата зг. дог. 402/26 ВН-004182', amount: 1004000, matchInv: 'ВН-004182 (Дт 311 Кт 361)', conf: 99.8, status: 'Готово до звірки' },
+        { id: 'BR-2', date: '16.11.2026', partner: 'ТОВ «Подорожник»', purpose: 'За ортопедичні вироби рах. 8819', amount: 540000, matchInv: 'ВН-004155 (Дт 311 Кт 361)', conf: 97.4, status: 'Готово до звірки' },
+        { id: 'BR-3', date: '15.11.2026', partner: 'АТ КБ «ПриватБанк»', purpose: 'Комісія за РКО листопад', amount: -2450, matchInv: 'Списання на 92 (Дт 92 Кт 311)', conf: 100.0, status: 'Готово до звірки' },
+        { id: 'BR-4', date: '15.11.2026', partner: 'ММ «Добробут»', purpose: 'Часткова оплата по ВН-004182', amount: 630000, matchInv: 'ВН-004182 (Дт 311 Кт 361)', conf: 95.0, status: 'Звірено автоматично' }
+      ],
+      kpis: (rows) => {
+        const pending = rows.filter(r => r.status.includes('Готово')).length;
+        return [
+          { title: 'До звірки сьогодні', val: pending + ' платежі' },
+          { title: 'Авто-підбір AI / Rules', val: '98.1% точність' },
+          { title: 'Оброблено автоматично', val: '124 транзакції' },
+          { title: 'Статус виписки', val: 'Синхронізовано' }
+        ];
+      },
+      summary: () => `<div>Інтерактивна звірка банку (Odoo / Copilot Matching)</div><div class="summary-checksum"><span class="checksum-badge">1-Клік проведення в ОСВ</span></div>`
+    },
+
+    'coa': {
+      columns: [
+        { key: 'acc', label: 'Код', editable: true },
+        { key: 'name', label: 'Назва рахунку (План рахунків)', editable: true },
+        { key: 'type', label: 'Тип (Class)', editable: true },
+        { key: 'ctrl', label: 'Контроль субкниги', editable: true },
+        { key: 'balance', label: 'Live Сальдо (грн)', num: true, editable: true }
+      ],
+      rows: [
+        { id: 'COA-10', acc: '10', name: 'Основні засоби (Обладнання цеху)', type: 'Asset (Необоротні)', ctrl: 'Основні засоби', balance: 18870000 },
+        { id: 'COA-201', acc: '201', name: 'Сировина й матеріали', type: 'Asset (Запаси)', ctrl: 'Складський облік', balance: 5030000 },
+        { id: 'COA-23', acc: '23', name: 'Виробництво (WIP)', type: 'Asset (Виробництво)', ctrl: 'Наряди цеху', balance: 1370000 },
+        { id: 'COA-26', acc: '26', name: 'Готова продукція', type: 'Asset (Запаси)', ctrl: 'Партії LOT', balance: 5880000 },
+        { id: 'COA-311', acc: '311', name: 'Поточні рахунки в банках', type: 'Liquidity (Гроші)', ctrl: 'Банк-Клієнт', balance: 14850000 },
+        { id: 'COA-361', acc: '361', name: 'Розрахунки з покупцями', type: 'Receivable (Субкнига AR)', ctrl: 'Тільки через AR', balance: 7000000 },
+        { id: 'COA-631', acc: '631', name: 'Розрахунки з постачальниками', type: 'Payable (Субкнига AP)', ctrl: 'Тільки через AP', balance: -3670000 },
+        { id: 'COA-641', acc: '641', name: 'Розрахунки за податками', type: 'Liability (Податки)', ctrl: 'Tax Grid ПДВ', balance: -1680000 }
+      ],
+      summary: () => `<div>Інтерактивний План рахунків (Chart of Accounts)</div><div class="summary-checksum"><span class="checksum-badge">Live агрегація з Universal Journal</span></div>`
+    },
+
+    'fixed-assets': {
+      columns: [
+        { key: 'inv', label: 'Інв. №', editable: true },
+        { key: 'name', label: 'Об’єкт основних засобів', editable: true },
+        { key: 'cost', label: 'Первісна вартість', num: true, editable: true },
+        { key: 'deprAcc', label: 'Накопичений знос (131)', num: true, editable: true },
+        { key: 'monthly', label: 'Міс. амортизація', num: true, editable: true },
+        { key: 'net', label: 'Залишкова вартість', num: true, computed: true },
+        { key: 'status', label: 'Стан', editable: true }
+      ],
+      recalcRow: (r) => { r.net = Number(r.cost) - Number(r.deprAcc); },
+      rows: [
+        { id: 'FA-1', inv: 'ОЗ-00101', name: 'В’язальні автомати Merz CC4 (Лінія №1, 4 шт)', cost: 9200000, deprAcc: 2100000, monthly: 95000, net: 7100000, status: 'В експлуатації' },
+        { id: 'FA-2', inv: 'ОЗ-00102', name: 'В’язальні автомати Merz CC4 (Лінія №2, 4 шт)', cost: 6400000, deprAcc: 1280000, monthly: 62000, net: 5120000, status: 'В експлуатації' },
+        { id: 'FA-3', inv: 'ОЗ-00204', name: 'Автоматичний розкрійний комплекс CAD/CAM', cost: 2450000, deprAcc: 640000, monthly: 20400, net: 1810000, status: 'В експлуатації' },
+        { id: 'FA-4', inv: 'ОЗ-00309', name: 'Стенд тестування компресійного тиску HATRA', cost: 820000, deprAcc: 285000, monthly: 7600, net: 535000, status: 'В експлуатації' }
+      ],
+      kpis: (rows) => {
+        const totNet = rows.reduce((s, r) => s + Number(r.net), 0);
+        const totMon = rows.reduce((s, r) => s + Number(r.monthly), 0);
+        return [
+          { title: 'Об’єктів ОЗ', val: rows.length + ' ліній' },
+          { title: 'Залишкова вартість', val: fmt(totNet) + ' грн' },
+          { title: 'Місячна амортизація', val: fmt(totMon) + ' грн' },
+          { title: 'Метод нарахування', val: 'Прямолінійний (Авто)' }
+        ];
+      },
+      summary: (rows) => `<div>Місячний знос (Дт 23 Кт 131): <strong>${fmt(rows.reduce((s, r) => s + Number(r.monthly), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Графік амортизації активний</span></div>`
     },
 
     'osv': {
@@ -948,7 +1056,7 @@
       screen.classList.add('hidden');
       updateAuditRadar();
       if (roleKey === 'CEO') switchToCEO();
-      else window.__switchToTable('osv');
+      else switchToAccountingCockpit();
       showToast(`Вхід виконано: ${profile.title}`);
     }
 
@@ -982,14 +1090,124 @@
     if (saved && CREDENTIALS[saved]) loginAs(saved);
   }
 
-  // ================= CEO ANALYTICS & PREDICTION =================
+  // ================= CEO & ACCOUNTING COCKPITS =================
   function switchToCEO() {
     state.activeMode = 'CEO';
     document.getElementById('ceo-cockpit-view').classList.add('active');
+    document.getElementById('acc-cockpit-view').classList.remove('active');
     document.getElementById('table-workspace-view').classList.add('hidden');
     document.getElementById('btn-sidebar-ceo').classList.add('active');
+    document.getElementById('btn-sidebar-acc')?.classList.remove('active');
     renderSidebar();
     renderCEOCockpit();
+  }
+
+  function switchToAccountingCockpit() {
+    state.activeMode = 'ACC';
+    document.getElementById('ceo-cockpit-view').classList.remove('active');
+    document.getElementById('acc-cockpit-view').classList.add('active');
+    document.getElementById('table-workspace-view').classList.add('hidden');
+    document.getElementById('btn-sidebar-ceo').classList.remove('active');
+    document.getElementById('btn-sidebar-acc')?.classList.add('active');
+    renderSidebar();
+    renderAccountingCockpit();
+  }
+
+  function renderAccountingCockpit() {
+    const bankTot = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end), 0);
+    const arTot = DATASETS['sales-recon'].rows.reduce((s, r) => s + Number(r.end), 0);
+    const reconPending = DATASETS['bank-recon'].rows.filter(r => r.status.includes('Готово')).length;
+
+    document.getElementById('acc-journal-grid').innerHTML = `
+      <div class="journal-card green">
+        <div class="journal-card-head">
+          <div><div class="journal-card-title">Банк (Приват24 / Райффайзен)</div><div class="journal-card-sub">Рахунок 311 • Синхронізація Open Banking</div></div>
+          <span class="status-badge status-warning">${reconPending} до звірки</span>
+        </div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(bankTot)}</div>
+        <div class="journal-card-actions">
+          <button class="btn-action-primary" onclick="window.__switchToTable('bank-recon')">Звірка банку (Side-by-Side) &rarr;</button>
+          <button class="btn-row-action" onclick="window.__switchToTable('treasury-stmt')">Виписки</button>
+        </div>
+      </div>
+
+      <div class="journal-card">
+        <div class="journal-card-head">
+          <div><div class="journal-card-title">Рахунки покупцям (AR / 361)</div><div class="journal-card-sub">Контрольний рахунок мереж • Авто-проводки</div></div>
+          <span class="status-badge status-info">Вчасно.ЕДО</span>
+        </div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(arTot)}</div>
+        <div class="journal-card-actions">
+          <button class="btn-action-outline" onclick="window.__switchToTable('sales-recon')">Акти звірки</button>
+          <button class="btn-row-action" onclick="window.__switchToTable('sales-aging')">Старіння (Aging)</button>
+        </div>
+      </div>
+
+      <div class="journal-card amber">
+        <div class="journal-card-head">
+          <div><div class="journal-card-title">Податки та ПДВ (641 / ЄРПН)</div><div class="journal-card-sub">Tax Grid 7% медвироби / 20% імпорт</div></div>
+          <span class="status-badge status-ok">ПК: 490 тис.</span>
+        </div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(150500)} <span style="font-size:12px; font-weight:500; color:#64748B;">до сплати</span></div>
+        <div class="journal-card-actions">
+          <button class="btn-action-outline" onclick="window.__switchToTable('vat-decl')">Реєстр ПДВ</button>
+          <button class="btn-row-action" onclick="window.__switchToTable('an-tax')">Навантаження</button>
+        </div>
+      </div>
+
+      <div class="journal-card">
+        <div class="journal-card-head">
+          <div><div class="journal-card-title">Єдиний журнал (ACDOCA / Live)</div><div class="journal-card-sub">Подвійний запис без ручного вводу Дт/Кт</div></div>
+          <span class="status-badge status-ok">${DATASETS['ledger'].rows.length} записів</span>
+        </div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '0.00'} <span style="font-size:12px; font-weight:500; color:#059669;">розбіжностей</span></div>
+        <div class="journal-card-actions">
+          <button class="btn-action-outline" onclick="window.__switchToTable('ledger')">Журнал проводок</button>
+          <button class="btn-row-action" onclick="window.__switchToTable('posting-setup')">Posting Groups</button>
+        </div>
+      </div>
+
+      <div class="journal-card">
+        <div class="journal-card-head">
+          <div><div class="journal-card-title">Виробництво та Склад (WIP / 23 / 26)</div><div class="journal-card-sub">М-29, Партії LOT, Собівартість Merz CC4</div></div>
+          <span class="status-badge status-info">ISO 13485</span>
+        </div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(7250000)}</div>
+        <div class="journal-card-actions">
+          <button class="btn-action-outline" onclick="window.__switchToTable('mes-m29')">Списання М-29</button>
+          <button class="btn-row-action" onclick="window.__switchToTable('wms-batch')">Партії LOT</button>
+        </div>
+      </div>
+
+      <div class="journal-card green">
+        <div class="journal-card-head">
+          <div><div class="journal-card-title">Основні засоби та Зарплата (ОЗ / П-6)</div><div class="journal-card-sub">Авто-амортизація 131 + ФОП 18%/5%/22%</div></div>
+          <span class="status-badge status-ok">Готово</span>
+        </div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(185000)} <span style="font-size:12px; font-weight:500; color:#64748B;">знос/міс</span></div>
+        <div class="journal-card-actions">
+          <button class="btn-action-outline" onclick="window.__switchToTable('fixed-assets')">Основні засоби</button>
+          <button class="btn-row-action" onclick="window.__switchToTable('hr-payroll')">Зарплата П-6</button>
+        </div>
+      </div>
+    `;
+
+    const shortcuts = [
+      { id: 'osv', title: 'Оборотно-сальдова (ОСВ)', sub: 'Синтетичний баланс' },
+      { id: 'balance', title: 'Баланс (Форма №1)', sub: 'Актив = Пасив (51.05M)' },
+      { id: 'pnl-stat', title: 'Фін. результати (Форма №2)', sub: 'P&L / Прибуток 6.36M' },
+      { id: 'vat-decl', title: 'Декларація ПДВ та ЄРПН', sub: 'Зобов’язання та кредит' },
+      { id: 'mes-cost', title: 'Калькуляція собівартості', sub: 'Матеріали + ЗП + ЗВВ' },
+      { id: 'wms-m19', title: 'Матеріальний звіт (М-19)', sub: 'Рух по складах №1/№2' },
+      { id: 'wms-inv19', title: 'Інвентаризація (Інв-19)', sub: 'Звірка ТМЦ по ТСД' },
+      { id: 'coa', title: 'План рахунків (Live)', sub: 'Всі залишки в реальному часі' }
+    ];
+    document.getElementById('acc-reports-shortcut-grid').innerHTML = shortcuts.map(s => `
+      <div onclick="window.__switchToTable('${s.id}')" style="cursor:pointer; padding:10px 12px; border:1px solid #E2E8F0; border-radius:8px; background:#F8FAFC; transition:all 0.15s;" onmouseover="this.style.borderColor='#2563EB'" onmouseout="this.style.borderColor='#E2E8F0'">
+        <div style="font-weight:700; font-size:12.5px; color:#0F172A;">${esc(s.title)}</div>
+        <div style="font-size:11px; color:#64748B; margin-top:2px;">${esc(s.sub)} &rarr;</div>
+      </div>
+    `).join('');
   }
 
   window.__switchToTable = function(viewId, highlightId = null) {
@@ -999,8 +1217,10 @@
     state.viewDisplayMode = 'LIST';
     state.sortCol = null;
     document.getElementById('ceo-cockpit-view').classList.remove('active');
+    document.getElementById('acc-cockpit-view').classList.remove('active');
     document.getElementById('table-workspace-view').classList.remove('hidden');
     document.getElementById('btn-sidebar-ceo').classList.remove('active');
+    document.getElementById('btn-sidebar-acc')?.classList.remove('active');
     DOMAINS.forEach(d => { if (d.subtypes.some(s => s.id === viewId)) d.open = true; });
     renderSidebar();
     renderActiveView();
@@ -1230,7 +1450,43 @@
     const viewport = document.getElementById('table-viewport');
     if (!viewport) return;
 
-    if (state.viewDisplayMode === 'GRAPH') {
+    if (state.activeView === 'bank-recon' && state.viewDisplayMode === 'LIST') {
+      viewport.innerHTML = `
+        <div class="recon-split">
+          <div class="recon-col">
+            <div style="font-size:12px; font-weight:700; color:#334155; text-transform:uppercase;">1. Банківська виписка (Приват24 / Райффайзен)</div>
+            ${filteredRows.map(r => `
+              <div class="recon-item ${r.status.includes('Звірено') ? 'matched' : ''}">
+                <div>
+                  <div style="font-weight:700; font-size:12.5px;">${esc(r.partner)}</div>
+                  <div style="font-size:11px; color:#64748B;">${esc(r.date)} • ${esc(r.purpose)}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-family:var(--font-mono); font-weight:800; color:${r.amount >= 0 ? '#059669' : '#DC2626'};">${r.amount >= 0 ? '+' : ''}${fmt(r.amount)} грн</div>
+                  <span class="status-badge ${r.status.includes('Звірено') ? 'status-ok' : 'status-warning'}">${esc(r.status)}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="recon-col">
+            <div style="font-size:12px; font-weight:700; color:#334155; text-transform:uppercase;">2. AI-Підбір інвойсів та 1-Клік Проведення</div>
+            ${filteredRows.map(r => `
+              <div class="recon-item ${r.status.includes('Звірено') ? 'matched' : ''}">
+                <div>
+                  <div style="font-weight:700; font-size:12.5px;">${esc(r.matchInv)}</div>
+                  <div style="font-size:11px; color:#059669; font-weight:600;">Впевненість моделі: ${fmtPct(r.conf)}</div>
+                </div>
+                <div>
+                  ${r.status.includes('Звірено')
+                    ? '<span class="status-badge status-ok">Проведено</span>'
+                    : `<button class="btn-action-primary" onclick="window.__reconcileBankRow('${esc(r.id)}')">Звірити і Провести &rarr;</button>`}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else if (state.viewDisplayMode === 'GRAPH') {
       const labelCol = dataset.columns.find(c => !c.num && c.key !== 'id') || dataset.columns[0];
       const numCols = dataset.columns.filter(c => c.num);
       const metricCol = numCols[numCols.length - 1] || numCols[0];
@@ -1330,6 +1586,28 @@
     const summaryEl = document.getElementById('table-summary-bar');
     if (summaryEl) summaryEl.innerHTML = dataset.summary ? dataset.summary(filteredRows) : `<div>Рядків: ${filteredRows.length}</div>`;
   }
+
+  window.__reconcileBankRow = function(rowId) {
+    const r = DATASETS['bank-recon'].rows.find(x => x.id === rowId);
+    if (!r) return;
+    r.status = 'Звірено автоматично';
+    DATASETS['ledger'].rows.unshift({
+      id: 'JRN-' + Math.floor(100 + Math.random() * 899),
+      time: '16.11 Щойно', doc: 'БВ-RECON',
+      dt: r.amount >= 0 ? '311' : '92',
+      ct: r.amount >= 0 ? '361' : '311',
+      sum: Math.abs(r.amount),
+      desc: `${r.partner}: ${r.purpose}`,
+      status: 'Авто-звірка банку'
+    });
+    if (r.partner.includes('АНЦ')) {
+      const anc = DATASETS['sales-recon'].rows.find(x => x.id === 'REC-ANC');
+      if (anc) anc.status = 'Звірено автоматично (Банк OK)';
+    }
+    updateAuditRadar();
+    renderActiveView();
+    showToast(`Платіж ${r.partner} звірено та проведено в Єдиний журнал!`);
+  };
 
   window.__sortCol = function(colKey) {
     if (state.sortCol === colKey) state.sortDir *= -1;
@@ -1634,6 +1912,7 @@
     updateAuditRadar();
 
     document.getElementById('btn-sidebar-ceo')?.addEventListener('click', switchToCEO);
+    document.getElementById('btn-sidebar-acc')?.addEventListener('click', switchToAccountingCockpit);
     document.getElementById('tree-search')?.addEventListener('input', renderSidebar);
     document.getElementById('btn-undo')?.addEventListener('click', performUndo);
 
