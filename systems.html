@@ -3,34 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpexMetrix Systems • Центр корпоративної звітності та обліку (Заміна 1С/BAS)</title>
+  <title>OpexMetrix Systems | Операційний контур підприємства</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-app: #0F172A;
-      --bg-surface: #1E293B;
+      --bg-header: #0B1120;
+      --bg-sidebar: #0F172A;
+      --bg-subsidebar: #1E293B;
+      --bg-main: #F8FAFC;
       --bg-card: #FFFFFF;
-      --bg-subtle: #F8FAFC;
-      --bg-hover: #F1F5F9;
       --border: #E2E8F0;
       --border-dark: #334155;
       --text-main: #0F172A;
       --text-muted: #64748B;
+      --text-light: #94A3B8;
       --primary: #2563EB;
       --primary-hover: #1D4ED8;
       --success: #059669;
+      --success-bg: #ECFDF5;
       --warning: #D97706;
+      --warning-bg: #FFFBEB;
       --danger: #DC2626;
-      --font-sans: 'Inter', -apple-system, sans-serif;
+      --danger-bg: #FEF2F2;
+      --info-bg: #EFF6FF;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', Consolas, monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font-sans);
-      background: #F1F5F9;
+      background: var(--bg-main);
       color: var(--text-main);
       font-size: 13px;
       line-height: 1.4;
@@ -40,17 +45,18 @@
       flex-direction: column;
     }
 
-    /* Top Enterprise Command Header */
+    /* Enterprise Header */
     .sys-header {
-      background: #0B1120;
+      background: var(--bg-header);
       color: #FFFFFF;
       height: 48px;
       padding: 0 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #1E293B;
+      border-bottom: 1px solid var(--border-dark);
       flex-shrink: 0;
+      z-index: 30;
     }
     .sys-brand {
       display: flex;
@@ -58,635 +64,1067 @@
       gap: 12px;
     }
     .sys-logo {
-      background: linear-gradient(135deg, #2563EB, #1D4ED8);
-      color: #FFFFFF;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      letter-spacing: 0.05em;
-    }
-    .sys-title {
+      font-family: var(--font-mono);
       font-weight: 700;
-      font-size: 14px;
-      color: #F8FAFC;
+      font-size: 15px;
+      letter-spacing: -0.5px;
+      color: #FFFFFF;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .sys-badge {
+    .sys-logo-mark {
+      background: linear-gradient(135deg, #2563EB, #3B82F6);
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+    .sys-entity {
+      font-size: 12px;
+      color: var(--text-light);
       background: #1E293B;
-      color: #93C5FD;
-      font-size: 10.5px;
-      font-weight: 600;
-      padding: 2px 7px;
+      padding: 3px 8px;
       border-radius: 4px;
       border: 1px solid #334155;
-    }
-
-    .sys-header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .audit-reconcile-pill {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(5, 150, 105, 0.15);
-      border: 1px solid rgba(5, 150, 105, 0.35);
-      color: #34D399;
+    }
+    .sys-entity-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+    }
+    .sys-search-box {
+      flex: 1;
+      max-width: 380px;
+      margin: 0 20px;
+      position: relative;
+    }
+    .sys-search-input {
+      width: 100%;
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #FFFFFF;
+      border-radius: 6px;
+      padding: 5px 10px 5px 30px;
+      font-size: 12px;
+      outline: none;
+      font-family: var(--font-sans);
+    }
+    .sys-search-input:focus {
+      border-color: #3B82F6;
+      background: #0F172A;
+    }
+    .sys-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748B;
+      font-size: 12px;
+      pointer-events: none;
+    }
+    .sys-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-toggle-numbers {
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #CBD5E1;
       font-size: 11px;
       font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-family: var(--font-mono);
-    }
-    .audit-dot {
-      width: 7px;
-      height: 7px;
-      background: #10B981;
-      border-radius: 50%;
-      box-shadow: 0 0 6px #10B981;
-    }
-
-    .btn-return-pulse {
-      background: #1E293B;
-      border: 1px solid #334155;
-      color: #E2E8F0;
-      font-size: 11.5px;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 4px;
-      text-decoration: none;
-      transition: all 0.15s ease;
-      display: flex;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      transition: all 0.15s ease;
     }
-    .btn-return-pulse:hover {
+    .btn-toggle-numbers:hover {
       background: #334155;
       color: #FFFFFF;
     }
+    .btn-toggle-numbers.active {
+      background: #1E3A8A;
+      border-color: #3B82F6;
+      color: #93C5FD;
+    }
+    .btn-tasks-drawer {
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+    .btn-tasks-drawer:hover {
+      background: #334155;
+    }
+    .task-counter-badge {
+      background: #DC2626;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #CBD5E1;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #3B82F6;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .btn-back-dashboard {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94A3B8;
+      text-decoration: none;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-back-dashboard:hover {
+      color: #FFFFFF;
+      background: #1E293B;
+    }
 
-    /* Main Workstation Layout */
-    .sys-workspace {
-      display: grid;
-      grid-template-columns: 290px 1fr;
+    /* Layout Body */
+    .sys-layout {
+      display: flex;
       flex: 1;
       overflow: hidden;
     }
 
-    /* Left Sidebar: Report Navigator Tree */
+    /* Sidebar: Domains & Subtypes */
     .sys-sidebar {
-      background: #FFFFFF;
-      border-right: 1px solid var(--border);
+      width: 300px;
+      background: var(--bg-sidebar);
+      color: #CBD5E1;
       display: flex;
       flex-direction: column;
+      border-right: 1px solid var(--border-dark);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .sidebar-search {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1E293B;
+    }
+    .sidebar-search input {
+      width: 100%;
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #FFFFFF;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      outline: none;
+    }
+    .sidebar-search input:focus {
+      border-color: #3B82F6;
+    }
+    .sidebar-tree {
+      flex: 1;
       overflow-y: auto;
+      padding: 6px 0;
     }
-    .sidebar-section-title {
-      padding: 12px 14px 6px 14px;
-      font-size: 10.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-      border-top: 1px solid #F1F5F9;
+    .sidebar-tree::-webkit-scrollbar {
+      width: 5px;
     }
-    .sidebar-section-title:first-child { border-top: none; }
+    .sidebar-tree::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
 
-    .report-tree-item {
+    /* Domain Accordion */
+    .acc-domain-group {
+      margin-bottom: 2px;
+    }
+    .domain-header {
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 14px;
       cursor: pointer;
-      color: #334155;
-      font-size: 12.5px;
-      font-weight: 500;
-      transition: all 0.1s ease;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94A3B8;
+      background: #111827;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s ease;
+    }
+    .domain-header:hover {
+      background: #172554;
+      color: #FFFFFF;
+    }
+    .domain-header-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .domain-arrow {
+      font-size: 10px;
+      transition: transform 0.2s ease;
+    }
+    .acc-domain-group.open .domain-arrow {
+      transform: rotate(90deg);
+    }
+    .domain-count {
+      font-size: 10px;
+      background: #1E293B;
+      padding: 1px 5px;
+      border-radius: 8px;
+      color: #64748B;
+    }
+    .subtype-list {
+      display: none;
+      background: #0B1120;
+    }
+    .acc-domain-group.open .subtype-list {
+      display: block;
+    }
+    .subtype-item {
+      padding: 7px 12px 7px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 12px;
+      color: #CBD5E1;
       border-left: 3px solid transparent;
-      user-select: none;
+      transition: all 0.12s ease;
     }
-    .report-tree-item:hover {
-      background: var(--bg-hover);
-      color: var(--text-main);
+    .subtype-item:hover {
+      background: #1E293B;
+      color: #FFFFFF;
     }
-    .report-tree-item.active {
-      background: #EFF6FF;
-      color: var(--primary);
+    .subtype-item.active {
+      background: #1E3A8A;
+      color: #FFFFFF;
       font-weight: 600;
-      border-left-color: var(--primary);
+      border-left-color: #3B82F6;
     }
-    .report-code-badge {
+    .subtype-code {
       font-family: var(--font-mono);
       font-size: 10px;
-      font-weight: 600;
-      background: #F1F5F9;
       color: #64748B;
-      padding: 1px 5px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 1px 4px;
       border-radius: 3px;
     }
-    .report-tree-item.active .report-code-badge {
-      background: #DBEAFE;
-      color: #1D4ED8;
+    .subtype-item.active .subtype-code {
+      color: #93C5FD;
+      background: rgba(255, 255, 255, 0.12);
     }
 
-    /* Right Main Panel: Report Canvas */
-    .sys-canvas {
+    /* Main Workspace */
+    .sys-workspace {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      background: #F8FAFC;
       overflow: hidden;
+      background: #F8FAFC;
     }
 
-    /* Filter Toolbar (1C Style) */
-    .sys-toolbar {
+    /* Subtype Control Top Bar */
+    .ctrl-topbar {
       background: #FFFFFF;
       border-bottom: 1px solid var(--border);
       padding: 10px 16px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 10px;
       flex-shrink: 0;
     }
-    .toolbar-filters {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .toolbar-label {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-    .sys-select, .sys-input {
-      height: 30px;
-      padding: 0 8px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 12px;
-      background: #FFFFFF;
-      color: var(--text-main);
-      font-family: var(--font-sans);
-    }
-    .sys-select:focus, .sys-input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-    .toolbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .btn-exec {
-      background: #0F172A;
-      color: #FFFFFF;
-      border: 1px solid #0F172A;
-      height: 30px;
-      padding: 0 14px;
-      font-size: 12px;
-      font-weight: 600;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-exec:hover { background: #1E293B; }
-    .btn-tool {
-      background: #FFFFFF;
-      color: #334155;
-      border: 1px solid var(--border);
-      height: 30px;
-      padding: 0 10px;
-      font-size: 12px;
-      font-weight: 500;
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-    }
-    .btn-tool:hover { background: #F1F5F9; border-color: #CBD5E1; color: var(--text-main); }
-
-    /* Cross-check Banner under Toolbar */
-    .reconciliation-strip {
-      background: #ECFDF5;
-      border-bottom: 1px solid #A7F3D0;
-      padding: 6px 16px;
-      font-size: 11.5px;
-      color: #065F46;
+    .ctrl-row-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-shrink: 0;
     }
-    .strip-items {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .strip-item {
+    .ctrl-breadcrumb {
       display: flex;
       align-items: center;
       gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
     }
-    .strip-item strong {
-      font-family: var(--font-mono);
+    .ctrl-title {
+      font-size: 16px;
       font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ctrl-tag {
+      font-size: 11px;
+      font-weight: 600;
+      background: #EFF6FF;
+      color: #1D4ED8;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #DBEAFE;
+    }
+    .ctrl-row-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .period-btn-group {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+    .period-btn {
+      border: none;
+      background: transparent;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+    }
+    .period-btn:last-child {
+      border-right: none;
+    }
+    .period-btn:hover {
+      background: #F1F5F9;
+      color: var(--text-main);
+    }
+    .period-btn.active {
+      background: #2563EB;
+      color: #FFFFFF;
+    }
+    .ctrl-select, .ctrl-input {
+      padding: 5px 8px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      outline: none;
+      background: #FFFFFF;
+      color: var(--text-main);
+    }
+    .ctrl-select:focus, .ctrl-input:focus {
+      border-color: var(--primary);
+    }
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-action-primary {
+      background: #2563EB;
+      color: #FFFFFF;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-action-primary:hover {
+      background: #1D4ED8;
+    }
+    .btn-action-outline {
+      background: #FFFFFF;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-action-outline:hover {
+      background: #F1F5F9;
     }
 
-    /* Report Content Viewport */
-    .report-viewport {
+    /* Content Area & Table */
+    .sys-content {
       flex: 1;
       overflow: auto;
-      padding: 16px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
     }
-    .report-paper {
+    .data-table-card {
       background: #FFFFFF;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 24px;
-      min-width: 900px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .report-header-block {
-      border-bottom: 2px solid #0F172A;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
     }
-    .report-main-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0F172A;
-      letter-spacing: -0.01em;
+    .table-container {
+      flex: 1;
+      overflow: auto;
     }
-    .report-meta-line {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-    .report-signature-stamp {
-      font-size: 11px;
-      color: #059669;
-      font-family: var(--font-mono);
-      font-weight: 600;
-      text-align: right;
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    /* Enterprise Accounting Grid (High Density) */
-    .acc-table {
+    .op-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
-      font-family: var(--font-sans);
+      white-space: nowrap;
     }
-    .acc-table th {
+    .op-table th {
       background: #F8FAFC;
-      color: #334155;
+      color: #475569;
       font-weight: 600;
       text-align: left;
-      padding: 7px 8px;
-      border: 1px solid #CBD5E1;
-      font-size: 11.5px;
-      vertical-align: middle;
+      padding: 7px 10px;
+      border-bottom: 2px solid var(--border);
+      border-right: 1px solid #F1F5F9;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      user-select: none;
     }
-    .acc-table td {
-      padding: 6px 8px;
-      border: 1px solid #E2E8F0;
-      color: #1E293B;
-      vertical-align: middle;
-    }
-    .acc-table tr:hover td {
-      background: #F8FAFC;
-    }
-    .acc-table .mono {
+    .op-table th.num, .op-table td.num {
+      text-align: right;
       font-family: var(--font-mono);
     }
-    .acc-table .text-right { text-align: right; }
-    .acc-table .text-center { text-align: center; }
-    .acc-table .row-group {
-      background: #F1F5F9;
-      font-weight: 700;
-      color: #0F172A;
+    .op-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #F1F5F9;
+      border-right: 1px solid #F8FAFC;
+      color: var(--text-main);
     }
-    .acc-table .row-subtotal {
+    .op-table tr:hover td {
       background: #F8FAFC;
-      font-weight: 600;
     }
-    .acc-table .row-total {
-      background: #E2E8F0;
-      font-weight: 800;
-      color: #0F172A;
-      border-top: 2px solid #0F172A;
-      border-bottom: 2px solid #0F172A;
+    .op-table tr.highlighted td {
+      background: #EFF6FF !important;
+      animation: flashRow 2s ease;
     }
-    .clickable-cell {
-      color: #2563EB;
+    @keyframes flashRow {
+      0% { background: #FEF08A !important; }
+      100% { background: #EFF6FF !important; }
+    }
+    .row-actions {
+      display: inline-flex;
+      gap: 4px;
+    }
+    .btn-row-action {
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
+      color: #475569;
+      padding: 2px 6px;
+      font-size: 11px;
+      border-radius: 3px;
       cursor: pointer;
-      text-decoration: underline;
     }
-    .clickable-cell:hover {
-      color: #1D4ED8;
+    .btn-row-action:hover {
+      background: #2563EB;
+      color: #FFFFFF;
+      border-color: #2563EB;
+    }
+    .status-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .status-ok { background: #ECFDF5; color: #059669; }
+    .status-warning { background: #FFFBEB; color: #D97706; }
+    .status-danger { background: #FEF2F2; color: #DC2626; }
+    .status-info { background: #EFF6FF; color: #2563EB; }
+
+    /* Summary Bar */
+    .table-summary-bar {
+      background: #F8FAFC;
+      border-top: 2px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .summary-checksum {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .checksum-badge {
+      background: #ECFDF5;
+      color: #059669;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid #A7F3D0;
     }
 
-    /* Document Modal */
-    .modal-backdrop {
-      display: none;
+    /* Tasks Drawer */
+    .drawer-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 40;
+      display: none;
       backdrop-filter: blur(2px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
     }
-    .modal-backdrop.active { display: flex; }
-    .modal-sheet {
+    .drawer-overlay.open {
+      display: block;
+    }
+    .tasks-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 480px;
       background: #FFFFFF;
-      width: 100%;
-      max-width: 840px;
-      max-height: 90vh;
-      border-radius: 8px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      z-index: 50;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      transform: translateX(100%);
+      transition: transform 0.25s ease-out;
     }
-    .modal-header {
+    .tasks-drawer.open {
+      transform: translateX(0);
+    }
+    .drawer-header {
+      padding: 14px 16px;
       background: #0F172A;
       color: #FFFFFF;
-      padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .modal-title { font-weight: 700; font-size: 14px; }
-    .modal-body {
-      padding: 20px;
-      overflow-y: auto;
-      font-size: 12.5px;
-    }
-    .modal-footer {
-      background: #F8FAFC;
-      border-top: 1px solid var(--border);
-      padding: 10px 18px;
+    .drawer-title {
+      font-size: 14px;
+      font-weight: 700;
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-close-drawer {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .btn-close-drawer:hover {
+      color: #FFFFFF;
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      background: #F8FAFC;
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
+    .task-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .task-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .task-priority-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .priority-urgent { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+    .priority-approval { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .priority-normal { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
+    .task-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0F172A;
+    }
+    .task-meta {
+      font-size: 11px;
+      color: #64748B;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .task-comment-box {
+      background: #F8FAFC;
+      border-left: 3px solid #3B82F6;
+      padding: 6px 8px;
+      font-size: 11px;
+      color: #334155;
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .btn-task-action {
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-task-action:hover {
+      background: #2563EB;
+      color: #FFFFFF;
+      border-color: #2563EB;
+    }
 
-    @media print {
-      body { height: auto; overflow: visible; background: #FFFFFF; }
-      .sys-header, .sys-sidebar, .sys-toolbar, .reconciliation-strip { display: none !important; }
-      .sys-workspace { display: block; }
-      .sys-canvas, .report-viewport { overflow: visible; padding: 0; }
-      .report-paper { border: none; box-shadow: none; min-width: 100%; padding: 0; }
+    /* Modal dialogs */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: 8px;
+      width: 520px;
+      max-width: 90vw;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 12px 16px;
+      background: #0F172A;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .modal-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-label {
+      font-weight: 600;
+      color: #334155;
+      font-size: 11px;
+    }
+    .form-control {
+      padding: 6px 10px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      outline: none;
+      font-family: var(--font-sans);
+    }
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+    .modal-footer {
+      padding: 12px 16px;
+      background: #F8FAFC;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Primary Document Preview Modal */
+    .modal-doc-box {
+      width: 760px;
+      max-height: 85vh;
+    }
+    .doc-paper {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      padding: 24px;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: #0F172A;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .doc-barcode-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #CBD5E1;
+    }
+    .doc-title-h1 {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .doc-grid {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .doc-grid-label {
+      font-weight: 600;
+      color: #64748B;
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 10.5px;
+    }
+    .doc-table th, .doc-table td {
+      border: 1px solid #334155;
+      padding: 4px 6px;
+    }
+    .doc-table th {
+      background: #F1F5F9;
+      font-weight: 600;
+    }
+    .doc-signatures {
+      margin-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .doc-sig-block {
+      border-top: 1px solid #334155;
+      padding-top: 4px;
+      width: 200px;
+      text-align: center;
+      font-size: 10px;
+      color: #475569;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-left: 4px solid #10B981;
+      animation: slideInToast 0.2s ease-out;
+      pointer-events: auto;
+    }
+    @keyframes slideInToast {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Enterprise Command Header -->
+  <!-- Top Enterprise Header -->
   <header class="sys-header">
     <div class="sys-brand">
-      <span class="sys-logo">OPEXMETRIX</span>
-      <div class="sys-title">
-        <span>Systems</span>
-        <span class="sys-badge">Центр звітності 1C/BAS v4.8</span>
+      <div class="sys-logo">
+        <span class="sys-logo-mark">OM</span>
+        <span>OpexMetrix Systems</span>
+      </div>
+      <div class="sys-entity">
+        <span class="sys-entity-dot"></span>
+        <span>ТОВ «ТД «Алком» • ЄДРПОУ 32894510</span>
       </div>
     </div>
 
-    <div class="sys-header-right">
-      <div class="audit-reconcile-pill" title="Автоматична перехресна звірка: ОСВ, Склад, Баланс і Банк ідеально збігаються до копійки">
-        <span class="audit-dot"></span>
-        <span>ПЕРЕХРЕСНИЙ КОНТРОЛЬ: 0 РОЗБІЖНОСТЕЙ</span>
+    <div class="sys-search-box">
+      <span class="sys-search-icon">&#128269;</span>
+      <input type="text" id="global-search" class="sys-search-input" placeholder="Пошук підтипу, звіту, рахунку або документа (Ctrl+K)...">
+    </div>
+
+    <div class="sys-actions">
+      <button id="btn-toggle-numbers" class="btn-toggle-numbers" title="Перемикач: з цифрами або чиста структура">
+        <span>Режим:</span>
+        <strong id="label-num-mode">З цифрами</strong>
+      </button>
+
+      <button id="btn-tasks-drawer" class="btn-tasks-drawer" title="Маршрутизація документів між працівниками">
+        <span>Маршрути та завдання</span>
+        <span id="task-badge-count" class="task-counter-badge">4</span>
+      </button>
+
+      <div class="user-pill">
+        <div class="user-avatar">ШО</div>
+        <span>Шевченко О. В. (Головбух)</span>
       </div>
 
-      <a href="./index.html" class="btn-return-pulse">
-        <span>← Повернутися до Пульсу</span>
+      <a href="./index.html" class="btn-back-dashboard" title="Повернутися на Головне табло">
+        <span>Головне табло</span>
+        <span>&rarr;</span>
       </a>
     </div>
   </header>
 
-  <!-- Workspace Grid -->
-  <div class="sys-workspace">
-
-    <!-- Left Sidebar: Report Navigator Tree -->
+  <!-- Layout Body -->
+  <div class="sys-layout">
+    
+    <!-- Sidebar: Hierarchical Subtypes Tree -->
     <aside class="sys-sidebar">
-      <div class="sidebar-section-title">1. Бухгалтерські регістри</div>
-      <div class="report-tree-item active" data-report="osv">
-        <span>Оборотно-сальдова відомість (ОСВ)</span>
-        <span class="report-code-badge">Синтетика</span>
-      </div>
-      <div class="report-tree-item" data-report="osv-account">
-        <span>ОСВ по рахунку (розгорнута)</span>
-        <span class="report-code-badge">Субконто</span>
-      </div>
-      <div class="report-tree-item" data-report="card-account">
-        <span>Картка рахунку (Хронологія)</span>
-        <span class="report-code-badge">Проводки</span>
-      </div>
-      <div class="report-tree-item" data-report="analysis-account">
-        <span>Аналіз рахунку (Кореспонденція)</span>
-        <span class="report-code-badge">Дт / Кт</span>
-      </div>
-      <div class="report-tree-item" data-report="chessboard">
-        <span>Шахова відомість (Шахматка)</span>
-        <span class="report-code-badge">Матриця</span>
-      </div>
-      <div class="report-tree-item" data-report="general-ledger">
-        <span>Головна книга</span>
-        <span class="report-code-badge">Помісячно</span>
+      <div class="sidebar-search">
+        <input type="text" id="tree-search" placeholder="Фільтр підтипів діяльності...">
       </div>
 
-      <div class="sidebar-section-title">2. Виробництво та Собівартість</div>
-      <div class="report-tree-item" data-report="prod-cost">
-        <span>Калькуляція собівартості випуску</span>
-        <span class="report-code-badge">231 / 91</span>
-      </div>
-      <div class="report-tree-item" data-report="prod-m29">
-        <span>Звіт про рух матеріалів (М-29)</span>
-        <span class="report-code-badge">Норма/Факт</span>
-      </div>
-      <div class="report-tree-item" data-report="prod-shifts">
-        <span>Випуск за змінами та нарядами</span>
-        <span class="report-code-badge">MES / OEE</span>
-      </div>
-      <div class="report-tree-item" data-report="prod-scrap">
-        <span>Звіт про брак та відходи</span>
-        <span class="report-code-badge">Рах. 24</span>
-      </div>
-
-      <div class="sidebar-section-title">3. Склад і Партійний облік</div>
-      <div class="report-tree-item" data-report="stock-m19">
-        <span>Матеріальний звіт складу (М-19)</span>
-        <span class="report-code-badge">Кільк./Сум.</span>
-      </div>
-      <div class="report-tree-item" data-report="stock-batch">
-        <span>Звіт по партіях і серіях (Batch/Lot)</span>
-        <span class="report-code-badge">FEFO / Терміни</span>
-      </div>
-      <div class="report-tree-item" data-report="stock-reserves">
-        <span>Залишки, резерви та доступність</span>
-        <span class="report-code-badge">WMS Free</span>
-      </div>
-      <div class="report-tree-item" data-report="stock-inv19">
-        <span>Порівняльна відомість (Інв-19)</span>
-        <span class="report-code-badge">Інвентаризація</span>
-      </div>
-
-      <div class="sidebar-section-title">4. Взаєморозрахунки та Збут</div>
-      <div class="report-tree-item" data-report="settle-recon">
-        <span>Акт звірки взаєморозрахунків</span>
-        <span class="report-code-badge">Дводзеркальний</span>
-      </div>
-      <div class="report-tree-item" data-report="settle-aging">
-        <span>Старіння дебіторки (Aging report)</span>
-        <span class="report-code-badge">Стоп-лист</span>
-      </div>
-      <div class="report-tree-item" data-report="settle-profit">
-        <span>Валовий прибуток за клієнтами</span>
-        <span class="report-code-badge">Маржинальність</span>
-      </div>
-
-      <div class="sidebar-section-title">5. Регламентовані форми (ДПС/Стат)</div>
-      <div class="report-tree-item" data-report="stat-balance">
-        <span>Баланс підприємства (Форма №1)</span>
-        <span class="report-code-badge">НП(С)БО 1</span>
-      </div>
-      <div class="report-tree-item" data-report="stat-pnl">
-        <span>Звіт про фін. результати (Форма №2)</span>
-        <span class="report-code-badge">P&L ДПС</span>
-      </div>
-      <div class="report-tree-item" data-report="stat-vat">
-        <span>Декларація з ПДВ (Реєстр ЄРПН)</span>
-        <span class="report-code-badge">J02001 / СЕА</span>
+      <div class="sidebar-tree" id="sidebar-tree-container">
+        <!-- Rendered dynamically or by accordion groups -->
       </div>
     </aside>
 
-    <!-- Right Main Panel: Report Canvas -->
-    <main class="sys-canvas">
+    <!-- Main Workspace -->
+    <main class="sys-workspace">
+      <!-- Control Topbar for active Subtype -->
+      <div class="ctrl-topbar">
+        <div class="ctrl-row-top">
+          <div>
+            <div class="ctrl-breadcrumb" id="ctrl-breadcrumb">Головна книга та Бухоблік &gt; Оборотно-сальдова відомість</div>
+            <h1 class="ctrl-title" id="ctrl-title">
+              <span>Оборотно-сальдова відомість (ОСВ)</span>
+              <span class="ctrl-tag" id="ctrl-tag">Рахунки 1–9 класу</span>
+            </h1>
+          </div>
+          <div class="action-group">
+            <button class="btn-action-primary" id="btn-handoff-report">
+              <span>Передати звіт колезі</span>
+            </button>
+            <button class="btn-action-outline" id="btn-export-csv">
+              <span>Експорт Excel / CSV</span>
+            </button>
+          </div>
+        </div>
 
-      <!-- Filter Toolbar -->
-      <div class="sys-toolbar">
-        <div class="toolbar-filters">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span class="toolbar-label">Організація:</span>
-            <select id="flt-entity" class="sys-select" style="font-weight:600; min-width:210px;">
-              <option value="ALKOM" selected>ТОВ "ТД Алком" (Ортопедія • ORTOS • Аптеки)</option>
-              <option value="PLANT">ТОВ "ПромТех Виробництво"</option>
-              <option value="HOLDING">Консолідований Холдинг (Всі)</option>
+        <div class="ctrl-row-bottom">
+          <div class="filter-group">
+            <div class="period-btn-group" id="period-btn-group">
+              <button class="period-btn" data-period="TODAY">Сьогодні</button>
+              <button class="period-btn active" data-period="CURRENT_MONTH">Поточний місяць</button>
+              <button class="period-btn" data-period="Q3">III Квартал</button>
+              <button class="period-btn" data-period="YEAR">2026 Рік</button>
+            </div>
+
+            <select id="filter-entity" class="ctrl-select">
+              <option value="ALKOM">ТОВ «ТД «Алком» (Основний)</option>
+              <option value="ALL">Всі філії та підрозділи</option>
+            </select>
+
+            <select id="filter-account" class="ctrl-select" style="display:none;">
+              <option value="361">361 - Розрахунки з вітчизняними покупцями</option>
+              <option value="631">631 - Розрахунки з вітчизняними постачальниками</option>
+              <option value="281">281 - Товари на складі</option>
+              <option value="26">26 - Готова продукція</option>
+              <option value="201">201 - Сировина й матеріали</option>
             </select>
           </div>
 
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span class="toolbar-label">Період:</span>
-            <select id="flt-period" class="sys-select" style="font-weight:600;">
-              <option value="CURRENT_MONTH" selected>Поточний місяць (Листопад 2026)</option>
-              <option value="OCTOBER_2026">Жовтень 2026</option>
-              <option value="Q3_2026">3 Квартал 2026</option>
-              <option value="YTD_2026">2026 Рік YTD</option>
-            </select>
+          <div class="filter-group">
+            <input type="text" id="table-search" class="ctrl-input" placeholder="Пошук у таблиці..." style="width: 180px;">
           </div>
-
-          <div id="flt-account-container" style="display:flex; align-items:center; gap:6px;">
-            <span class="toolbar-label">Рахунок:</span>
-            <select id="flt-account" class="sys-select mono" style="font-weight:600;">
-              <option value="201">201 — Сировина й матеріали</option>
-              <option value="231">231 — Основне виробництво</option>
-              <option value="26">26 — Готова продукція</option>
-              <option value="311">311 — Поточні рахунки в банку</option>
-              <option value="361" selected>361 — Розрахунки з покупцями (АНЦ, ORTOS)</option>
-              <option value="631">631 — Розрахунки з постачальниками</option>
-              <option value="6412">6412 — Розрахунки за ПДВ</option>
-              <option value="701">701 — Дохід від реалізації ГП</option>
-              <option value="901">901 — Собівартість реалізованої ГП</option>
-              <option value="91">91 — Загальновиробничі витрати</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="toolbar-actions">
-          <button type="button" class="btn-exec" id="btn-generate-report">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>Сформувати</span>
-          </button>
-          <button type="button" class="btn-tool" id="btn-export-excel" title="Експорт поточної таблиці у формат Excel (.xlsx / .csv)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            <span>Excel</span>
-          </button>
-          <button type="button" class="btn-tool" onclick="window.print()" title="Друк регламентованої форми">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-            <span>Друк</span>
-          </button>
         </div>
       </div>
 
-      <!-- Reconciliation Cross-Check Strip -->
-      <div class="reconciliation-strip" id="recon-strip">
-        <div class="strip-items">
-          <div class="strip-item">
-            <span>Звірка Склад $\leftrightarrow$ ОСВ (201):</span>
-            <strong id="recon-stock">М-19 ₴ 4 120 000 == ОСВ ₴ 4 120 000 [Δ 0.00 ₴] ✓</strong>
+      <!-- Content Area with Table -->
+      <div class="sys-content">
+        <div class="data-table-card">
+          <div class="table-container" id="table-viewport">
+            <!-- Dynamic Subtype Table Rendered Here -->
           </div>
-          <div class="strip-item">
-            <span>Звірка Дебіторка $\leftrightarrow$ ОСВ (361):</span>
-            <strong id="recon-debt">Реєстр ₴ 4 920 000 == ОСВ ₴ 4 920 000 [Δ 0.00 ₴] ✓</strong>
+          <div class="table-summary-bar" id="table-summary-bar">
+            <!-- Totals & Checksums -->
           </div>
-          <div class="strip-item">
-            <span>Баланс Ф-1:</span>
-            <strong id="recon-balance">Активи ₴ 38 420 000 == Пасиви ₴ 38 420 000 ✓</strong>
-          </div>
-        </div>
-        <div style="font-weight:600; font-size:11px;">
-          Статус контролю: <span style="color:#047857;">БЕЗ КОНФЛІКТІВ І РОЗБІЖНОСТЕЙ</span>
         </div>
       </div>
-
-      <!-- Main Report Viewport -->
-      <div class="report-viewport">
-        <div class="report-paper" id="report-paper">
-          <!-- Dynamically Rendered Report Goes Here -->
-        </div>
-      </div>
-
     </main>
 
   </div>
 
-  <!-- Primary Document Drill-Down Modal -->
-  <div class="modal-backdrop" id="doc-modal">
-    <div class="modal-sheet">
-      <div class="modal-header">
-        <div class="modal-title" id="modal-doc-title">Первинний документ: Видаткова накладна</div>
-        <button type="button" onclick="closeDocModal()" style="background:none; border:none; color:#FFFFFF; font-size:18px; cursor:pointer;">&times;</button>
+  <!-- Slide-Over Tasks Drawer ("Маршрути та завдання") -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <aside class="tasks-drawer" id="tasks-drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>Маршрутизація та Завдання</span>
+        <span class="task-counter-badge" id="drawer-badge-count">4</span>
       </div>
-      <div class="modal-body" id="modal-doc-body">
-        <!-- Rendered Document View -->
+      <button class="btn-close-drawer" id="btn-close-drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-tasks-list">
+      <!-- Dynamic Tasks Rendered Here -->
+    </div>
+    <div style="padding: 12px 16px; background: #FFFFFF; border-top: 1px solid var(--border);">
+      <button class="btn-action-primary" style="width: 100%; justify-content: center;" id="btn-create-task-drawer">
+        <span>+ Створити новий маршрут</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Handoff Modal ("Передати документ колезі") -->
+  <div class="modal-overlay" id="modal-handoff">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="handoff-modal-title">Передати звіт / документ колезі</h3>
+        <button class="btn-close-drawer" id="btn-close-handoff">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Документ або звіт:</label>
+          <input type="text" id="handoff-doc-name" class="form-control" readonly value="Оборотно-сальдова відомість (ОСВ)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Кому призначити (відповідальний):</label>
+          <select id="handoff-recipient" class="form-control">
+            <option value="Коваленко І. П. (Фінансовий директор)">Коваленко І. П. (Фінансовий директор)</option>
+            <option value="Бондар В. А. (Зав. центральним складом)">Бондар В. А. (Зав. центральним складом)</option>
+            <option value="Мельник С. М. (Начальник швейного цеху)">Мельник С. М. (Начальник швейного цеху)</option>
+            <option value="Савченко Д. І. (Комерційний директор)">Савченко Д. І. (Комерційний директор)</option>
+            <option value="Григоренко П. Т. (Начальник ВТК)">Григоренко П. Т. (Начальник ВТК)</option>
+            <option value="Шевченко О. В. (Головний бухгалтер)">Шевченко О. В. (Головний бухгалтер)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Пріоритет обробки:</label>
+          <select id="handoff-priority" class="form-control">
+            <option value="NORMAL">Звичайний (в плановому порядку)</option>
+            <option value="URGENT">Терміново (вирішити протягом 2 годин)</option>
+            <option value="APPROVAL">На погодження (вимагає підпису керівника)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Коментар або доручення:</label>
+          <textarea id="handoff-comment" class="form-control" rows="3" placeholder="Вкажіть суть завдання або деталі перевірки розбіжностей..."></textarea>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn-tool" onclick="window.print()">Друк документа</button>
-        <button type="button" class="btn-exec" onclick="closeDocModal()">Закрити</button>
+        <button class="btn-action-outline" id="btn-cancel-handoff">Скасувати</button>
+        <button class="btn-action-primary" id="btn-confirm-handoff">Відправити в роботу &rarr;</button>
       </div>
     </div>
   </div>
 
+  <!-- Primary Document Preview Modal -->
+  <div class="modal-overlay" id="modal-doc-viewer">
+    <div class="modal-box modal-doc-box">
+      <div class="modal-header">
+        <h3 id="doc-viewer-header-title">Первинний обліковий документ</h3>
+        <button class="btn-close-drawer" id="btn-close-doc-viewer">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 12px;">
+        <div class="doc-paper" id="doc-paper-content">
+          <!-- Dynamic Document Content -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-outline" id="btn-print-doc">Друк / Експорт PDF</button>
+        <button class="btn-action-primary" id="btn-doc-handoff">Передати на підпис &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Script -->
   <script src="./systems.js"></script>
 </body>
 </html>
