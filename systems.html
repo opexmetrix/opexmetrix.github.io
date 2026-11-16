@@ -409,11 +409,82 @@
     .op-table td { padding: 11px 14px; color: var(--text-main); vertical-align: middle; }
     .op-table td.primary-col { font-weight: 600; color: var(--text-main); }
 
-    .status-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-    .status-ok { background: var(--success-soft); color: var(--success); }
-    .status-warning { background: var(--warning-soft); color: var(--warning); }
-    .status-danger { background: var(--danger-soft); color: var(--danger); }
-    .status-info { background: var(--primary-soft); color: var(--primary); }
+    .status-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .status-ok { background: #D1FAE5; color: #065F46; }
+    .status-warning { background: #FEF3C7; color: #92400E; }
+    .status-danger { background: #FEE2E2; color: #991B1B; }
+    .status-info { background: #DBEAFE; color: #1E40AF; }
+
+    body, .ceo-kpi-val, .mod-kpi-val, .journal-card-val, .op-table td.num { font-variant-numeric: tabular-nums; }
+
+    /* Pinned last column for wide tables */
+    .op-table th:last-child, .op-table td:last-child {
+      position: sticky; right: 0; background: #FFFFFF; box-shadow: -4px 0 8px rgba(15,23,42,0.04); z-index: 5;
+    }
+    .op-table thead th:last-child { background: #F8FAFC; z-index: 15; }
+    .op-table tbody tr:hover td:last-child { background: #F8FAFC; }
+    .op-table tbody tr.selected-row td:last-child { background: #EFF6FF; }
+
+    /* Interactive Kanban Next Stage Button */
+    .btn-kanban-next {
+      background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 5px; cursor: pointer;
+    }
+    .btn-kanban-next:hover { background: #2563EB; color: #FFFFFF; border-color: #2563EB; }
+
+    /* Scan Type Toggle & Doc Viewer Tabs */
+    .scan-doc-type-toggle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 6px; }
+    .btn-doc-type {
+      border: 1px solid var(--border); background: #F8FAFC; padding: 8px 6px; border-radius: 6px;
+      font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; text-align: center;
+    }
+    .btn-doc-type:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .btn-doc-type.active { border-color: var(--primary); background: var(--primary); color: #FFFFFF; }
+    .doc-viewer-tabs { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .doc-tab-btn {
+      background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px;
+      font-size: 11.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer;
+    }
+    .doc-tab-btn.active { background: var(--primary); border-color: var(--primary); color: #FFFFFF; }
+
+    /* Mobile Hamburger & Responsive Breakpoints */
+    .btn-mobile-menu {
+      display: none; background: transparent; border: 1px solid #334155; color: #FFFFFF;
+      font-size: 16px; border-radius: 6px; padding: 4px 8px; cursor: pointer; margin-right: 6px;
+    }
+    .sidebar-backdrop {
+      position: fixed; inset: 52px 0 0 0; background: rgba(15,23,42,0.5); backdrop-filter: blur(2px); z-index: 44; display: none;
+    }
+    .sidebar-backdrop.open { display: block; }
+    @media (max-width: 1366px) {
+      .ctrl-topbar { padding: 12px 16px; }
+      .ctrl-row-top { flex-wrap: wrap; gap: 10px; }
+      .action-group { flex-wrap: wrap; }
+    }
+    @media (max-width: 1024px) {
+      .btn-mobile-menu { display: inline-flex; align-items: center; justify-content: center; }
+      .sys-sidebar {
+        position: fixed; top: 52px; bottom: 0; left: 0; width: 280px; z-index: 45;
+        transform: translateX(-100%); transition: transform 0.25s ease; box-shadow: 12px 0 24px rgba(0,0,0,0.3);
+      }
+      .sys-sidebar.mobile-open { transform: translateX(0); }
+      .scan-split, .recon-split, .ceo-split-grid { grid-template-columns: 1fr !important; height: auto; overflow-y: auto; }
+      .module-kpi-strip { grid-template-columns: repeat(2, 1fr); padding: 12px 16px 0; }
+      #acc-reports-shortcut-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+    @media (max-width: 768px) {
+      .sys-entity, .sys-search-box { display: none; }
+      .ctrl-row-bottom { flex-direction: column; align-items: stretch; }
+      .filter-group { width: 100%; justify-content: space-between; }
+      .period-btn-group { width: 100%; display: flex; }
+      .period-btn { flex: 1; text-align: center; }
+      #table-search { width: 100% !important; }
+    }
+    @media (max-width: 640px) {
+      .ceo-kpi-grid, .module-kpi-strip, .journal-grid, .inspector-field-grid { grid-template-columns: 1fr !important; }
+      #acc-reports-shortcut-grid { grid-template-columns: 1fr !important; }
+      .inspector-drawer, .tasks-drawer { width: 100%; max-width: 100vw; }
+    }
 
     .btn-row-action {
       background: #FFFFFF; border: 1px solid var(--border); color: var(--text-secondary);
@@ -587,6 +658,7 @@
   <!-- ================= ENTERPRISE HEADER ================= -->
   <header class="sys-header">
     <div class="sys-brand">
+      <button class="btn-mobile-menu" id="btn-mobile-menu" aria-label="Меню">&#9776;</button>
       <div class="sys-logo">
         <span class="sys-logo-mark">OM</span>
         <span>OpexMetrix Systems</span>
@@ -619,7 +691,8 @@
 
   <!-- ================= MAIN LAYOUT ================= -->
   <div class="sys-layout">
-    <aside class="sys-sidebar">
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+    <aside class="sys-sidebar" id="sys-sidebar">
       <div style="padding: 8px 0 4px; border-bottom: 1px solid #1E293B;">
         <button class="sidebar-nav-item" id="btn-sidebar-ceo">
           <span>Огляд та Аналітика</span>
@@ -718,9 +791,11 @@
             <h1 style="font-size:19px; font-weight:800; color:#0F172A;">Робочий стіл Бухгалтера — Автоматичний облік (Odoo / SAP / BC)</h1>
             <div style="font-size:12px; color:#64748B;">Журнали операцій, авто-звірка банку, матриця проводок (Posting Groups) та всі регламентні звіти</div>
           </div>
-          <div style="display:flex; gap:8px;">
-            <button class="btn-action-outline" onclick="window.__switchToTable('posting-setup')">Матриця проводок (Posting Groups)</button>
-            <button class="btn-action-outline" onclick="window.__switchToTable('osv')">ОСВ</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-action-outline" onclick="document.getElementById('modal-import').classList.add('open')">Імпорт виписки</button>
+            <button class="btn-action-outline" onclick="window.__accrueDepreciation()">Нарахувати амортизацію</button>
+            <button class="btn-action-outline" onclick="window.__openAutomationModal()">Закриття місяця</button>
+            <button class="btn-action-outline" onclick="window.__switchToTable('posting-setup')">Матриця проводок</button>
             <button class="btn-action-primary" onclick="window.__openCreateDocModal()">+ Створити документ</button>
           </div>
         </div>

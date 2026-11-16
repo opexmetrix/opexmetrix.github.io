@@ -14,7 +14,8 @@
     role: null,
     activeMode: 'TABLE',
     activeView: 'osv',
-    viewDisplayMode: 'LIST', // 'LIST' | 'KANBAN'
+    viewDisplayMode: 'LIST', // 'LIST' | 'KANBAN' | 'GRAPH'
+    selectedGraphMetric: null,
     chartMetric: 'rev',
     noNumbersMode: false,
     searchQuery: '',
@@ -28,8 +29,8 @@
     scanDraft: {
       fileName: 'Фото_накладної_телефон.jpg',
       previewUrl: null,
-      sampleMode: 'INVOICE',
-      docType: 'Прибуткова накладна (Вхідна від постачальника)',
+      docCategory: 'INCOMING',
+      docType: 'Прибуткова накладна (Сировина)',
       docNum: 'ПН-009482',
       docDate: '16.11.2026',
       partner: 'ТОВ «Текстиль-Імпорт» (ЄДРПОУ 38491022)',
@@ -600,11 +601,15 @@
         { id: '301', acc: '301', name: 'Готівка в касі', begDt: 42500, begCt: 0, turnDt: 180000, turnCt: 165000, endDt: 57500, endCt: 0 },
         { id: '311', acc: '311', name: 'Поточні рахунки в банках', begDt: 11420000, begCt: 0, turnDt: 29450000, turnCt: 26020000, endDt: 14850000, endCt: 0 },
         { id: '361', acc: '361', name: 'Розрахунки з покупцями (Мережі)', begDt: 5640000, begCt: 0, turnDt: 28500000, turnCt: 27140000, endDt: 7000000, endCt: 0 },
+        { id: '40', acc: '40', name: 'Зареєстрований (статутний) капітал', begDt: 0, begCt: 35000000, turnDt: 0, turnCt: 0, endDt: 0, endCt: 35000000 },
+        { id: '44', acc: '44', name: 'Нерозподілений прибуток', begDt: 0, begCt: 4482500, turnDt: 0, turnCt: 4280000, endDt: 0, endCt: 8762500 },
         { id: '631', acc: '631', name: 'Розрахунки з постачальниками', begDt: 0, begCt: 3180000, turnDt: 4920000, turnCt: 5410000, endDt: 0, endCt: 3670000 },
         { id: '641', acc: '641', name: 'Розрахунки за податками', begDt: 0, begCt: 1420000, turnDt: 1420000, turnCt: 1680000, endDt: 0, endCt: 1680000 },
         { id: '661', acc: '661', name: 'Розрахунки за зарплатою', begDt: 0, begCt: 1850000, turnDt: 1850000, turnCt: 1940000, endDt: 0, endCt: 1940000 },
         { id: '701', acc: '701', name: 'Дохід від реалізації', begDt: 0, begCt: 0, turnDt: 28500000, turnCt: 28500000, endDt: 0, endCt: 0 },
-        { id: '901', acc: '901', name: 'Собівартість реалізації', begDt: 0, begCt: 0, turnDt: 17120000, turnCt: 17120000, endDt: 0, endCt: 0 }
+        { id: '901', acc: '901', name: 'Собівартість реалізації', begDt: 0, begCt: 0, turnDt: 17120000, turnCt: 17120000, endDt: 0, endCt: 0 },
+        { id: '92', acc: '92', name: 'Адміністративні витрати', begDt: 0, begCt: 0, turnDt: 1950000, turnCt: 1950000, endDt: 0, endCt: 0 },
+        { id: '93', acc: '93', name: 'Витрати на збут', begDt: 0, begCt: 0, turnDt: 1680000, turnCt: 1680000, endDt: 0, endCt: 0 }
       ],
       kpis: (rows) => {
         const dt = rows.reduce((s, r) => s + Number(r.turnDt || 0), 0);
@@ -693,11 +698,11 @@
       ],
       recalcRow: (r) => { r.diff = Number(r.end) - Number(r.beg); },
       rows: [
-        { id: 'B-1010', code: '1010', article: 'Основні засоби', beg: 14120000, end: 14565000, diff: 445000 },
-        { id: 'B-1100', code: '1100', article: 'Запаси (Сировина, НЗВ, ГП)', beg: 12950000, end: 14580000, diff: 1630000 },
+        { id: 'B-1010', code: '1010', article: 'Основні засоби (залишкова вартість)', beg: 14330000, end: 14565000, diff: 235000 },
+        { id: 'B-1100', code: '1100', article: 'Запаси (Сировина, НЗВ, ГП)', beg: 14500000, end: 14580000, diff: 80000 },
         { id: 'B-1125', code: '1125', article: 'Дебіторська заборгованість', beg: 5640000, end: 7000000, diff: 1360000 },
         { id: 'B-1165', code: '1165', article: 'Гроші та еквіваленти', beg: 11462500, end: 14907500, diff: 3445000 },
-        { id: 'B-1400', code: '1400', article: 'Власний капітал (Пасив)', beg: 37722500, end: 43762500, diff: 6040000 },
+        { id: 'B-1400', code: '1400', article: 'Власний капітал (Пасив)', beg: 39482500, end: 43762500, diff: 4280000 },
         { id: 'B-1615', code: '1615', article: 'Кредиторська заборгованість', beg: 3180000, end: 3670000, diff: 490000 },
         { id: 'B-1620', code: '1620', article: 'Зобов’язання перед бюджетом', beg: 1420000, end: 1680000, diff: 260000 },
         { id: 'B-1630', code: '1630', article: 'Оплата праці', beg: 1850000, end: 1940000, diff: 90000 }
@@ -766,6 +771,18 @@
         { id: 'COST-3', sku: 'ALK-OR2-S', name: 'Ортез OR-2 (S)', qty: 1450, mat: 609000, lab: 261000, ovh: 145000, unit: 700, tot: 1015000 },
         { id: 'COST-4', sku: 'ALK-GL1-L', name: 'Гольфи КЛ-1 (L)', qty: 6500, mat: 650000, lab: 325000, ovh: 195000, unit: 180, tot: 1170000 }
       ],
+      kpis: (rows) => {
+        const tot = rows.reduce((s, r) => s + Number(r.tot), 0);
+        const mat = rows.reduce((s, r) => s + Number(r.mat), 0);
+        const lab = rows.reduce((s, r) => s + Number(r.lab), 0);
+        const ovh = rows.reduce((s, r) => s + Number(r.ovh), 0);
+        return [
+          { title: 'Собівартість випуску', val: fmt(tot) + ' грн' },
+          { title: 'Прямі матеріали (201)', val: fmt(mat) + ' грн (' + (tot ? (mat / tot * 100).toFixed(1) : '0') + '%)' },
+          { title: 'Оплата праці (661)', val: fmt(lab) + ' грн (' + (tot ? (lab / tot * 100).toFixed(1) : '0') + '%)' },
+          { title: 'ЗВВ цеху (91)', val: fmt(ovh) + ' грн (' + (tot ? (ovh / tot * 100).toFixed(1) : '0') + '%)' }
+        ];
+      },
       summary: (rows) => `<div>Собівартість випуску: <strong>${fmt(rows.reduce((s, r) => s + Number(r.tot), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Авто-калькуляція</span></div>`
     },
 
@@ -786,7 +803,17 @@
         { id: 'M29-NEOP', order: 'WO-2026-4409', mat: 'Неопрен медичний 3мм', unit: 'м2', norm: 620.0, fact: 620.0, diff: 0, status: 'В межах норми' },
         { id: 'M29-SIL', order: 'WO-2026-4411', mat: 'Стрічка силіконова 50мм', unit: 'м.п.', norm: 2100.0, fact: 2100.0, diff: 0, status: 'В межах норми' }
       ],
-      summary: () => `<div>Форма М-29</div><div class="summary-checksum"><span class="checksum-badge">Допуск: 0.5%</span></div>`
+      kpis: (rows) => {
+        const over = rows.filter(r => Number(r.diff) > 0);
+        const save = rows.filter(r => Number(r.diff) < 0);
+        return [
+          { title: 'Номенклатур списання', val: rows.length + ' позиції' },
+          { title: 'Позицій з перевитратою', val: over.length + ' (Lycra +1.8 кг)' },
+          { title: 'Позицій з економією', val: save.length + ' (PA 6.6 -1.5 кг)' },
+          { title: 'Статус нормативів', val: over.length > 0 ? 'Допустиме відхил.' : 'В нормі' }
+        ];
+      },
+      summary: (rows) => `<div>Списано матеріалів: <strong>${rows.length} позицій</strong></div><div class="summary-checksum"><span class="checksum-badge">Перевитрат: ${rows.filter(r => Number(r.diff) > 0).length} поз.</span></div>`
     },
 
     'mes-orders': {
@@ -807,7 +834,23 @@
         { id: 'WO-2026-4411', product: 'Гольфи КЛ-1 (LOT-2026-GL901)', workshop: 'Merz CC4 #5-8', plan: 6500, done: 6500, pct: 100.0, status: 'Передано на склад ГП' },
         { id: 'WO-2026-4418', product: 'Ортез OR-2 (LOT-2026-OR07)', workshop: 'Складальна №2', plan: 2000, done: 940, pct: 47.0, status: 'В роботі' }
       ],
-      summary: (rows) => `<div>Нарядів: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Виконання: 87.5%</span></div>`
+      kpis: (rows) => {
+        const totPlan = rows.reduce((s, r) => s + Number(r.plan), 0);
+        const totDone = rows.reduce((s, r) => s + Number(r.done), 0);
+        const avgPct = totPlan > 0 ? (totDone / totPlan * 100).toFixed(1) : '0.0';
+        return [
+          { title: 'План / Факт випуску', val: `${fmtInt(totPlan)} / ${fmtInt(totDone)} шт` },
+          { title: 'Виконання плану', val: avgPct + '%' },
+          { title: 'Нарядів у роботі', val: rows.filter(r => r.status !== 'Передано на склад ГП').length + ' з ' + rows.length },
+          { title: 'Середній OEE', val: '86.3%' }
+        ];
+      },
+      summary: (rows) => {
+        const totPlan = rows.reduce((s, r) => s + Number(r.plan), 0);
+        const totDone = rows.reduce((s, r) => s + Number(r.done), 0);
+        const pct = totPlan > 0 ? (totDone / totPlan * 100).toFixed(1) : '0.0';
+        return `<div>Нарядів: <strong>${rows.length}</strong> | Факт: <strong>${fmtInt(totDone)} шт</strong></div><div class="summary-checksum"><span class="checksum-badge">Виконання: ${pct}%</span></div>`;
+      }
     },
 
     'mes-boms': {
@@ -840,7 +883,17 @@
         { id: 'SCR-01', act: 'АБ-0084', date: '12.11.2026', lot: 'LOT-2026-TC112', item: 'Панчохи КЛ-2', qty: 28, loss: 7560, reason: 'Тиск <23 мм рт. ст.' },
         { id: 'SCR-02', act: 'АБ-0089', date: '14.11.2026', lot: 'LOT-2026-AK048', item: 'Бандаж БП-4', qty: 12, loss: 5640, reason: 'Дефект рядка велкро' }
       ],
-      summary: (rows) => `<div>Брак: <strong>0.32%</strong></div><div class="summary-checksum"><span class="checksum-badge">Втрати: ${fmt(rows.reduce((s, r) => s + Number(r.loss), 0))}</span></div>`
+      kpis: (rows) => {
+        const totQty = rows.reduce((s, r) => s + Number(r.qty), 0);
+        const totLoss = rows.reduce((s, r) => s + Number(r.loss), 0);
+        return [
+          { title: 'Загальний брак ВТК', val: fmtInt(totQty, 'шт') },
+          { title: 'Фінансові втрати', val: fmt(totLoss) + ' грн' },
+          { title: 'Відсоток браку', val: '0.28% випуску' },
+          { title: 'Критична причина', val: 'Тиск <23 мм рт.ст.' }
+        ];
+      },
+      summary: (rows) => `<div>Брак ВТК: <strong>${fmtInt(rows.reduce((s, r) => s + Number(r.qty), 0), 'шт')}</strong></div><div class="summary-checksum"><span class="checksum-badge">Втрати: ${fmt(rows.reduce((s, r) => s + Number(r.loss), 0))} грн</span></div>`
     },
 
     'wms-m19': {
@@ -858,8 +911,20 @@
         { id: 'M19-1', wh: 'Склад Сировини №1', item: 'Пряжа Lycra 70 DEN (кг)', beg: 1840, inc: 1200, exp: 950, end: 2090, sum: 1881000 },
         { id: 'M19-2', wh: 'Склад Сировини №1', item: 'Нитка PA 6.6 (кг)', beg: 3200, inc: 2000, exp: 1850, end: 3350, sum: 1507500 },
         { id: 'M19-3', wh: 'Склад ГП №2', item: 'Панчохи КЛ-2 (пари)', beg: 8400, inc: 4200, exp: 5100, end: 7500, sum: 2025000 },
-        { id: 'M19-4', wh: 'Склад ГП №2', item: 'Бандажі АЛКОМ (шт)', beg: 5120, inc: 2800, exp: 3400, end: 4520, sum: 2124400 }
+        { id: 'M19-4', wh: 'Склад ГП №2', item: 'Бандажі АЛКОМ (шт)', beg: 5120, inc: 2800, exp: 3400, end: 4520, sum: 2124400 },
+        { id: 'M19-5', wh: 'Склад ГП №2', item: 'Гольфи КЛ-1 (пари)', beg: 0, inc: 6500, exp: 0, end: 6500, sum: 1170000 }
       ],
+      kpis: (rows) => {
+        const tot = rows.reduce((s, r) => s + Number(r.sum), 0);
+        const raw = rows.filter(r => r.wh.includes('Сировини')).reduce((s, r) => s + Number(r.sum), 0);
+        const fg = rows.filter(r => r.wh.includes('ГП')).reduce((s, r) => s + Number(r.sum), 0);
+        return [
+          { title: 'Вартість залишків', val: fmt(tot) + ' грн' },
+          { title: 'Склад сировини №1 (201)', val: fmt(raw) + ' грн' },
+          { title: 'Склад ГП №2 (26)', val: fmt(fg) + ' грн' },
+          { title: 'Позицій на обліку', val: rows.length + ' SKU' }
+        ];
+      },
       summary: (rows) => `<div>Залишок М-19: <strong>${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Рахунки 201 / 26: OK</span></div>`
     },
 
@@ -869,17 +934,27 @@
         { key: 'item', label: 'Виріб', editable: true },
         { key: 'mfgDate', label: 'Виробн.', editable: true },
         { key: 'expDate', label: 'Придатний до', editable: true },
-        { key: 'qty', label: 'Залишок', num: true, editable: true },
+        { key: 'qty', label: 'Придатний залишок', num: true, editable: true },
         { key: 'pressure', label: 'Протокол ВТК', editable: true },
         { key: 'status', label: 'Статус', editable: true }
       ],
       rows: [
-        { id: 'LOT-2026-TC112', item: 'Панчохи КЛ-2 (M)', mfgDate: '12.11.2026', expDate: '12.11.2031', qty: 4200, pressure: '26.4 мм рт.ст.', status: 'Дозволено до відвантаження' },
+        { id: 'LOT-2026-TC112', item: 'Панчохи КЛ-2 (M)', mfgDate: '12.11.2026', expDate: '12.11.2031', qty: 4172, pressure: '26.4 мм рт.ст. (-28 брак)', status: 'Дозволено до відвантаження' },
         { id: 'LOT-2026-AK048', item: 'Бандаж БП-4 (L)', mfgDate: '10.11.2026', expDate: '10.11.2031', qty: 2800, pressure: 'Тест жорсткості OK', status: 'Дозволено до відвантаження' },
         { id: 'LOT-2026-GL901', item: 'Гольфи КЛ-1 (L)', mfgDate: '08.11.2026', expDate: '08.11.2031', qty: 6500, pressure: '19.8 мм рт.ст.', status: 'Відвантажується (FEFO)' },
         { id: 'LOT-2026-OR07', item: 'Ортез OR-2', mfgDate: '14.11.2026', expDate: '14.11.2031', qty: 940, pressure: 'На тестуванні ВТК', status: 'Карантин до перевірки' }
       ],
-      summary: (rows) => `<div>Партій: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Простежуваність 100%</span></div>`
+      kpis: (rows) => {
+        const quar = rows.filter(r => r.status.includes('Карантин'));
+        const ok = rows.filter(r => !r.status.includes('Карантин'));
+        return [
+          { title: 'Партій (LOT)', val: rows.length + ' серій' },
+          { title: 'Допущено ВТК', val: ok.length + ' LOT (' + fmtInt(ok.reduce((s, r) => s + Number(r.qty), 0)) + ' шт)' },
+          { title: 'У карантині', val: quar.length + ' LOT (' + (quar[0]?.id || '—') + ')' },
+          { title: 'Відбраковано ВТК', val: '28 шт (Списано)' }
+        ];
+      },
+      summary: (rows) => `<div>Партій: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Простежуваність ISO 13485: 100%</span></div>`
     },
 
     'wms-reserves': {
@@ -897,6 +972,17 @@
         { id: 'RES-2', sku: 'ALK-BP4-L', name: 'Бандаж БП-4 (L)', phys: 4520, res: 1850, free: 2670, client: 'ОРТОС (1200), Добробут (650)' },
         { id: 'RES-3', sku: 'ALK-GL1-L', name: 'Гольфи КЛ-1', phys: 6500, res: 4100, free: 2400, client: 'Аптека 9-1-1 (4100)' }
       ],
+      kpis: (rows) => {
+        const phys = rows.reduce((s, r) => s + Number(r.phys), 0);
+        const res = rows.reduce((s, r) => s + Number(r.res), 0);
+        const free = rows.reduce((s, r) => s + Number(r.free), 0);
+        return [
+          { title: 'Фізичний залишок', val: fmtInt(phys, 'од.') },
+          { title: 'В резерві (EDI)', val: fmtInt(res, 'од.') },
+          { title: 'Вільний залишок', val: fmtInt(free, 'од.') },
+          { title: 'Захист від оверселінгу', val: 'Активний' }
+        ];
+      },
       summary: (rows) => `<div>В резерві: <strong>${fmtInt(rows.reduce((s, r) => s + Number(r.res), 0), 'од.')}</strong></div><div class="summary-checksum"><span class="checksum-badge">Оверселінг заблоковано</span></div>`
     },
 
@@ -933,9 +1019,10 @@
         { id: 'REC-ANC', contract: 'ТОВ «Аптека АНЦ» (№402/26)', beg: 1840000, shipped: 9450000, paid: 8920000, end: 2370000, status: 'Потребує звірки (ТТН ВН-004182)' },
         { id: 'REC-POD', contract: 'ТОВ «Подорожник» (№118/26)', beg: 1420000, shipped: 7800000, paid: 7410000, end: 1810000, status: 'Підписано в Вчасно.ЕДО' },
         { id: 'REC-ORT', contract: 'ТОВ «ОРТОС» (№085/26)', beg: 960000, shipped: 4620000, paid: 4380000, end: 1200000, status: 'Підписано в Вчасно.ЕДО' },
-        { id: 'REC-DOB', contract: 'ММ «Добробут» (№310/26)', beg: 540000, shipped: 2980000, paid: 2890000, end: 630000, status: 'Очікує підпису' }
+        { id: 'REC-DOB', contract: 'ММ «Добробут» (№310/26)', beg: 540000, shipped: 2980000, paid: 2890000, end: 630000, status: 'Очікує підпису' },
+        { id: 'REC-911', contract: 'Аптека 9-1-1 (№512/26)', beg: 880000, shipped: 3650000, paid: 3540000, end: 990000, status: 'Підписано в Вчасно.ЕДО' }
       ],
-      summary: (rows) => `<div>Дебіторка: <strong>${fmt(rows.reduce((s, r) => s + Number(r.end), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Вчасно.ЕДО / M.E.Doc</span></div>`
+      summary: (rows) => `<div>Дебіторка (361): <strong>${fmt(rows.reduce((s, r) => s + Number(r.end), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">100% збіг з ОСВ 361</span></div>`
     },
 
     'sales-aging': {
@@ -952,9 +1039,10 @@
         { id: 'AGE-1', client: 'ТОВ «Аптека АНЦ»', d15: 1950000, d30: 420000, d60: 0, d60p: 0, total: 2370000 },
         { id: 'AGE-2', client: 'ТОВ «Подорожник»', d15: 1600000, d30: 210000, d60: 0, d60p: 0, total: 1810000 },
         { id: 'AGE-3', client: 'ТОВ «ОРТОС»', d15: 850000, d30: 230000, d60: 120000, d60p: 0, total: 1200000 },
-        { id: 'AGE-4', client: 'Аптека 9-1-1', d15: 900000, d30: 90000, d60: 0, d60p: 0, total: 990000 }
+        { id: 'AGE-4', client: 'Аптека 9-1-1', d15: 900000, d30: 90000, d60: 0, d60p: 0, total: 990000 },
+        { id: 'AGE-5', client: 'ММ «Добробут»', d15: 540000, d30: 90000, d60: 0, d60p: 0, total: 630000 }
       ],
-      summary: () => `<div>Прострочка 60+: <strong>0.00 грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Ризик: Низький</span></div>`
+      summary: (rows) => `<div>Загальна дебіторка: <strong>${fmt(rows.reduce((s, r) => s + Number(r.total), 0))} грн</strong> | Прострочка 60+: <strong>0.00 грн</strong></div><div class="summary-checksum"><span class="checksum-badge">100% збіг з ОСВ 361</span></div>`
     },
 
     'sales-orders': {
@@ -973,6 +1061,17 @@
         { id: 'ORD-8819', date: '15.11.2026', client: 'ТОВ «Подорожник»', items: 94, sum: 1180000, status: 'Відвантажено' },
         { id: 'ORD-8824', date: '15.11.2026', client: 'ММ «Добробут»', items: 28, sum: 490000, status: 'Зарезервовано' }
       ],
+      kpis: (rows) => {
+        const tot = rows.reduce((s, r) => s + Number(r.sum), 0);
+        const shipped = rows.filter(r => r.status === 'Відвантажено').reduce((s, r) => s + Number(r.sum), 0);
+        const pick = rows.filter(r => r.status === 'На збірці' || r.status === 'Зарезервовано').reduce((s, r) => s + Number(r.sum), 0);
+        return [
+          { title: 'Портфель замовлень EDI', val: fmt(tot) + ' грн' },
+          { title: 'Відвантажено', val: fmt(shipped) + ' грн' },
+          { title: 'На збірці / Резерв', val: fmt(pick) + ' грн' },
+          { title: 'Очікує погодження', val: rows.filter(r => r.status.includes('Очікує')).length + ' замовл.' }
+        ];
+      },
       summary: (rows) => `<div>Замовлень: <strong>${rows.length}</strong> | Сума: <strong>${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">EDI активний</span></div>`
     },
 
@@ -1034,18 +1133,146 @@
         { key: 'gross', label: 'Нараховано', num: true, editable: true },
         { key: 'pdfo', label: 'ПДФО (18%)', num: true, computed: true },
         { key: 'vz', label: 'ВЗ (5%)', num: true, computed: true },
+        { key: 'esv', label: 'ЄСВ (22%)', num: true, computed: true },
         { key: 'net', label: 'До виплати', num: true, computed: true }
       ],
-      recalcRow: (r) => { r.pdfo = Number(r.gross) * 0.18; r.vz = Number(r.gross) * 0.05; r.net = Number(r.gross) - r.pdfo - r.vz; },
+      recalcRow: (r) => { r.pdfo = Number(r.gross) * 0.18; r.vz = Number(r.gross) * 0.05; r.esv = Number(r.gross) * 0.22; r.net = Number(r.gross) - r.pdfo - r.vz; },
       rows: [
-        { id: 'HR-1', dept: 'Швейно-в’язальний цех', emp: 84, gross: 2100000, pdfo: 378000, vz: 105000, net: 1617000 },
-        { id: 'HR-2', dept: 'Склад, Логістика та ВТК', emp: 24, gross: 540000, pdfo: 97200, vz: 27000, net: 415800 },
-        { id: 'HR-3', dept: 'Відділ продажів та ЕДО', emp: 18, gross: 680000, pdfo: 122400, vz: 34000, net: 523600 },
-        { id: 'HR-4', dept: 'Адміністрація та Бухгалтерія', emp: 14, gross: 520000, pdfo: 93600, vz: 26000, net: 400400 }
+        { id: 'HR-1', dept: 'Швейно-в’язальний цех', emp: 84, gross: 2100000, pdfo: 378000, vz: 105000, esv: 462000, net: 1617000 },
+        { id: 'HR-2', dept: 'Склад, Логістика та ВТК', emp: 24, gross: 540000, pdfo: 97200, vz: 27000, esv: 118800, net: 415800 },
+        { id: 'HR-3', dept: 'Відділ продажів та ЕДО', emp: 18, gross: 680000, pdfo: 122400, vz: 34000, esv: 149600, net: 523600 },
+        { id: 'HR-4', dept: 'Адміністрація та Бухгалтерія', emp: 14, gross: 520000, pdfo: 93600, vz: 26000, esv: 114400, net: 400400 }
       ],
-      summary: (rows) => `<div>До виплати: <strong>${fmt(rows.reduce((s, r) => s + Number(r.net), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">ПДФО+ВЗ авто</span></div>`
+      kpis: (rows) => {
+        const gross = rows.reduce((s, r) => s + Number(r.gross), 0);
+        const esv = rows.reduce((s, r) => s + Number(r.esv), 0);
+        const net = rows.reduce((s, r) => s + Number(r.net), 0);
+        return [
+          { title: 'Штат працівників', val: rows.reduce((s, r) => s + Number(r.emp), 0) + ' осіб' },
+          { title: 'Нараховано ФОП', val: fmt(gross) + ' грн' },
+          { title: 'ЄСВ (22%) на с/в', val: fmt(esv) + ' грн' },
+          { title: 'До виплати на картки', val: fmt(net) + ' грн' }
+        ];
+      },
+      summary: (rows) => `<div>До виплати: <strong>${fmt(rows.reduce((s, r) => s + Number(r.net), 0))} грн</strong> | ЄСВ (22%): <strong>${fmt(rows.reduce((s, r) => s + Number(r.esv), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">ПДФО + ВЗ + ЄСВ авто</span></div>`
     }
   };
+
+  // ================= CENTRALIZED DOUBLE-ENTRY ENGINE =================
+  function recomputeAllAccountingReports() {
+    DATASETS['osv'].rows.forEach(r => {
+      const net = (Number(r.begDt || 0) - Number(r.begCt || 0)) + (Number(r.turnDt || 0) - Number(r.turnCt || 0));
+      if (net >= 0) { r.endDt = net; r.endCt = 0; }
+      else { r.endDt = 0; r.endCt = Math.abs(net); }
+    });
+
+    const getOsvNet = (acc) => {
+      const r = DATASETS['osv'].rows.find(x => x.acc === acc);
+      return r ? (Number(r.endDt || 0) - Number(r.endCt || 0)) : 0;
+    };
+
+    DATASETS['coa'].rows.forEach(c => {
+      const r = DATASETS['osv'].rows.find(x => x.acc === c.acc);
+      if (r) c.balance = r.endDt > 0 ? r.endDt : -r.endCt;
+    });
+
+    const syncBal = (code, val) => {
+      const b = DATASETS['balance'].rows.find(r => r.code === code);
+      if (b) { b.end = val; b.diff = b.end - b.beg; }
+    };
+    syncBal('1010', getOsvNet('10') - Math.abs(getOsvNet('131')));
+    syncBal('1100', getOsvNet('201') + getOsvNet('23') + getOsvNet('26') + getOsvNet('281'));
+    syncBal('1125', getOsvNet('361'));
+    syncBal('1165', getOsvNet('301') + getOsvNet('311'));
+    syncBal('1615', Math.abs(getOsvNet('631')));
+    syncBal('1620', Math.abs(getOsvNet('641')));
+    syncBal('1630', Math.abs(getOsvNet('661')));
+    syncBal('1400', Math.abs(getOsvNet('40')) + Math.abs(getOsvNet('44')));
+
+    updateAuditRadar();
+  }
+
+  function postUniversalEntry({ doc, dt, ct, amount, partner, desc, source = 'Live' }) {
+    DATASETS['ledger'].rows.unshift({
+      id: 'JRN-' + Math.floor(100 + Math.random() * 899),
+      time: '16.11 Щойно', doc, dt, ct, sum: amount,
+      desc: `${partner}: ${desc}`, status: source
+    });
+
+    const rowDt = DATASETS['osv'].rows.find(r => r.acc === dt);
+    if (rowDt) rowDt.turnDt += amount;
+    const rowCt = DATASETS['osv'].rows.find(r => r.acc === ct);
+    if (rowCt) rowCt.turnCt += amount;
+
+    if (dt === '311' || ct === '311') {
+      const pb = DATASETS['treasury-stmt'].rows[0];
+      if (pb) {
+        if (dt === '311') pb.inc += amount;
+        if (ct === '311') pb.out += amount;
+        DATASETS['treasury-stmt'].recalcRow(pb);
+      }
+    }
+
+    if (dt === '361' || ct === '361') {
+      const shortName = partner.replace(/ТОВ\s*|ММ\s*|[«»"]/g, '').trim().split(' ')[0];
+      const rec = DATASETS['sales-recon'].rows.find(r => r.contract.includes(shortName) || r.id.includes(shortName));
+      if (rec) {
+        if (dt === '361') rec.shipped += amount;
+        if (ct === '361') { rec.paid += amount; rec.status = 'Звірено (Банк OK)'; }
+        DATASETS['sales-recon'].recalcRow(rec);
+      }
+      const age = DATASETS['sales-aging'].rows.find(r => r.client.includes(shortName));
+      if (age) {
+        if (dt === '361') age.d15 += amount;
+        if (ct === '361') {
+          if (age.d15 >= amount) age.d15 -= amount;
+          else { const rem = amount - age.d15; age.d15 = 0; age.d30 = Math.max(0, age.d30 - rem); }
+        }
+        DATASETS['sales-aging'].recalcRow(age);
+      }
+      const oacc = DATASETS['osv-acc'].rows.find(r => r.sub.includes(shortName));
+      if (oacc) {
+        if (dt === '361') oacc.turnDt += amount;
+        if (ct === '361') oacc.turnCt += amount;
+        DATASETS['osv-acc'].recalcRow(oacc);
+      }
+    }
+
+    recomputeAllAccountingReports();
+  }
+
+  function generateScanSvg(docNum, docType, partner, amount, date) {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 620" width="100%" height="100%" style="background:#FCFAF7; font-family:sans-serif;">
+        <rect width="100%" height="100%" fill="#FCFAF7"/>
+        <text x="28" y="34" font-size="11" font-weight="700" fill="#64748B">СКАН-КОПІЯ ПЕРВИННОГО ДОКУМЕНТА</text>
+        <text x="512" y="34" font-size="11" font-weight="700" text-anchor="end" fill="#059669">ВЧАСНО.ЕДО КЕП</text>
+        <line x1="28" y1="46" x2="512" y2="46" stroke="#CBD5E1" stroke-dasharray="4,4"/>
+        <rect x="28" y="64" width="84" height="24" rx="4" fill="#2563EB"/>
+        <text x="70" y="80" font-size="10" font-weight="700" fill="#FFF" text-anchor="middle">OPEXMETRIX</text>
+        <text x="122" y="81" font-size="13" font-weight="800" fill="#0F172A">ТОВ «ТД «АЛКОМ» • ЄДРПОУ 32894510</text>
+        <text x="270" y="130" font-size="15" font-weight="800" text-anchor="middle" fill="#0F172A">${String(docType).toUpperCase()}</text>
+        <text x="270" y="152" font-size="12" font-weight="700" text-anchor="middle" fill="#334155">№ ${docNum} від ${date}</text>
+        <rect x="28" y="172" width="484" height="64" rx="6" fill="#F1F5F9" stroke="#CBD5E1"/>
+        <text x="42" y="194" font-size="11" font-weight="700" fill="#475569">Контрагент:</text>
+        <text x="42" y="216" font-size="12" font-weight="700" fill="#0F172A">${partner}</text>
+        <rect x="28" y="256" width="484" height="24" fill="#E2E8F0"/>
+        <text x="38" y="272" font-size="10" font-weight="700" fill="#334155">Найменування / Партія</text>
+        <text x="498" y="272" font-size="10" font-weight="700" text-anchor="end" fill="#334155">Сума (грн)</text>
+        <text x="38" y="302" font-size="11" fill="#0F172A">Товарно-матеріальні цінності / Медвироби (ISO 13485)</text>
+        <text x="498" y="302" font-size="11" font-weight="700" text-anchor="end" fill="#0F172A">${Number(amount).toLocaleString('uk-UA')} грн</text>
+        <line x1="28" y1="324" x2="512" y2="324" stroke="#CBD5E1"/>
+        <text x="498" y="352" font-size="14" font-weight="800" text-anchor="end" fill="#0F172A">РАЗОМ: ${Number(amount).toLocaleString('uk-UA')} грн</text>
+        <circle cx="115" cy="480" r="42" fill="none" stroke="#2563EB" stroke-width="2" opacity="0.7" stroke-dasharray="6,2"/>
+        <text x="115" y="476" font-size="8" font-weight="800" fill="#2563EB" text-anchor="middle">ТОВ «ТД «АЛКОМ»</text>
+        <text x="115" y="490" font-size="7" font-weight="700" fill="#2563EB" text-anchor="middle">ПЕЧАТКА №1</text>
+        <rect x="288" y="444" width="224" height="72" rx="6" fill="#EFF6FF" stroke="#3B82F6"/>
+        <text x="300" y="464" font-size="10" font-weight="800" fill="#1D4ED8">КЕП ПІДПИСАНО</text>
+        <text x="300" y="480" font-size="9" fill="#1E3A8A">Шевченко О. В. (Головний бухгалтер)</text>
+        <text x="300" y="496" font-size="8" font-family="monospace" fill="#64748B">SHA-256: 8f4a2c91...d03e</text>
+      </svg>
+    `)}`;
+  }
 
   function pushUndo(viewId, rowsSnapshot) {
     state.undoStack.push({ viewId, rows: JSON.parse(JSON.stringify(rowsSnapshot)) });
@@ -1060,8 +1287,9 @@
     DATASETS[snap.viewId].rows = snap.rows;
     const btn = document.getElementById('btn-undo');
     if (btn) btn.disabled = state.undoStack.length === 0;
-    updateAuditRadar();
+    recomputeAllAccountingReports();
     if (state.activeMode === 'TABLE') renderActiveView();
+    else if (state.activeMode === 'ACC') renderAccountingCockpit();
     else renderCEOCockpit();
     showToast('Останню дію скасовано');
   }
@@ -1200,15 +1428,25 @@
   }
 
   function renderAccountingCockpit() {
-    const bankTot = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end), 0);
-    const arTot = DATASETS['sales-recon'].rows.reduce((s, r) => s + Number(r.end), 0);
+    const bankTot = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end || 0), 0);
+    const arTot = DATASETS['sales-recon'].rows.reduce((s, r) => s + Number(r.end || 0), 0);
     const reconPending = DATASETS['bank-recon'].rows.filter(r => r.status.includes('Готово')).length;
+    const vatRow = DATASETS['vat-decl']?.rows.find(r => r.id === 'VAT-3') || DATASETS['vat-decl']?.rows[DATASETS['vat-decl'].rows.length - 1];
+    const vatPayable = vatRow ? Number(vatRow.sum || 0) : 150500;
+    const osv23 = DATASETS['osv'].rows.find(r => r.acc === '23');
+    const osv26 = DATASETS['osv'].rows.find(r => r.acc === '26');
+    const wipFgTot = (osv23 ? Number(osv23.endDt || 0) : 0) + (osv26 ? Number(osv26.endDt || 0) : 0);
+    const deprTot = DATASETS['fixed-assets'].rows.reduce((s, r) => s + Number(r.depr || 0), 0);
+    const osvDiff = Math.abs(
+      DATASETS['osv'].rows.reduce((s, r) => s + Number(r.endDt || 0), 0) -
+      DATASETS['osv'].rows.reduce((s, r) => s + Number(r.endCt || 0), 0)
+    );
 
     document.getElementById('acc-journal-grid').innerHTML = `
       <div class="journal-card green">
         <div class="journal-card-head">
           <div><div class="journal-card-title">Банк (Приват24 / Райффайзен)</div><div class="journal-card-sub">Рахунок 311 • Синхронізація Open Banking</div></div>
-          <span class="status-badge status-warning">${reconPending} до звірки</span>
+          <span class="status-badge ${reconPending > 0 ? 'status-warning' : 'status-ok'}">${reconPending > 0 ? reconPending + ' до звірки' : 'Все звірено'}</span>
         </div>
         <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(bankTot)}</div>
         <div class="journal-card-actions">
@@ -1234,7 +1472,7 @@
           <div><div class="journal-card-title">Податки та ПДВ (641 / ЄРПН)</div><div class="journal-card-sub">Tax Grid 7% медвироби / 20% імпорт</div></div>
           <span class="status-badge status-ok">ПК: 490 тис.</span>
         </div>
-        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(150500)} <span style="font-size:12px; font-weight:500; color:#64748B;">до сплати</span></div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(vatPayable)} <span style="font-size:12px; font-weight:500; color:#64748B;">до сплати</span></div>
         <div class="journal-card-actions">
           <button class="btn-action-outline" onclick="window.__switchToTable('vat-decl')">Реєстр ПДВ</button>
           <button class="btn-row-action" onclick="window.__switchToTable('an-tax')">Навантаження</button>
@@ -1246,7 +1484,7 @@
           <div><div class="journal-card-title">Єдиний журнал (ACDOCA / Live)</div><div class="journal-card-sub">Подвійний запис без ручного вводу Дт/Кт</div></div>
           <span class="status-badge status-ok">${DATASETS['ledger'].rows.length} записів</span>
         </div>
-        <div class="journal-card-val">${state.noNumbersMode ? '—' : '0.00'} <span style="font-size:12px; font-weight:500; color:#059669;">розбіжностей</span></div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : fmt(osvDiff)} <span style="font-size:12px; font-weight:500; color:#059669;">розбіжностей</span></div>
         <div class="journal-card-actions">
           <button class="btn-action-outline" onclick="window.__switchToTable('ledger')">Журнал проводок</button>
           <button class="btn-row-action" onclick="window.__switchToTable('posting-setup')">Posting Groups</button>
@@ -1258,7 +1496,7 @@
           <div><div class="journal-card-title">Виробництво та Склад (WIP / 23 / 26)</div><div class="journal-card-sub">М-29, Партії LOT, Собівартість Merz CC4</div></div>
           <span class="status-badge status-info">ISO 13485</span>
         </div>
-        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(7250000)}</div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(wipFgTot)}</div>
         <div class="journal-card-actions">
           <button class="btn-action-outline" onclick="window.__switchToTable('mes-m29')">Списання М-29</button>
           <button class="btn-row-action" onclick="window.__switchToTable('wms-batch')">Партії LOT</button>
@@ -1270,7 +1508,7 @@
           <div><div class="journal-card-title">Основні засоби та Зарплата (ОЗ / П-6)</div><div class="journal-card-sub">Авто-амортизація 131 + ФОП 18%/5%/22%</div></div>
           <span class="status-badge status-ok">Готово</span>
         </div>
-        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(185000)} <span style="font-size:12px; font-weight:500; color:#64748B;">знос/міс</span></div>
+        <div class="journal-card-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(deprTot)} <span style="font-size:12px; font-weight:500; color:#64748B;">знос/міс</span></div>
         <div class="journal-card-actions">
           <button class="btn-action-outline" onclick="window.__switchToTable('fixed-assets')">Основні засоби</button>
           <button class="btn-row-action" onclick="window.__switchToTable('hr-payroll')">Зарплата П-6</button>
@@ -1317,9 +1555,11 @@
     if (!container) return;
     const series = TIME_SERIES[state.chartMetric] || TIME_SERIES.rev;
     const labels = TIME_SERIES.labels;
+    const metricUnits = { rev: 'млн ₴', profit: 'млн ₴', cash: 'млн ₴', units: 'тис. шт' };
+    const unit = metricUnits[state.chartMetric] || '';
     const allVals = [...series.y2025, ...series.y2026, ...series.pred].filter(v => v !== null);
-    const minV = Math.min(...allVals) * 0.85, maxV = Math.max(...allVals) * 1.08;
-    const W = 920, H = 210, padL = 46, padR = 20, padT = 18, padB = 28;
+    const minV = Math.floor(Math.min(...allVals) * 0.85), maxV = Math.ceil(Math.max(...allVals) * 1.15);
+    const W = 920, H = 220, padL = 52, padR = 25, padT = 25, padB = 30;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const getX = (i) => padL + (i / (labels.length - 1)) * plotW;
     const getY = (v) => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
@@ -1339,40 +1579,59 @@
     if (predPts.length > 1) {
       const upper = predPts.map((p, idx) => `${getX(p.i).toFixed(1)},${getY(p.v * (1 + idx * 0.025)).toFixed(1)}`);
       const lower = [...predPts].reverse().map((p, idx) => `${getX(p.i).toFixed(1)},${getY(p.v * (1 - (predPts.length - 1 - idx) * 0.025)).toFixed(1)}`);
-      bandPath = `<polygon points="${upper.concat(lower).join(' ')}" fill="rgba(16, 185, 129, 0.14)" />`;
+      bandPath = `<polygon points="${upper.concat(lower).join(' ')}" fill="rgba(16, 185, 129, 0.14)"><title>95% Довірчий інтервал прогнозу</title></polygon>`;
     }
 
-    let gridHtml = '';
+    let gridHtml = `<text x="${padL - 8}" y="${padT - 10}" font-size="10" font-weight="700" text-anchor="end" fill="#64748B">${unit}</text>`;
     for (let g = 0; g <= 4; g++) {
       const val = minV + ((maxV - minV) * g) / 4;
       const y = getY(val).toFixed(1);
       gridHtml += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#E2E8F0" stroke-width="1" />`;
-      gridHtml += `<text x="${padL - 6}" y="${Number(y) + 3}" font-size="10" text-anchor="end" fill="#64748B" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : val.toFixed(1)}</text>`;
+      gridHtml += `<text x="${padL - 8}" y="${Number(y) + 3}" font-size="10" text-anchor="end" fill="#64748B" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : val.toFixed(1)}</text>`;
     }
 
     const divX = getX(10).toFixed(1);
-    let xLabelsHtml = `<line x1="${divX}" y1="${padT}" x2="${divX}" y2="${H - padB}" stroke="#CBD5E1" stroke-dasharray="3,3" />`;
+    let xLabelsHtml = `<line x1="${divX}" y1="${padT - 8}" x2="${divX}" y2="${H - padB}" stroke="#059669" stroke-dasharray="3,3" stroke-width="1.5" /><text x="${divX}" y="${padT - 12}" font-size="9" font-weight="700" text-anchor="middle" fill="#059669">T=0 (Live)</text>`;
     labels.forEach((lbl, i) => {
       const isPred = lbl.includes('*');
-      xLabelsHtml += `<text x="${getX(i).toFixed(1)}" y="${H - 8}" font-size="10" text-anchor="middle" fill="${isPred ? '#059669' : '#64748B'}" font-weight="${isPred ? '700' : '500'}">${lbl}</text>`;
+      xLabelsHtml += `<text x="${getX(i).toFixed(1)}" y="${H - 10}" font-size="10" text-anchor="middle" fill="${isPred ? '#059669' : '#64748B'}" font-weight="${isPred ? '700' : '500'}">${lbl}</text>`;
     });
 
     let dotsHtml = '';
-    series.y2026.forEach((v, i) => { if (v !== null) dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.2" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" />`; });
+    series.y2025.forEach((v, i) => { if (v !== null) dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="2.8" fill="#94A3B8"><title>${labels[i]} 2025: ${v} ${unit}</title></circle>`; });
+    series.y2026.forEach((v, i) => {
+      if (v !== null) {
+        const v25 = series.y2025[i];
+        const diffStr = v25 ? ` (+${(((v - v25) / v25) * 100).toFixed(1)}% YoY)` : '';
+        dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="4" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" style="cursor:pointer;"><title>${labels[i]} 2026: ${v} ${unit}${diffStr}</title></circle>`;
+      }
+    });
     series.pred.forEach((v, i) => {
       if (v === null || i === 10) return;
-      dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.8" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5" />`;
-      dotsHtml += `<text x="${getX(i).toFixed(1)}" y="${(getY(v) - 8).toFixed(1)}" font-size="10" font-weight="700" text-anchor="middle" fill="#059669" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : v}</text>`;
+      dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="4.2" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5" style="cursor:pointer;"><title>Прогноз ${labels[i]}: ${v} ${unit}</title></circle>`;
+      dotsHtml += `<text x="${getX(i).toFixed(1)}" y="${(getY(v) - 9).toFixed(1)}" font-size="10" font-weight="700" text-anchor="middle" fill="#059669" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : v}</text>`;
     });
 
-    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="210" style="overflow:visible;">${gridHtml}${xLabelsHtml}${bandPath}<path d="${buildPath(series.y2025)}" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5,4" /><path d="${buildPath(series.y2026)}" fill="none" stroke="#2563EB" stroke-width="2.5" /><path d="${buildPath(series.pred)}" fill="none" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6,4" />${dotsHtml}</svg>`;
+    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="220" style="overflow:visible;">${gridHtml}${xLabelsHtml}${bandPath}<path d="${buildPath(series.y2025)}" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5,4" /><path d="${buildPath(series.y2026)}" fill="none" stroke="#2563EB" stroke-width="2.5" /><path d="${buildPath(series.pred)}" fill="none" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6,4" />${dotsHtml}</svg>`;
   }
 
   function renderCEOCockpit() {
-    const cashTot = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end), 0) + 57500;
+    const bankTot = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end), 0);
+    const cashOsv = DATASETS['osv'].rows.find(r => r.acc === '301')?.endDt || 57500;
+    const cashTot = bankTot + cashOsv;
     const revTot = DATASETS['sales-margin'].rows.reduce((s, r) => s + Number(r.rev), 0);
     const gpTot = DATASETS['sales-margin'].rows.reduce((s, r) => s + Number(r.gp), 0);
     const marginPct = revTot > 0 ? (gpTot / revTot * 100) : 0;
+    const yoyRows = DATASETS['an-yoy'].rows;
+    const novRow = yoyRows.find(r => r.month.includes('Листопад')) || yoyRows[3] || {};
+    const decPredRow = yoyRows.find(r => r.month.includes('Грудень')) || yoyRows[4] || {};
+    const yoyRevG = novRow.rev25 ? (((novRow.rev26 - novRow.rev25) / novRow.rev25) * 100).toFixed(1) : '21.8';
+    const yoyProfG = novRow.prof25 ? (((novRow.prof26 - novRow.prof25) / novRow.prof25) * 100).toFixed(1) : '39.4';
+    const cccRow = DATASETS['an-ccc'].rows.find(r => r.period.includes('Листопад')) || DATASETS['an-ccc'].rows[3] || {};
+    const unitRows = DATASETS['an-unit'].rows;
+    const avgSafety = unitRows.length ? (unitRows.reduce((s, r) => s + Number(r.safety), 0) / unitRows.length) : 66.3;
+    const totTaxes = DATASETS['an-tax'].rows.reduce((s, r) => s + Number(r.y2026), 0);
+    const taxRate = revTot > 0 ? (totTaxes / revTot * 100) : 11.5;
 
     document.getElementById('ceo-kpi-grid').innerHTML = `
       <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')"><div class="ceo-kpi-label">Виручка (Лис 2026)</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(revTot)}</div><div class="ceo-kpi-sub"><span>+21.8% vs 2025</span><span>YoY &rarr;</span></div></div>
@@ -1414,23 +1673,27 @@
       { w: 'Тиж 3 (02.12)', inc: 7.2, out: 3.9 },
       { w: 'Тиж 4 (09.12)', inc: 8.1, out: 4.2 }
     ];
+    const baseY = 82;
     document.getElementById('ceo-cash-runway-chart').innerHTML = `
-      <svg viewBox="0 0 420 140" width="100%" height="140">
+      <svg viewBox="0 0 420 155" width="100%" height="145" style="overflow:visible;">
+        <line x1="20" y1="${baseY}" x2="400" y2="${baseY}" stroke="#94A3B8" stroke-width="1.5" />
+        <text x="20" y="${baseY - 4}" font-size="8.5" fill="#64748B" font-weight="700">0</text>
         ${weeks.map((wk, i) => {
-          const x = 35 + i * 95;
-          const hIn = wk.inc * 11, hOut = wk.out * 11;
+          const x = 48 + i * 90;
+          const hIn = wk.inc * 6.5, hOut = wk.out * 6.5;
           return `
-            <rect x="${x}" y="${110 - hIn}" width="26" height="${hIn}" rx="3" fill="#10B981"></rect>
-            <text x="${x + 13}" y="${105 - hIn}" font-size="9" text-anchor="middle" fill="#059669" font-family="JetBrains Mono" font-weight="700">${state.noNumbersMode ? '—' : '+' + wk.inc + 'M'}</text>
-            <rect x="${x + 30}" y="${110 - hOut}" width="26" height="${hOut}" rx="3" fill="#F59E0B"></rect>
-            <text x="${x + 43}" y="${105 - hOut}" font-size="9" text-anchor="middle" fill="#D97706" font-family="JetBrains Mono" font-weight="700">${state.noNumbersMode ? '—' : '-' + wk.out + 'M'}</text>
-            <text x="${x + 28}" y="128" font-size="9.5" text-anchor="middle" fill="#64748B">${wk.w}</text>
+            <rect x="${x}" y="${baseY - hIn}" width="24" height="${hIn}" rx="3" fill="#10B981"><title>${wk.w} Cash-In: +${wk.inc}M грн</title></rect>
+            <text x="${x + 12}" y="${baseY - hIn - 4}" font-size="9" text-anchor="middle" fill="#059669" font-family="JetBrains Mono" font-weight="700">${state.noNumbersMode ? '—' : '+' + wk.inc + 'M'}</text>
+            <rect x="${x + 28}" y="${baseY}" width="24" height="${hOut}" rx="3" fill="#F59E0B"><title>${wk.w} Cash-Out: -${wk.out}M грн</title></rect>
+            <text x="${x + 40}" y="${baseY + hOut + 11}" font-size="9" text-anchor="middle" fill="#D97706" font-family="JetBrains Mono" font-weight="700">${state.noNumbersMode ? '—' : '-' + wk.out + 'M'}</text>
+            <text x="${x + 26}" y="150" font-size="9.5" text-anchor="middle" fill="#334155" font-weight="600">${wk.w}</text>
           `;
         }).join('')}
       </svg>
-      <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748B; border-top:1px solid #E2E8F0; padding-top:8px;">
-        <span><strong style="color:#059669;">Зелений:</strong> Прогноз Cash-In (Мережі)</span>
-        <span><strong style="color:#D97706;">Оранжевий:</strong> Закупівля сировини + ФОП</span>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748B; border-top:1px solid #E2E8F0; padding-top:6px;">
+        <span><strong style="color:#059669;">▲ Вгору:</strong> Cash-In (Мережі)</span>
+        <span><strong style="color:#D97706;">▼ Вниз:</strong> Cash-Out (OPEX)</span>
+        <span style="color:#059669; font-weight:700;">Профіцит: +11.6M грн</span>
       </div>
     `;
 
@@ -1538,70 +1801,65 @@
 
     if (state.activeView === 'doc-scan' && state.viewDisplayMode === 'LIST') {
       const sd = state.scanDraft;
-      const previewHtml = sd.previewUrl
-        ? `<img src="${sd.previewUrl}" alt="Скан документа">`
-        : `<div style="padding:20px; text-align:left; width:92%; background:#FFFFFF; color:#0F172A; border-radius:6px; font-family:var(--font-mono); font-size:11px; box-shadow:0 4px 14px rgba(0,0,0,0.25);">
-             <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #CBD5E1; padding-bottom:6px; margin-bottom:8px;">
-               <strong>${esc(sd.fileName)}</strong>
-               <span style="color:#059669; font-weight:700;">OCR 99.4%</span>
-             </div>
-             <div><strong>Документ:</strong> ${esc(sd.docType)} № ${esc(sd.docNum)}</div>
-             <div><strong>Дата:</strong> ${esc(sd.docDate)}</div>
-             <div><strong>Контрагент:</strong> ${esc(sd.partner)}</div>
-             <div style="margin-top:8px; padding:6px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:4px;">
-               <div><strong>Позиція:</strong> ${esc(sd.itemDesc)}</div>
-               <div><strong>Сума без ПДВ:</strong> ${fmt(sd.amount)} грн | <strong>ПДВ:</strong> ${fmt(sd.vat)} грн</div>
-             </div>
-           </div>`;
+      const effectivePreview = sd.previewUrl || generateScanSvg(sd.docNum, sd.docType, sd.partner, sd.amount + sd.vat, sd.docDate);
 
       viewport.innerHTML = `
         <div class="scan-split">
           <div style="display:flex; flex-direction:column; gap:12px;">
-            <label class="scan-dropzone" for="scan-file-input">
-              <div style="font-weight:700; font-size:13px; color:#0F172A;">Завантажити фото з телефону або скан з ПК (JPG / PNG / PDF)</div>
-              <div style="font-size:11.5px; color:#64748B;">Натисніть тут або зробіть фото камерою телефону — система розпізнає реквізити автоматично</div>
-              <input type="file" id="scan-file-input" accept="image/*,.pdf" capture="environment" style="display:none;" onchange="window.__handleScanUpload(this)">
-            </label>
-
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn-row-action" onclick="window.__loadSampleScan('INVOICE')">Зразок 1: Фото накладної (Сировина)</button>
-              <button class="btn-row-action" onclick="window.__loadSampleScan('TTN')">Зразок 2: Скан ТТН (Аптека АНЦ)</button>
+            <div style="background:#FFFFFF; border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px;">
+              <div style="font-weight:800; font-size:13px; color:#0F172A;">1. Джерело документа (Камера телефону або PDF/Файл)</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <label class="btn-action-primary" style="justify-content:center; cursor:pointer;" for="scan-cam-input">
+                  Зробити фото (Камера)
+                  <input type="file" id="scan-cam-input" accept="image/*" capture="environment" style="display:none;" onchange="window.__handleScanUpload(this)">
+                </label>
+                <label class="btn-action-outline" style="justify-content:center; cursor:pointer;" for="scan-file-input">
+                  Обрати PDF / Скан з ПК
+                  <input type="file" id="scan-file-input" accept="image/*,application/pdf" style="display:none;" onchange="window.__handleScanUpload(this)">
+                </label>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn-row-action" onclick="window.__setScanDocCategory('INCOMING')">Зразок 1: Прибуткова (201/631)</button>
+                <button class="btn-row-action" onclick="window.__setScanDocCategory('OUTGOING')">Зразок 2: Видаткова (361/701)</button>
+                <button class="btn-row-action" onclick="window.__setScanDocCategory('TTN')">Зразок 3: ТТН (93/631)</button>
+              </div>
             </div>
 
-            <div class="scan-preview-box">${previewHtml}</div>
+            <div class="scan-preview-box" style="background:#1E293B; min-height:360px;">
+              <img src="${effectivePreview}" alt="Скан первинного документа" style="width:100%; max-height:440px; object-fit:contain; border-radius:6px;">
+            </div>
           </div>
 
           <div class="scan-form-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h3 style="font-size:14px; font-weight:800;">Розпізнані дані (OCR) та Авто-проводка</h3>
-              <span class="status-badge status-ok">Готово до проведення</span>
+              <h3 style="font-size:14px; font-weight:800;">2. Розпізнані дані (OCR) та Проводка</h3>
+              <span class="status-badge status-ok">OCR 99.4%</span>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Тип документа:</label>
-              <input type="text" id="scan-doc-type" class="form-control" value="${esc(sd.docType)}">
+            <div>
+              <label class="form-label">Тип первинного документа (Posting Group):</label>
+              <div class="scan-doc-type-toggle">
+                <button type="button" class="btn-doc-type ${sd.postingDt === '201' ? 'active' : ''}" onclick="window.__setScanDocCategory('INCOMING')">Прибуткова (201/631)</button>
+                <button type="button" class="btn-doc-type ${sd.postingDt === '361' ? 'active' : ''}" onclick="window.__setScanDocCategory('OUTGOING')">Видаткова (361/701)</button>
+                <button type="button" class="btn-doc-type ${sd.postingDt === '93' ? 'active' : ''}" onclick="window.__setScanDocCategory('TTN')">ТТН (93/631)</button>
+              </div>
             </div>
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
               <div class="form-group"><label class="form-label">№ Документа:</label><input type="text" id="scan-doc-num" class="form-control" value="${esc(sd.docNum)}"></div>
               <div class="form-group"><label class="form-label">Дата:</label><input type="text" id="scan-doc-date" class="form-control" value="${esc(sd.docDate)}"></div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Контрагент (ЄДРПОУ):</label>
-              <input type="text" id="scan-partner" class="form-control" value="${esc(sd.partner)}">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Номенклатура / Призначення:</label>
-              <input type="text" id="scan-item" class="form-control" value="${esc(sd.itemDesc)}">
-            </div>
+            <div class="form-group"><label class="form-label">Контрагент (ЄДРПОУ):</label><input type="text" id="scan-partner" class="form-control" value="${esc(sd.partner)}"></div>
+            <div class="form-group"><label class="form-label">Номенклатура / Призначення:</label><input type="text" id="scan-item" class="form-control" value="${esc(sd.itemDesc)}"></div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
               <div class="form-group"><label class="form-label">Сума без ПДВ (грн):</label><input type="number" id="scan-amount" class="form-control" value="${sd.amount}"></div>
               <div class="form-group"><label class="form-label">ПДВ (грн):</label><input type="number" id="scan-vat" class="form-control" value="${sd.vat}"></div>
             </div>
-            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:10px; font-size:12px;">
+            <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:6px; padding:10px; font-size:12px; color:#1E3A8A;">
               <strong>Авто-визначена проводка (Posting Group):</strong> Дт <code>${esc(sd.postingDt)}</code> / Кт <code>${esc(sd.postingCt)}</code>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
-              <button class="btn-action-outline" onclick="window.__openHandoff('Скан документа ' + document.getElementById('scan-doc-num').value)">Передати колезі</button>
+            <div style="display:flex; justify-content:space-between; gap:8px; margin-top:4px;">
+              <button class="btn-action-outline" onclick="window.__openHandoff('Скан ' + document.getElementById('scan-doc-num').value, document.getElementById('scan-doc-num').value)">Передати колезі</button>
               <button class="btn-action-primary" onclick="window.__postScannedDoc()">Провести в облік і Реєстр ЕДО &rarr;</button>
             </div>
           </div>
@@ -1646,29 +1904,48 @@
     } else if (state.viewDisplayMode === 'GRAPH') {
       const labelCol = dataset.columns.find(c => !c.num && c.key !== 'id') || dataset.columns[0];
       const numCols = dataset.columns.filter(c => c.num);
-      const metricCol = numCols[numCols.length - 1] || numCols[0];
+      const metricCol = (state.selectedGraphMetric && numCols.find(c => c.key === state.selectedGraphMetric)) || numCols[numCols.length - 1] || numCols[0];
+      const isPctMetric = metricCol && ['pct', 'margin', 'growth', 'share', 'conf', 'oee', 'scrap'].includes(metricCol.key);
       const maxVal = metricCol ? Math.max(...filteredRows.map(r => Math.abs(Number(r[metricCol.key] || 0))), 1) : 1;
       const totalMetric = metricCol ? filteredRows.reduce((s, r) => s + Math.abs(Number(r[metricCol.key] || 0)), 0) : 0;
+      const avgMetric = filteredRows.length > 0 ? totalMetric / filteredRows.length : 0;
 
       viewport.innerHTML = `
         <div style="padding:20px 24px; display:flex; flex-direction:column; gap:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
             <div>
               <h3 style="font-size:15px; font-weight:800; color:#0F172A;">Візуальна аналітика модуля: ${esc(meta.subtype.title)}</h3>
               <div style="font-size:12px; color:#64748B;">Розподіл за показником «${esc(metricCol ? metricCol.label : 'Значення')}» • Клікніть по позиції для відкриття картки</div>
             </div>
-            <div style="font-family:var(--font-mono); font-size:13px; font-weight:700; color:#2563EB;">Разом: ${metricCol ? fmt(totalMetric) : filteredRows.length}</div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              ${numCols.length > 1 ? `
+                <select class="form-select" style="width:auto; min-width:170px; height:32px; font-size:12px; padding:4px 8px;" onchange="window.__changeGraphMetric(this.value)">
+                  ${numCols.map(c => `<option value="${esc(c.key)}" ${metricCol && c.key === metricCol.key ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}
+                </select>
+              ` : ''}
+              <div style="font-family:var(--font-mono); font-size:13px; font-weight:700; color:#2563EB;">
+                ${state.noNumbersMode ? '—' : (isPctMetric ? 'Середнє: ' + fmtPct(avgMetric) : 'Разом: ' + (metricCol ? fmt(totalMetric) : filteredRows.length))}
+              </div>
+            </div>
           </div>
+          ${filteredRows.length === 0 ? `
+            <div class="empty-state">
+              <div style="font-weight:700; color:#0F172A; margin-bottom:4px;">Записів не знайдено</div>
+              <div style="font-size:12px; margin-bottom:12px;">Спробуйте змінити пошуковий запит або очистити фільтри.</div>
+              <button class="btn-action-outline" onclick="window.__resetSearchFilter()">Скинути пошук</button>
+            </div>
+          ` : `
           <div style="display:flex; flex-direction:column; gap:10px;">
             ${filteredRows.map(r => {
               const val = metricCol ? Math.abs(Number(r[metricCol.key] || 0)) : 1;
               const pct = Math.max(3, (val / maxVal) * 100);
               const share = totalMetric > 0 ? ((val / totalMetric) * 100).toFixed(1) : '0.0';
+              const valFormatted = isPctMetric ? fmtPct(r[metricCol.key]) : fmt(r[metricCol.key]) + ' (' + share + '%)';
               return `
                 <div onclick="window.__openInspector('${esc(r.id)}')" style="cursor:pointer; padding:8px 12px; border:1px solid #E2E8F0; border-radius:8px; background:#F8FAFC;">
                   <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
                     <span style="font-weight:700; color:#0F172A;">${esc(r[labelCol.key])}</span>
-                    <span style="font-family:var(--font-mono); font-weight:700;">${state.noNumbersMode ? '—' : fmt(r[metricCol.key]) + ' (' + share + '%)'}</span>
+                    <span style="font-family:var(--font-mono); font-weight:700;">${state.noNumbersMode ? '—' : valFormatted}</span>
                   </div>
                   <div style="height:10px; background:#E2E8F0; border-radius:5px; overflow:hidden;">
                     <div style="width:${pct.toFixed(1)}%; height:100%; background:linear-gradient(90deg, #2563EB, #10B981); border-radius:5px;"></div>
@@ -1676,12 +1953,13 @@
                 </div>
               `;
             }).join('')}
-          </div>
+          </div>`}
         </div>
       `;
     } else if (meta.subtype.hasKanban && state.viewDisplayMode === 'KANBAN' && dataset.kanbanStages) {
-      viewport.innerHTML = `<div class="kanban-board">${dataset.kanbanStages.map(stage => {
+      viewport.innerHTML = `<div class="kanban-board">${dataset.kanbanStages.map((stage, sIdx) => {
         const cards = filteredRows.filter(r => r.status === stage);
+        const hasNext = sIdx < dataset.kanbanStages.length - 1;
         return `
           <div class="kanban-col">
             <div class="kanban-col-head"><span>${esc(stage)}</span><span class="domain-count">${cards.length}</span></div>
@@ -1690,59 +1968,121 @@
                 <div style="font-family:var(--font-mono); font-size:11px; color:#2563EB; font-weight:700;">${esc(r.id)}</div>
                 <div style="font-weight:700; font-size:12.5px;">${esc(r.product || r.client)}</div>
                 <div style="font-size:11px; color:#64748B;">${esc(r.workshop || r.date)} • ${r.sum ? fmt(r.sum) + ' грн' : fmtPct(r.pct)}</div>
+                ${hasNext ? `<button class="btn-kanban-next" onclick="event.stopPropagation(); window.__advanceKanbanStage('${esc(r.id)}')">Наступний етап &rarr;</button>` : ''}
               </div>
             `).join('')}
           </div>
         `;
       }).join('')}</div>`;
     } else {
-      let thead = '<thead><tr>';
-      dataset.columns.forEach(col => {
-        const arrow = state.sortCol === col.key ? (state.sortDir === 1 ? ' ▲' : ' ▼') : '';
-        thead += `<th class="${col.num ? 'num' : ''}" onclick="window.__sortCol('${col.key}')">${esc(col.label)}${arrow}</th>`;
-      });
-      thead += '<th style="text-align:right; width:140px;">Дії</th></tr></thead>';
-
-      let tbody = '<tbody>';
-      filteredRows.forEach(row => {
-        const isHighlighted = state.highlightedRowId === row.id ? 'highlighted' : '';
-        const isSelected = state.inspectedRowId === row.id ? 'selected-row' : '';
-        tbody += `<tr class="${isHighlighted} ${isSelected}" id="row-${esc(row.id)}" onclick="window.__openInspector('${esc(row.id)}')">`;
-
-        dataset.columns.forEach((col, cIdx) => {
-          const val = row[col.key];
-          let displayVal = '';
-          if (col.num) {
-            if (['pct', 'margin', 'growth', 'share', 'conf', 'oee', 'scrap'].includes(col.key)) displayVal = fmtPct(val);
-            else if (['qty', 'emp', 'items', 'book', 'fact', 'phys', 'res', 'free', 'plan', 'done', 'predQty', 'recStock', 'dso', 'output', 'matDays'].includes(col.key)) displayVal = fmtInt(val);
-            else displayVal = fmt(val);
-          } else if (col.key === 'status') {
-            let badgeClass = 'status-info';
-            const s = String(val).toLowerCase();
-            if (s.includes('ок') || s.includes('дозв') || s.includes('підпис') || s.includes('прийн') || s.includes('зареєст') || s.includes('передано') || s.includes('норм') || s.includes('звірен') || s.includes('авто') || s.includes('aaa') || s.includes('факт') || s.includes('відвантаж')) badgeClass = 'status-ok';
-            else if (s.includes('потр') || s.includes('очік') || s.includes('перевитр') || s.includes('карант') || s.includes('увага') || s.includes('ризик')) badgeClass = 'status-warning';
-            displayVal = `<span class="status-badge ${badgeClass}">${esc(val)}</span>`;
-          } else {
-            displayVal = esc(val);
-          }
-          tbody += `<td class="${col.num ? 'num' : ''} ${cIdx === 0 || cIdx === 1 ? 'primary-col' : ''}">${displayVal}</td>`;
+      if (filteredRows.length === 0) {
+        viewport.innerHTML = `
+          <div class="empty-state">
+            <div style="font-weight:700; font-size:14px; color:#0F172A; margin-bottom:6px;">Записів не знайдено</div>
+            <div style="font-size:12.5px; color:#64748B; margin-bottom:14px;">За запитом «${esc(state.searchQuery)}» у реєстрі «${esc(meta.subtype.title)}» немає збігів.</div>
+            <button class="btn-action-outline" onclick="window.__resetSearchFilter()">Скинути пошук</button>
+          </div>
+        `;
+      } else {
+        let thead = '<thead><tr>';
+        dataset.columns.forEach(col => {
+          const arrow = state.sortCol === col.key ? (state.sortDir === 1 ? ' ▲' : ' ▼') : '';
+          thead += `<th class="${col.num ? 'num' : ''}" onclick="window.__sortCol('${col.key}')">${esc(col.label)}${arrow}</th>`;
         });
+        thead += '<th style="text-align:right; width:165px;">Дії</th></tr></thead>';
 
-        const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
-        tbody += `
-          <td style="text-align:right;" onclick="event.stopPropagation();">
-            <button class="btn-row-action" onclick="window.__openInspector('${esc(row.id)}')">Картка</button>
-            <button class="btn-row-action" onclick="window.__openHandoff('${esc(meta.subtype.title)}: ${esc(rowLabel)}', '${esc(row.id)}')">Передати</button>
-          </td>
-        </tr>`;
-      });
-      tbody += '</tbody>';
-      viewport.innerHTML = `<table class="op-table">${thead}${tbody}</table>`;
+        let tbody = '<tbody>';
+        filteredRows.forEach(row => {
+          const isHighlighted = state.highlightedRowId === row.id ? 'highlighted' : '';
+          const isSelected = state.inspectedRowId === row.id ? 'selected-row' : '';
+          tbody += `<tr class="${isHighlighted} ${isSelected}" id="row-${esc(row.id)}" onclick="window.__openInspector('${esc(row.id)}')">`;
+
+          dataset.columns.forEach((col, cIdx) => {
+            const val = row[col.key];
+            let displayVal = '';
+            if (col.num) {
+              if (['pct', 'margin', 'growth', 'share', 'conf', 'oee', 'scrap'].includes(col.key)) displayVal = fmtPct(val);
+              else if (['qty', 'emp', 'items', 'book', 'fact', 'phys', 'res', 'free', 'plan', 'done', 'predQty', 'recStock', 'dso', 'output', 'matDays'].includes(col.key)) displayVal = fmtInt(val);
+              else displayVal = fmt(val);
+            } else if (col.key === 'status') {
+              let badgeClass = 'status-info';
+              const s = String(val).toLowerCase();
+              if (s.includes('ок') || s.includes('дозв') || s.includes('підпис') || s.includes('прийн') || s.includes('зареєст') || s.includes('передано') || s.includes('норм') || s.includes('звірен') || s.includes('авто') || s.includes('aaa') || s.includes('факт') || s.includes('відвантаж') || s.includes('провед') || s.includes('погодж')) badgeClass = 'status-ok';
+              else if (s.includes('потр') || s.includes('очік') || s.includes('перевитр') || s.includes('карант') || s.includes('увага') || s.includes('ризик') || s.includes('сторн')) badgeClass = 'status-warning';
+              displayVal = `<span class="status-badge ${badgeClass}">${esc(val)}</span>`;
+            } else {
+              displayVal = esc(val);
+            }
+            tbody += `<td class="${col.num ? 'num' : ''} ${cIdx === 0 || cIdx === 1 ? 'primary-col' : ''}">${displayVal}</td>`;
+          });
+
+          const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
+          const canStorno = state.activeView === 'ledger' && !String(row.status || '').includes('Сторно');
+          tbody += `
+            <td style="text-align:right;" onclick="event.stopPropagation();">
+              <button class="btn-row-action" onclick="window.__openInspector('${esc(row.id)}')">Картка</button>
+              ${canStorno ? `<button class="btn-row-action" style="color:#DC2626; border-color:#FECACA;" onclick="window.__stornoLedgerEntry('${esc(row.id)}')">Сторно</button>` : `<button class="btn-row-action" onclick="window.__openHandoff('${esc(meta.subtype.title)}: ${esc(rowLabel)}', '${esc(row.id)}')">Передати</button>`}
+            </td>
+          </tr>`;
+        });
+        tbody += '</tbody>';
+        viewport.innerHTML = `<table class="op-table">${thead}${tbody}</table>`;
+      }
     }
 
     const summaryEl = document.getElementById('table-summary-bar');
     if (summaryEl) summaryEl.innerHTML = dataset.summary ? dataset.summary(filteredRows) : `<div>Рядків: ${filteredRows.length}</div>`;
   }
+
+  window.__changeGraphMetric = function(metricKey) {
+    state.selectedGraphMetric = metricKey;
+    renderActiveView();
+  };
+
+  window.__resetSearchFilter = function() {
+    state.searchQuery = '';
+    const gs = document.getElementById('global-search');
+    const ts = document.getElementById('table-search');
+    if (gs) gs.value = '';
+    if (ts) ts.value = '';
+    renderActiveView();
+  };
+
+  window.__advanceKanbanStage = function(rowId) {
+    const dataset = DATASETS[state.activeView];
+    if (!dataset || !dataset.kanbanStages) return;
+    const row = dataset.rows.find(r => r.id === rowId);
+    if (!row) return;
+    const idx = dataset.kanbanStages.indexOf(row.status);
+    if (idx < 0 || idx >= dataset.kanbanStages.length - 1) return;
+    pushUndo(state.activeView, dataset.rows);
+    row.status = dataset.kanbanStages[idx + 1];
+    if (typeof row.done === 'number' && typeof row.plan === 'number') {
+      if (idx + 1 === dataset.kanbanStages.length - 1) { row.done = row.plan; row.pct = 100; }
+      else if (row.pct < 50) { row.pct = 65; row.done = Math.round(row.plan * 0.65); }
+    }
+    updateAuditRadar();
+    renderActiveView();
+    showToast(`${row.id} переведено на етап «${row.status}»`);
+  };
+
+  window.__setScanDocCategory = function(cat) {
+    state.scanDraft.docCategory = cat;
+    if (cat === 'OUTGOING') {
+      state.scanDraft.docType = 'Видаткова накладна / ТТН (Реалізація)';
+      state.scanDraft.postingDt = '361';
+      state.scanDraft.postingCt = '701';
+    } else if (cat === 'EXPENSE') {
+      state.scanDraft.docType = 'Акт виконаних робіт / Послуги (Адмін/Збут)';
+      state.scanDraft.postingDt = '93';
+      state.scanDraft.postingCt = '631';
+    } else {
+      state.scanDraft.docType = 'Прибуткова накладна (Вхідна від постачальника)';
+      state.scanDraft.postingDt = '201';
+      state.scanDraft.postingCt = '631';
+    }
+    renderActiveView();
+  };
 
   window.__handleScanUpload = function(input) {
     const file = input.files && input.files[0];
@@ -1753,13 +2093,13 @@
       reader.onload = (e) => {
         state.scanDraft.previewUrl = e.target.result;
         renderActiveView();
-        showToast(`Файл «${file.name}» завантажено та розпізнано через OCR`);
+        showToast(`Фото «${file.name}» завантажено та розпізнано через OCR`);
       };
       reader.readAsDataURL(file);
     } else {
       state.scanDraft.previewUrl = null;
       renderActiveView();
-      showToast(`PDF-документ «${file.name}» завантажено в чергу OCR`);
+      showToast(`Файл «${file.name}» завантажено в чергу OCR`);
     }
   };
 
@@ -1767,7 +2107,7 @@
     state.scanDraft.previewUrl = null;
     if (mode === 'TTN') {
       state.scanDraft = {
-        fileName: 'Скан_ТТН_АНЦ_004195.pdf', previewUrl: null, sampleMode: 'TTN',
+        fileName: 'Скан_ТТН_АНЦ_004195.pdf', previewUrl: null, sampleMode: 'TTN', docCategory: 'OUTGOING',
         docType: 'Товарно-транспортна накладна (ТТН)', docNum: 'ТТН-004195', docDate: '16.11.2026',
         partner: 'ТОВ «Аптека АНЦ» (ЄДРПОУ 38910421)',
         itemDesc: 'Панчохи компресійні КЛ-2 (1 200 пар, Партія LOT-2026-TC112)',
@@ -1775,7 +2115,7 @@
       };
     } else {
       state.scanDraft = {
-        fileName: 'Фото_накладної_телефон.jpg', previewUrl: null, sampleMode: 'INVOICE',
+        fileName: 'Фото_накладної_телефон.jpg', previewUrl: null, sampleMode: 'INVOICE', docCategory: 'INCOMING',
         docType: 'Прибуткова накладна (Вхідна від постачальника)', docNum: 'ПН-009482', docDate: '16.11.2026',
         partner: 'ТОВ «Текстиль-Імпорт» (ЄДРПОУ 38491022)',
         itemDesc: 'Пряжа еластанова Lycra 70 DEN (800 кг) — Склад №1',
@@ -1794,19 +2134,23 @@
     const amt = parseFloat(document.getElementById('scan-amount').value) || 0;
     const vat = parseFloat(document.getElementById('scan-vat').value) || 0;
     const tot = amt + vat;
+    const savedPreview = state.scanDraft.previewUrl || generateScanSvg(docNum, docType, partner, amt, docDate);
 
     DATASETS['doc-flow'].rows.unshift({
       id: docNum, date: docDate, type: docType, partner: partner,
       channel: 'Скан (Телефон / ПК OCR)', sum: tot,
-      status: `Проведено (Дт ${state.scanDraft.postingDt} Кт ${state.scanDraft.postingCt})`
+      status: `Проведено (Дт ${state.scanDraft.postingDt} Кт ${state.scanDraft.postingCt})`,
+      previewUrl: savedPreview
     });
-    DATASETS['ledger'].rows.unshift({
-      id: 'JRN-' + Math.floor(100 + Math.random() * 899),
-      time: '16.11 Щойно', doc: docNum,
-      dt: state.scanDraft.postingDt, ct: state.scanDraft.postingCt,
-      sum: tot, desc: `${partner}: ${itemDesc}`, status: 'Скан OCR → Облік'
+    postUniversalEntry({
+      doc: docNum,
+      dt: state.scanDraft.postingDt,
+      ct: state.scanDraft.postingCt,
+      amount: tot,
+      partner,
+      desc: `${partner}: ${itemDesc}`,
+      source: 'Скан OCR → Облік'
     });
-    updateAuditRadar();
     showToast(`Скан ${docNum} проведено! Додано в Реєстр обігу та Єдиний журнал.`);
     window.__switchToTable('doc-flow', docNum);
   };
@@ -1814,23 +2158,64 @@
   window.__reconcileBankRow = function(rowId) {
     const r = DATASETS['bank-recon'].rows.find(x => x.id === rowId);
     if (!r) return;
+    if (r.status.includes('Звірено')) { showToast('Цей платіж вже звірено'); return; }
+    pushUndo('bank-recon', DATASETS['bank-recon'].rows);
     r.status = 'Звірено автоматично';
-    DATASETS['ledger'].rows.unshift({
-      id: 'JRN-' + Math.floor(100 + Math.random() * 899),
-      time: '16.11 Щойно', doc: 'БВ-RECON',
+    postUniversalEntry({
+      doc: 'БВ-RECON',
       dt: r.amount >= 0 ? '311' : '92',
       ct: r.amount >= 0 ? '361' : '311',
-      sum: Math.abs(r.amount),
+      amount: Math.abs(r.amount),
+      partner: r.partner,
       desc: `${r.partner}: ${r.purpose}`,
-      status: 'Авто-звірка банку'
+      source: 'Авто-звірка банку'
     });
     if (r.partner.includes('АНЦ')) {
       const anc = DATASETS['sales-recon'].rows.find(x => x.id === 'REC-ANC');
-      if (anc) anc.status = 'Звірено автоматично (Банк OK)';
+      if (anc) { anc.paid += Math.abs(r.amount); DATASETS['sales-recon'].recalcRow(anc); anc.status = 'Звірено автоматично (Банк OK)'; }
+      const ancTask = state.tasks.find(t => t.id === 'TSK-101' && t.status === 'ACTIVE');
+      if (ancTask) { ancTask.status = 'DONE'; renderTasksDrawer(); }
     }
     updateAuditRadar();
     renderActiveView();
     showToast(`Платіж ${r.partner} звірено та проведено в Єдиний журнал!`);
+  };
+
+  window.__accrueDepreciation = function() {
+    const deprTot = DATASETS['fixed-assets'].rows.reduce((s, r) => s + Number(r.depr || 0), 0);
+    if (deprTot <= 0) return;
+    postUniversalEntry({
+      doc: 'АМОРТ-1126',
+      dt: '23',
+      ct: '131',
+      amount: deprTot,
+      partner: 'Виробництво / Merz CC4',
+      desc: 'Нарахування щомісячної амортизації ОЗ (131) у собівартість (23)',
+      source: 'Авто-амортизація'
+    });
+    if (state.activeMode === 'ACC') renderAccountingCockpit();
+    else if (state.activeMode === 'CEO') renderCEOCockpit();
+    else renderActiveView();
+    showToast(`Амортизацію ${fmt(deprTot)} грн нараховано (Дт 23 Кт 131)!`);
+  };
+
+  window.__stornoLedgerEntry = function(rowId) {
+    const entry = DATASETS['ledger'].rows.find(r => r.id === rowId);
+    if (!entry || String(entry.status).includes('Сторно')) return;
+    pushUndo('ledger', DATASETS['ledger'].rows);
+    entry.status = 'Сторновано';
+    postUniversalEntry({
+      doc: 'СТОРНО-' + entry.doc,
+      dt: entry.dt,
+      ct: entry.ct,
+      amount: -Math.abs(Number(entry.sum || 0)),
+      partner: entry.desc,
+      desc: `[ЧЕРВОНЕ СТОРНО] ${entry.desc}`,
+      source: 'Червоне сторно'
+    });
+    closeInspector();
+    renderActiveView();
+    showToast(`Проводку ${entry.id} сторновано методом Червоне сторно!`);
   };
 
   window.__sortCol = function(colKey) {
@@ -1850,6 +2235,29 @@
 
     document.getElementById('inspector-title').textContent = `${meta.subtype.code}: ${rowLabel}`;
     const body = document.getElementById('inspector-body');
+    const hasScanPreview = row.previewUrl || state.activeView === 'doc-flow' || state.activeView === 'sales-orders';
+    const previewSrc = row.previewUrl || generateScanSvg(row.id, meta.subtype.title, row.partner || row.client || 'ТОВ «ТД «Алком»', row.sum || row.amount || 0, row.date || '16.11.2026');
+    const isLedgerStornable = state.activeView === 'ledger' && !String(row.status || '').includes('Сторно');
+
+    let crossLinksHtml = '';
+    if (state.activeView === 'sales-orders' || state.activeView === 'wms-batch') {
+      const linkedMes = DATASETS['mes-orders']?.rows.slice(0, 2) || [];
+      if (linkedMes.length) {
+        crossLinksHtml = `
+          <div class="inspector-section">
+            <div class="inspector-sec-title">Пов'язані замовлення виробництва (MES)</div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              ${linkedMes.map(m => `
+                <div onclick="window.__switchToTable('mes-orders', '${esc(m.id)}')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; font-size:12px;">
+                  <span><strong>${esc(m.id)}</strong> — ${esc(m.product)}</span>
+                  <span class="status-badge status-info">${esc(m.status)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+    }
 
     body.innerHTML = `
       <div class="inspector-section">
@@ -1864,6 +2272,17 @@
         </div>
       </div>
 
+      ${hasScanPreview ? `
+        <div class="inspector-section">
+          <div class="inspector-sec-title">Скан-копія / Первинний документ</div>
+          <div style="border:1px solid #CBD5E1; border-radius:8px; overflow:hidden; background:#FFFFFF;">
+            <img src="${previewSrc}" alt="Скан документа" style="width:100%; max-height:220px; object-fit:contain; display:block;">
+          </div>
+        </div>
+      ` : ''}
+
+      ${crossLinksHtml}
+
       <div class="inspector-section">
         <div class="inspector-sec-title">Журнал стану та Авто-проводки</div>
         <div class="timeline-box">
@@ -1871,6 +2290,12 @@
           <div class="timeline-step"><strong>Перевірено Аудит-Радаром 24/7</strong><div style="font-size:11px; color:#64748B;">Кореспонденція рахунків та балансові інваріанти валідні</div></div>
         </div>
       </div>
+
+      ${isLedgerStornable ? `
+        <div class="inspector-section">
+          <button class="btn-action-outline" style="width:100%; color:#DC2626; border-color:#FECACA;" onclick="window.__stornoLedgerEntry('${esc(row.id)}')">Сторнувати (Червоне сторно)</button>
+        </div>
+      ` : ''}
     `;
 
     document.getElementById('inspector-overlay').classList.add('open');
@@ -1940,22 +2365,19 @@
 
     if (type === 'SALE') {
       DATASETS['sales-orders'].rows.unshift({ id: docId, date: '16.11.2026', client: partner, items: 24, sum: amt, status: 'Відвантажено' });
-      DATASETS['ledger'].rows.unshift({ id: 'JRN-' + Date.now(), time: '16.11 Щойно', doc: docId, dt: '361', ct: '701', sum: amt, desc: `${partner}: ${desc}`, status: 'Авто-проводка' });
-      const osv361 = DATASETS['osv'].rows.find(r => r.acc === '361');
-      if (osv361) { osv361.turnDt += amt; DATASETS['osv'].recalcRow(osv361); }
-      const osv701 = DATASETS['osv'].rows.find(r => r.acc === '701');
-      if (osv701) { osv701.turnCt += amt; osv701.turnDt += amt; }
+      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Видаткова накладна', partner, channel: 'Вчасно.ЕДО / 1С-міст', sum: amt, status: 'Проведено (Дт 361 Кт 701)' });
+      postUniversalEntry({ doc: docId, dt: '361', ct: '701', amount: amt, partner, desc: `${partner}: ${desc}`, source: 'Авто-проводка' });
     } else if (type === 'PAYMENT') {
-      DATASETS['ledger'].rows.unshift({ id: 'JRN-' + Date.now(), time: '16.11 Щойно', doc: docId, dt: '311', ct: '361', sum: amt, desc: `Оплата від ${partner}`, status: 'Банк-Клієнт' });
-      const pb = DATASETS['treasury-stmt'].rows[0];
-      if (pb) { pb.inc += amt; DATASETS['treasury-stmt'].recalcRow(pb); }
+      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Банківська виписка', partner, channel: 'Open Banking API', sum: amt, status: 'Проведено (Дт 311 Кт 361)' });
+      postUniversalEntry({ doc: docId, dt: '311', ct: '361', amount: amt, partner, desc: `Оплата від ${partner}`, source: 'Банк-Клієнт' });
     } else {
       DATASETS['mes-orders'].rows.unshift({ id: docId, product: desc, workshop: partner, plan: amt, done: 0, pct: 0, status: 'В роботі' });
+      updateAuditRadar();
     }
 
-    updateAuditRadar();
     document.getElementById('modal-create-doc').classList.remove('open');
     if (state.activeMode === 'CEO') renderCEOCockpit();
+    else if (state.activeMode === 'ACC') renderAccountingCockpit();
     else renderActiveView();
     showToast(`Документ ${docId} проведено в облік та Журнал проводок!`);
   });
@@ -2091,27 +2513,83 @@
   window.__goToTaskView = function(viewId, rowId) {
     closeTasksDrawer();
     window.__switchToTable(viewId, rowId || null);
+    if (rowId) setTimeout(() => window.__openInspector(rowId), 80);
   };
 
   window.__completeTask = function(taskId) {
     const t = state.tasks.find(x => x.id === taskId);
-    if (t) { t.status = 'DONE'; renderTasksDrawer(); if (state.activeMode === 'CEO') renderCEOCockpit(); showToast('Погоджено'); }
+    if (!t) return;
+    t.status = 'DONE';
+    if (t.rowId === 'ORD-8812') {
+      const ord = DATASETS['sales-orders'].rows.find(r => r.id === 'ORD-8812');
+      if (ord) ord.status = 'Погоджено CEO';
+      const res = DATASETS['wms-reserves']?.rows.find(r => r.order === 'ORD-8812');
+      if (res) res.status = 'Дозволено до відвантаження';
+    }
+    updateAuditRadar();
+    renderTasksDrawer();
+    if (state.activeMode === 'CEO') renderCEOCockpit();
+    else if (state.activeMode === 'ACC') renderAccountingCockpit();
+    else renderActiveView();
+    showToast('Погоджено');
   };
 
   function openTasksDrawer() { document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('tasks-drawer').classList.add('open'); }
   function closeTasksDrawer() { document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('tasks-drawer').classList.remove('open'); }
 
+  window.closeDocViewer = function() {
+    document.getElementById('modal-doc-viewer')?.classList.remove('open');
+  };
+
+  window.closeModal = function(modalId) {
+    document.getElementById(modalId)?.classList.remove('open');
+  };
+
+  window.__switchDocViewerTab = function(tab) {
+    const elTab = document.getElementById('doc-tab-elec');
+    const scanTab = document.getElementById('doc-tab-scan');
+    const elBtn = document.getElementById('btn-doc-tab-elec');
+    const scanBtn = document.getElementById('btn-doc-tab-scan');
+    if (!elTab || !scanTab) return;
+    if (tab === 'SCAN') {
+      elTab.style.display = 'none';
+      scanTab.style.display = 'block';
+      elBtn?.classList.remove('active');
+      scanBtn?.classList.add('active');
+    } else {
+      elTab.style.display = 'block';
+      scanTab.style.display = 'none';
+      elBtn?.classList.add('active');
+      scanBtn?.classList.remove('active');
+    }
+  };
+
   window.__openDocViewer = function(docId, docLabel) {
     state.docContext = { docId, docLabel };
     const paper = document.getElementById('doc-paper-content');
     if (!paper) return;
-    const sumVal = state.noNumbersMode ? '—' : '1 004 000.00 грн (ПДВ 7%: 65 682.24 грн)';
+    const flowRow = DATASETS['doc-flow']?.rows.find(r => r.id === docId);
+    const sumNum = flowRow ? Number(flowRow.sum || 0) : 1004000;
+    const sumVal = state.noNumbersMode ? '—' : `${fmt(sumNum)} грн`;
+    const scanSrc = (flowRow && flowRow.previewUrl) || generateScanSvg(docId, 'Первинний документ', docLabel, sumNum, flowRow ? flowRow.date : '16.11.2026');
+
     paper.innerHTML = `
-      <div class="doc-barcode-row"><div><strong>Електронний первинний документ</strong></div><div style="font-family:var(--font-mono); font-size:12px;">ID: ${esc(docId)} | QR-VERIFIED</div></div>
-      <div class="doc-title-h1">ПЕРВИННИЙ ОБЛІКОВИЙ ДОКУМЕНТ № ${esc(docId)} від 16.11.2026</div>
-      <div class="doc-grid"><div class="doc-grid-label">Підприємство:</div><div>ТОВ «ТД «Алком» (ЄДРПОУ 32894510)</div><div class="doc-grid-label">Об'єкт:</div><div><strong>${esc(docLabel)}</strong></div></div>
-      <table class="doc-table"><thead><tr><th>№</th><th>Найменування / Партія</th><th>Од.</th><th>Кількість</th><th>Сума (грн)</th></tr></thead><tbody><tr><td>1</td><td>${esc(docLabel)} (LOT-2026-TC112)</td><td>шт/пар</td><td style="text-align:right;">${state.noNumbersMode ? '—' : '1 200'}</td><td style="text-align:right;">${sumVal}</td></tr></tbody></table>
-      <div class="doc-signatures"><div class="doc-sig-block">Сформував<br><strong>Шевченко О. В.</strong></div><div class="doc-sig-block">ЕЦП / КЕП<br><strong>Дійсний</strong></div><div class="doc-sig-block">Погодив (CEO)<br><strong>Коваленко І. П.</strong></div></div>
+      <div class="doc-viewer-tabs">
+        <button id="btn-doc-tab-elec" class="doc-viewer-tab active" onclick="window.__switchDocViewerTab('ELEC')">Електронний бланк</button>
+        <button id="btn-doc-tab-scan" class="doc-viewer-tab" onclick="window.__switchDocViewerTab('SCAN')">Скан-копія / Фото</button>
+      </div>
+      <div id="doc-tab-elec">
+        <div class="doc-barcode-row"><div><strong>Електронний первинний документ</strong></div><div style="font-family:var(--font-mono); font-size:12px;">ID: ${esc(docId)} | QR-VERIFIED</div></div>
+        <div class="doc-title-h1">ПЕРВИННИЙ ОБЛІКОВИЙ ДОКУМЕНТ № ${esc(docId)} від 16.11.2026</div>
+        <div class="doc-grid"><div class="doc-grid-label">Підприємство:</div><div>ТОВ «ТД «Алком» (ЄДРПОУ 32894510)</div><div class="doc-grid-label">Об'єкт:</div><div><strong>${esc(docLabel)}</strong></div></div>
+        <table class="doc-table"><thead><tr><th>№</th><th>Найменування / Партія</th><th>Од.</th><th>Кількість</th><th>Сума (грн)</th></tr></thead><tbody><tr><td>1</td><td>${esc(docLabel)} (LOT-2026-TC112)</td><td>шт/пар</td><td style="text-align:right;">${state.noNumbersMode ? '—' : '1 200'}</td><td style="text-align:right;">${sumVal}</td></tr></tbody></table>
+        <div class="doc-signatures"><div class="doc-sig-block">Сформував<br><strong>Шевченко О. В.</strong></div><div class="doc-sig-block">ЕЦП / КЕП<br><strong>Дійсний</strong></div><div class="doc-sig-block">Погодив (CEO)<br><strong>Коваленко І. П.</strong></div></div>
+      </div>
+      <div id="doc-tab-scan" style="display:none;">
+        <div style="border:1px solid #CBD5E1; border-radius:8px; overflow:hidden; background:#FFFFFF;">
+          <img src="${scanSrc}" alt="Скан-копія документа" style="width:100%; max-height:460px; object-fit:contain; display:block;">
+        </div>
+      </div>
     `;
     document.getElementById('modal-doc-viewer').classList.add('open');
   };
@@ -2176,7 +2654,40 @@
       btn.addEventListener('click', () => {
         document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        state.activePeriod = btn.textContent.trim();
         renderActiveView();
+        showToast(`Період: ${state.activePeriod}`);
+      });
+    });
+
+    // Mobile sidebar drawer
+    const mobileMenuBtn = document.getElementById('btn-mobile-menu');
+    const sysSidebar = document.getElementById('sys-sidebar');
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    if (mobileMenuBtn && sysSidebar && sidebarBackdrop) {
+      mobileMenuBtn.addEventListener('click', () => {
+        sysSidebar.classList.toggle('mobile-open');
+        sidebarBackdrop.classList.toggle('open');
+      });
+      sidebarBackdrop.addEventListener('click', () => {
+        sysSidebar.classList.remove('mobile-open');
+        sidebarBackdrop.classList.remove('open');
+      });
+    }
+
+    // Accounting Cockpit action buttons
+    document.getElementById('btn-acc-import')?.addEventListener('click', () => {
+      document.getElementById('import-log-box').style.display = 'none';
+      document.getElementById('modal-import')?.classList.add('open');
+    });
+    document.getElementById('btn-acc-depreciation')?.addEventListener('click', () => window.__accrueDepreciation());
+    document.getElementById('btn-acc-close-month')?.addEventListener('click', window.__openAutomationModal);
+    document.getElementById('btn-acc-posting-setup')?.addEventListener('click', () => window.__switchToTable('posting-setup'));
+
+    // Modal backdrop click-to-close
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('open');
       });
     });
 
@@ -2198,6 +2709,13 @@
 
     document.getElementById('btn-export-csv')?.addEventListener('click', exportCSV);
     document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+        closeInspector();
+        closeTasksDrawer();
+        sysSidebar?.classList.remove('mobile-open');
+        sidebarBackdrop?.classList.remove('open');
+      }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
         e.preventDefault();
         performUndo();
