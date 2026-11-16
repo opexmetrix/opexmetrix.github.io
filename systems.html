@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpexMetrix Systems | Операційний контур підприємства</title>
+  <title>OpexMetrix Systems | Єдина ERP-система підприємства</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-header: #0B1120;
       --bg-sidebar: #0F172A;
-      --bg-subsidebar: #1E293B;
-      --bg-main: #F8FAFC;
+      --bg-main: #F1F5F9;
       --bg-card: #FFFFFF;
-      --border: #E2E8F0;
+      --border: #CBD5E1;
+      --border-light: #E2E8F0;
       --border-dark: #334155;
       --text-main: #0F172A;
       --text-muted: #64748B;
@@ -27,7 +27,8 @@
       --warning-bg: #FFFBEB;
       --danger: #DC2626;
       --danger-bg: #FEF2F2;
-      --info-bg: #EFF6FF;
+      --excel-green: #107C41;
+      --excel-green-bg: #E6F4EA;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', Consolas, monospace;
     }
@@ -45,12 +46,193 @@
       flex-direction: column;
     }
 
-    /* Enterprise Header */
+    /* ================= LOGIN GATE ================= */
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: radial-gradient(circle at 20% 20%, #1E293B 0%, #0B1120 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-screen.hidden {
+      display: none;
+    }
+    .login-card {
+      background: #FFFFFF;
+      width: 440px;
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+    .login-card-top {
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 22px 24px;
+      border-bottom: 1px solid #1E293B;
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .login-brand-mark {
+      background: linear-gradient(135deg, #2563EB, #10B981);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #FFFFFF;
+    }
+    .login-subtitle {
+      font-size: 12px;
+      color: #94A3B8;
+    }
+    .login-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .login-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .char-counter {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #64748B;
+    }
+    .char-counter.valid {
+      color: #059669;
+      font-weight: 700;
+    }
+    .login-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .login-input {
+      width: 100%;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      padding: 9px 36px 9px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      outline: none;
+      color: #0F172A;
+      background: #F8FAFC;
+    }
+    .login-input:focus {
+      border-color: #2563EB;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .btn-eye {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #64748B;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .login-error {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #DC2626;
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .login-error.show {
+      display: block;
+    }
+    .btn-login-submit {
+      background: #2563EB;
+      color: #FFFFFF;
+      border: none;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-login-submit:hover {
+      background: #1D4ED8;
+    }
+    .login-quick-box {
+      border-top: 1px solid #E2E8F0;
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .login-quick-title {
+      font-size: 11px;
+      color: #64748B;
+      font-weight: 600;
+    }
+    .login-quick-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-quick-role {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #0F172A;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .btn-quick-role:hover {
+      border-color: #2563EB;
+      background: #EFF6FF;
+      color: #1D4ED8;
+    }
+    .btn-quick-role span {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #64748B;
+      margin-top: 2px;
+    }
+
+    /* ================= ENTERPRISE HEADER ================= */
     .sys-header {
       background: var(--bg-header);
       color: #FFFFFF;
       height: 48px;
-      padding: 0 16px;
+      padding: 0 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -61,32 +243,32 @@
     .sys-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .sys-logo {
       font-family: var(--font-mono);
       font-weight: 700;
-      font-size: 15px;
-      letter-spacing: -0.5px;
+      font-size: 14px;
+      letter-spacing: -0.4px;
       color: #FFFFFF;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .sys-logo-mark {
-      background: linear-gradient(135deg, #2563EB, #3B82F6);
+      background: linear-gradient(135deg, #2563EB, #10B981);
       width: 22px;
       height: 22px;
       border-radius: 4px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 800;
       color: #FFFFFF;
     }
     .sys-entity {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-light);
       background: #1E293B;
       padding: 3px 8px;
@@ -104,8 +286,8 @@
     }
     .sys-search-box {
       flex: 1;
-      max-width: 380px;
-      margin: 0 20px;
+      max-width: 320px;
+      margin: 0 14px;
       position: relative;
     }
     .sys-search-input {
@@ -113,11 +295,10 @@
       background: #1E293B;
       border: 1px solid #334155;
       color: #FFFFFF;
-      border-radius: 6px;
-      padding: 5px 10px 5px 30px;
+      border-radius: 5px;
+      padding: 5px 10px 5px 28px;
       font-size: 12px;
       outline: none;
-      font-family: var(--font-sans);
     }
     .sys-search-input:focus {
       border-color: #3B82F6;
@@ -125,7 +306,7 @@
     }
     .sys-search-icon {
       position: absolute;
-      left: 10px;
+      left: 9px;
       top: 50%;
       transform: translateY(-50%);
       color: #64748B;
@@ -135,9 +316,9 @@
     .sys-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-    .btn-toggle-numbers {
+    .btn-header {
       background: #1E293B;
       border: 1px solid #334155;
       color: #CBD5E1;
@@ -149,33 +330,32 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: all 0.15s ease;
+      transition: all 0.15s;
     }
-    .btn-toggle-numbers:hover {
+    .btn-header:hover {
       background: #334155;
       color: #FFFFFF;
     }
-    .btn-toggle-numbers.active {
+    .btn-header.active {
       background: #1E3A8A;
       border-color: #3B82F6;
       color: #93C5FD;
     }
-    .btn-tasks-drawer {
-      background: #1E293B;
-      border: 1px solid #334155;
+    .btn-auto-header {
+      background: linear-gradient(135deg, #059669, #10B981);
+      border: none;
       color: #FFFFFF;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 11px;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      position: relative;
+      gap: 5px;
     }
-    .btn-tasks-drawer:hover {
-      background: #334155;
+    .btn-auto-header:hover {
+      filter: brightness(1.08);
     }
     .task-counter-badge {
       background: #DC2626;
@@ -188,52 +368,51 @@
     .user-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: #CBD5E1;
+      gap: 7px;
+      font-size: 11px;
+      color: #E2E8F0;
       padding: 4px 8px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.05);
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid #334155;
     }
     .user-avatar {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      background: #3B82F6;
+      background: #2563EB;
       color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
     }
-    .btn-back-dashboard {
+    .btn-logout {
       background: transparent;
       border: 1px solid #334155;
       color: #94A3B8;
-      text-decoration: none;
-      font-size: 12px;
-      padding: 5px 10px;
+      font-size: 11px;
+      padding: 5px 8px;
       border-radius: 5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
+      cursor: pointer;
     }
-    .btn-back-dashboard:hover {
+    .btn-logout:hover {
       color: #FFFFFF;
-      background: #1E293B;
+      border-color: #EF4444;
+      background: rgba(239, 68, 68, 0.15);
     }
 
-    /* Layout Body */
+    /* ================= LAYOUT ================= */
     .sys-layout {
       display: flex;
       flex: 1;
       overflow: hidden;
     }
 
-    /* Sidebar: Domains & Subtypes */
+    /* Sidebar */
     .sys-sidebar {
-      width: 300px;
+      width: 280px;
       background: var(--bg-sidebar);
       color: #CBD5E1;
       display: flex;
@@ -242,8 +421,29 @@
       flex-shrink: 0;
       user-select: none;
     }
+    .sidebar-ceo-btn {
+      margin: 10px 10px 4px;
+      padding: 9px 12px;
+      background: linear-gradient(135deg, #1E3A8A, #1D4ED8);
+      color: #FFFFFF;
+      border: 1px solid #3B82F6;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s;
+    }
+    .sidebar-ceo-btn:hover {
+      filter: brightness(1.1);
+    }
+    .sidebar-ceo-btn.active {
+      box-shadow: 0 0 0 2px #93C5FD;
+    }
     .sidebar-search {
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-bottom: 1px solid #1E293B;
     }
     .sidebar-search input {
@@ -262,20 +462,12 @@
     .sidebar-tree {
       flex: 1;
       overflow-y: auto;
-      padding: 6px 0;
+      padding: 4px 0;
     }
-    .sidebar-tree::-webkit-scrollbar {
-      width: 5px;
-    }
-    .sidebar-tree::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 3px;
-    }
+    .sidebar-tree::-webkit-scrollbar { width: 5px; }
+    .sidebar-tree::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
-    /* Domain Accordion */
-    .acc-domain-group {
-      margin-bottom: 2px;
-    }
+    .acc-domain-group { margin-bottom: 2px; }
     .domain-header {
       padding: 8px 12px;
       display: flex;
@@ -285,44 +477,26 @@
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       color: #94A3B8;
       background: #111827;
       border-top: 1px solid rgba(255, 255, 255, 0.04);
-      transition: background 0.15s ease;
     }
-    .domain-header:hover {
-      background: #172554;
-      color: #FFFFFF;
-    }
-    .domain-header-title {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .domain-arrow {
-      font-size: 10px;
-      transition: transform 0.2s ease;
-    }
-    .acc-domain-group.open .domain-arrow {
-      transform: rotate(90deg);
-    }
+    .domain-header:hover { background: #1E293B; color: #FFFFFF; }
+    .domain-header-title { display: flex; align-items: center; gap: 6px; }
+    .domain-arrow { font-size: 9px; transition: transform 0.2s ease; }
+    .acc-domain-group.open .domain-arrow { transform: rotate(90deg); }
     .domain-count {
       font-size: 10px;
       background: #1E293B;
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 8px;
       color: #64748B;
     }
-    .subtype-list {
-      display: none;
-      background: #0B1120;
-    }
-    .acc-domain-group.open .subtype-list {
-      display: block;
-    }
+    .subtype-list { display: none; background: #0B1120; }
+    .acc-domain-group.open .subtype-list { display: block; }
     .subtype-item {
-      padding: 7px 12px 7px 24px;
+      padding: 7px 12px 7px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -330,12 +504,8 @@
       font-size: 12px;
       color: #CBD5E1;
       border-left: 3px solid transparent;
-      transition: all 0.12s ease;
     }
-    .subtype-item:hover {
-      background: #1E293B;
-      color: #FFFFFF;
-    }
+    .subtype-item:hover { background: #1E293B; color: #FFFFFF; }
     .subtype-item.active {
       background: #1E3A8A;
       color: #FFFFFF;
@@ -347,52 +517,142 @@
       font-size: 10px;
       color: #64748B;
       background: rgba(255, 255, 255, 0.06);
-      padding: 1px 4px;
+      padding: 1px 5px;
       border-radius: 3px;
     }
     .subtype-item.active .subtype-code {
       color: #93C5FD;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.14);
     }
 
-    /* Main Workspace */
+    /* ================= MAIN WORKSPACE ================= */
     .sys-workspace {
       flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: #F8FAFC;
+      background: var(--bg-main);
     }
 
-    /* Subtype Control Top Bar */
+    /* CEO Cockpit View */
+    .ceo-cockpit {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .ceo-cockpit.active {
+      display: flex;
+    }
+    .ceo-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .ceo-kpi-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .ceo-kpi-card:hover {
+      border-color: #2563EB;
+      transform: translateY(-1px);
+    }
+    .ceo-kpi-label { font-size: 11px; font-weight: 600; color: #64748B; text-transform: uppercase; }
+    .ceo-kpi-val { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: #0F172A; margin: 6px 0 4px; }
+    .ceo-kpi-sub { font-size: 11px; color: #059669; font-weight: 600; }
+    .ceo-split-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 14px;
+    }
+    .ceo-panel {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .ceo-panel-header {
+      padding: 10px 14px;
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ceo-panel-body {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ceo-approval-item {
+      border: 1px solid #E2E8F0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      background: #F8FAFC;
+    }
+    .btn-approve-sm {
+      background: #059669;
+      color: #FFFFFF;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-approve-sm:hover { background: #047857; }
+
+    /* Table Workspace View */
+    .table-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .table-workspace.hidden {
+      display: none;
+    }
+
+    /* Control Topbar */
     .ctrl-topbar {
       background: #FFFFFF;
       border-bottom: 1px solid var(--border);
       padding: 10px 16px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       flex-shrink: 0;
     }
     .ctrl-row-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
     }
-    .ctrl-breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
+    .ctrl-breadcrumb { font-size: 11px; color: var(--text-muted); }
     .ctrl-title {
       font-size: 16px;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .ctrl-tag {
       font-size: 11px;
@@ -407,75 +667,65 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    .filter-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .period-btn-group {
       display: inline-flex;
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 5px;
       overflow: hidden;
-      background: #FFFFFF;
     }
     .period-btn {
       border: none;
-      background: transparent;
-      padding: 5px 10px;
+      background: #FFFFFF;
+      padding: 4px 9px;
       font-size: 11px;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
-      border-right: 1px solid var(--border);
+      border-right: 1px solid var(--border-light);
     }
-    .period-btn:last-child {
-      border-right: none;
-    }
-    .period-btn:hover {
-      background: #F1F5F9;
-      color: var(--text-main);
-    }
-    .period-btn.active {
-      background: #2563EB;
-      color: #FFFFFF;
-    }
+    .period-btn:last-child { border-right: none; }
+    .period-btn.active { background: #2563EB; color: #FFFFFF; }
     .ctrl-select, .ctrl-input {
-      padding: 5px 8px;
+      padding: 4px 8px;
       font-size: 12px;
       border: 1px solid var(--border);
       border-radius: 5px;
       outline: none;
       background: #FFFFFF;
-      color: var(--text-main);
     }
-    .ctrl-select:focus, .ctrl-input:focus {
-      border-color: var(--primary);
-    }
-    .action-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .action-group { display: flex; align-items: center; gap: 6px; }
     .btn-action-primary {
       background: #2563EB;
       color: #FFFFFF;
       border: none;
-      padding: 6px 12px;
+      padding: 6px 11px;
       font-size: 12px;
       font-weight: 600;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
-    .btn-action-primary:hover {
-      background: #1D4ED8;
+    .btn-action-primary:hover { background: #1D4ED8; }
+    .btn-action-excel {
+      background: var(--excel-green);
+      color: #FFFFFF;
+      border: none;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
     }
+    .btn-action-excel:hover { filter: brightness(1.1); }
     .btn-action-outline {
       background: #FFFFFF;
       color: var(--text-main);
@@ -487,17 +737,64 @@
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
-    .btn-action-outline:hover {
-      background: #F1F5F9;
+    .btn-action-outline:hover { background: #F1F5F9; }
+
+    /* ================= EXCEL FORMULA BAR ================= */
+    .excel-fx-bar {
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border);
+      padding: 5px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .fx-cell-ref {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      min-width: 64px;
+      text-align: center;
+      color: #0F172A;
+    }
+    .fx-label {
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      color: #107C41;
+      font-size: 13px;
+      padding: 0 4px;
+    }
+    .fx-input {
+      flex: 1;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #FFFFFF;
+      outline: none;
+    }
+    .fx-input:focus {
+      border-color: var(--excel-green);
+    }
+    .fx-hint {
+      font-size: 11px;
+      color: #64748B;
+      white-space: nowrap;
     }
 
-    /* Content Area & Table */
+    /* ================= EXCEL-STYLE DATA GRID ================= */
     .sys-content {
       flex: 1;
-      overflow: auto;
-      padding: 12px 16px;
+      overflow: hidden;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
     }
@@ -505,7 +802,7 @@
       background: #FFFFFF;
       border: 1px solid var(--border);
       border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
       flex: 1;
@@ -514,6 +811,7 @@
     .table-container {
       flex: 1;
       overflow: auto;
+      position: relative;
     }
     .op-table {
       width: 100%;
@@ -521,33 +819,89 @@
       font-size: 12px;
       white-space: nowrap;
     }
-    .op-table th {
+    .op-table thead th.col-letter-row {
+      background: #EEF2F6;
+      color: #64748B;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      padding: 3px 6px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 12;
+    }
+    .op-table thead th.col-title-row {
       background: #F8FAFC;
-      color: #475569;
-      font-weight: 600;
+      color: #334155;
+      font-weight: 700;
       text-align: left;
       padding: 7px 10px;
       border-bottom: 2px solid var(--border);
-      border-right: 1px solid #F1F5F9;
+      border-right: 1px solid var(--border-light);
       position: sticky;
-      top: 0;
-      z-index: 10;
+      top: 21px;
+      z-index: 11;
       user-select: none;
     }
     .op-table th.num, .op-table td.num {
       text-align: right;
       font-family: var(--font-mono);
     }
-    .op-table td {
-      padding: 7px 10px;
-      border-bottom: 1px solid #F1F5F9;
-      border-right: 1px solid #F8FAFC;
-      color: var(--text-main);
+    .op-table td.row-index-cell {
+      background: #EEF2F6;
+      color: #64748B;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      width: 36px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border-light);
+      user-select: none;
     }
-    .op-table tr:hover td {
+    .op-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border-light);
+      border-right: 1px solid #F1F5F9;
+      color: var(--text-main);
+      position: relative;
+    }
+    .op-table td.editable-cell {
+      cursor: cell;
+    }
+    .op-table td.editable-cell:hover {
+      background: #F0FDF4;
+    }
+    .op-table td.active-cell {
+      outline: 2px solid var(--excel-green);
+      outline-offset: -2px;
+      background: #F0FDF4 !important;
+    }
+    .op-table td.recalc-flash {
+      animation: recalcPulse 0.9s ease;
+    }
+    @keyframes recalcPulse {
+      0% { background: #BBF7D0; }
+      100% { background: transparent; }
+    }
+    .cell-inline-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: #FFFFFF;
+      font-family: inherit;
+      font-size: inherit;
+      text-align: inherit;
+      color: #0F172A;
+      padding: 0;
+    }
+    .op-table tr:hover td:not(.row-index-cell):not(.active-cell) {
       background: #F8FAFC;
     }
-    .op-table tr.highlighted td {
+    .op-table tr.highlighted td:not(.row-index-cell) {
       background: #EFF6FF !important;
       animation: flashRow 2s ease;
     }
@@ -555,16 +909,14 @@
       0% { background: #FEF08A !important; }
       100% { background: #EFF6FF !important; }
     }
-    .row-actions {
-      display: inline-flex;
-      gap: 4px;
-    }
+    .row-actions { display: inline-flex; gap: 4px; }
     .btn-row-action {
       background: #F1F5F9;
-      border: 1px solid #E2E8F0;
-      color: #475569;
+      border: 1px solid #CBD5E1;
+      color: #334155;
       padding: 2px 6px;
       font-size: 11px;
+      font-weight: 500;
       border-radius: 3px;
       cursor: pointer;
     }
@@ -585,11 +937,11 @@
     .status-danger { background: #FEF2F2; color: #DC2626; }
     .status-info { background: #EFF6FF; color: #2563EB; }
 
-    /* Summary Bar */
+    /* Summary Status Bar */
     .table-summary-bar {
       background: #F8FAFC;
       border-top: 2px solid var(--border);
-      padding: 8px 16px;
+      padding: 7px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -600,7 +952,7 @@
     .summary-checksum {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-family: var(--font-mono);
       font-size: 11px;
       color: var(--text-muted);
@@ -608,40 +960,55 @@
     .checksum-badge {
       background: #ECFDF5;
       color: #059669;
-      padding: 2px 6px;
-      border-radius: 3px;
+      padding: 2px 7px;
+      border-radius: 4px;
       border: 1px solid #A7F3D0;
+      font-weight: 700;
     }
 
-    /* Tasks Drawer */
+    /* ================= AUTOMATION MODAL / PANEL ================= */
+    .auto-log-box {
+      background: #0B1120;
+      color: #E2E8F0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 12px;
+      border-radius: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .auto-log-line { display: flex; gap: 8px; }
+    .auto-log-ok { color: #34D399; font-weight: 700; }
+
+    /* ================= DRAWERS & MODALS ================= */
     .drawer-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(15, 23, 42, 0.45);
       z-index: 40;
       display: none;
       backdrop-filter: blur(2px);
     }
-    .drawer-overlay.open {
-      display: block;
-    }
+    .drawer-overlay.open { display: block; }
     .tasks-drawer {
       position: fixed;
       top: 0;
       right: 0;
       bottom: 0;
-      width: 480px;
+      width: 460px;
+      max-width: 95vw;
       background: #FFFFFF;
-      box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      box-shadow: -4px 0 20px rgba(0,0,0,0.18);
       z-index: 50;
       display: flex;
       flex-direction: column;
       transform: translateX(100%);
       transition: transform 0.25s ease-out;
     }
-    .tasks-drawer.open {
-      transform: translateX(0);
-    }
+    .tasks-drawer.open { transform: translateX(0); }
     .drawer-header {
       padding: 14px 16px;
       background: #0F172A;
@@ -650,23 +1017,15 @@
       align-items: center;
       justify-content: space-between;
     }
-    .drawer-title {
-      font-size: 14px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .drawer-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .btn-close-drawer {
       background: transparent;
       border: none;
       color: #94A3B8;
-      font-size: 18px;
+      font-size: 20px;
       cursor: pointer;
     }
-    .btn-close-drawer:hover {
-      color: #FFFFFF;
-    }
+    .btn-close-drawer:hover { color: #FFFFFF; }
     .drawer-body {
       flex: 1;
       overflow-y: auto;
@@ -678,40 +1037,20 @@
     }
     .task-card {
       background: #FFFFFF;
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-light);
       border-radius: 6px;
       padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      gap: 7px;
     }
-    .task-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .task-priority-tag {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 1px 6px;
-      border-radius: 4px;
-    }
+    .task-card-header { display: flex; align-items: center; justify-content: space-between; }
+    .task-priority-tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; }
     .priority-urgent { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
     .priority-approval { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
     .priority-normal { background: #EFF6FF; color: #2563EB; border: 1px solid #BFDBFE; }
-    .task-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #0F172A;
-    }
-    .task-meta {
-      font-size: 11px;
-      color: #64748B;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .task-title { font-size: 13px; font-weight: 600; color: #0F172A; }
+    .task-meta { font-size: 11px; color: #64748B; display: flex; justify-content: space-between; }
     .task-comment-box {
       background: #F8FAFC;
       border-left: 3px solid #3B82F6;
@@ -719,14 +1058,8 @@
       font-size: 11px;
       color: #334155;
       font-style: italic;
-      border-radius: 0 4px 4px 0;
     }
-    .task-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 4px;
-    }
+    .task-actions { display: flex; gap: 8px; margin-top: 2px; }
     .btn-task-action {
       background: #F1F5F9;
       border: 1px solid #CBD5E1;
@@ -736,13 +1069,8 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .btn-task-action:hover {
-      background: #2563EB;
-      color: #FFFFFF;
-      border-color: #2563EB;
-    }
+    .btn-task-action:hover { background: #2563EB; color: #FFFFFF; border-color: #2563EB; }
 
-    /* Modal dialogs */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -753,15 +1081,13 @@
       justify-content: center;
       backdrop-filter: blur(2px);
     }
-    .modal-overlay.open {
-      display: flex;
-    }
+    .modal-overlay.open { display: flex; }
     .modal-box {
       background: #FFFFFF;
       border-radius: 8px;
-      width: 520px;
-      max-width: 90vw;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 540px;
+      max-width: 92vw;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.22);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -774,58 +1100,32 @@
       align-items: center;
       justify-content: space-between;
     }
-    .modal-header h3 {
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .modal-body {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      font-size: 12px;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .form-label {
-      font-weight: 600;
-      color: #334155;
-      font-size: 11px;
-    }
+    .modal-header h3 { font-size: 14px; font-weight: 700; }
+    .modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-label { font-weight: 600; color: #334155; font-size: 11px; }
     .form-control {
       padding: 6px 10px;
       font-size: 12px;
       border: 1px solid var(--border);
       border-radius: 4px;
       outline: none;
-      font-family: var(--font-sans);
     }
-    .form-control:focus {
-      border-color: var(--primary);
-    }
+    .form-control:focus { border-color: var(--primary); }
     .modal-footer {
       padding: 12px 16px;
       background: #F8FAFC;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid var(--border-light);
       display: flex;
-      align-items: center;
       justify-content: flex-end;
       gap: 8px;
     }
 
-    /* Primary Document Preview Modal */
-    .modal-doc-box {
-      width: 760px;
-      max-height: 85vh;
-    }
+    .modal-doc-box { width: 760px; max-height: 85vh; }
     .doc-paper {
       background: #FFFFFF;
       border: 1px solid #CBD5E1;
-      padding: 24px;
-      font-family: var(--font-sans);
+      padding: 22px;
       font-size: 11px;
       color: #0F172A;
       max-height: 60vh;
@@ -839,42 +1139,13 @@
       padding-bottom: 8px;
       border-bottom: 1px dashed #CBD5E1;
     }
-    .doc-title-h1 {
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .doc-grid {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    .doc-grid-label {
-      font-weight: 600;
-      color: #64748B;
-    }
-    .doc-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      font-size: 10.5px;
-    }
-    .doc-table th, .doc-table td {
-      border: 1px solid #334155;
-      padding: 4px 6px;
-    }
-    .doc-table th {
-      background: #F1F5F9;
-      font-weight: 600;
-    }
-    .doc-signatures {
-      margin-top: 24px;
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-    }
+    .doc-title-h1 { font-size: 15px; font-weight: 700; text-align: center; margin-bottom: 12px; }
+    .doc-grid { display: grid; grid-template-columns: 120px 1fr; gap: 6px; margin-bottom: 12px; }
+    .doc-grid-label { font-weight: 600; color: #64748B; }
+    .doc-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10.5px; }
+    .doc-table th, .doc-table td { border: 1px solid #334155; padding: 4px 6px; }
+    .doc-table th { background: #F1F5F9; font-weight: 600; }
+    .doc-signatures { margin-top: 22px; display: flex; justify-content: space-between; gap: 20px; }
     .doc-sig-block {
       border-top: 1px solid #334155;
       padding-top: 4px;
@@ -884,12 +1155,11 @@
       color: #475569;
     }
 
-    /* Toast */
     .toast-container {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      z-index: 70;
+      z-index: 80;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -902,20 +1172,69 @@
       border-radius: 6px;
       font-size: 12px;
       font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       border-left: 4px solid #10B981;
-      animation: slideInToast 0.2s ease-out;
       pointer-events: auto;
-    }
-    @keyframes slideInToast {
-      from { transform: translateY(10px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Enterprise Header -->
+  <!-- ================= 20-CHAR LOGIN GATE ================= -->
+  <div class="login-screen" id="login-screen">
+    <div class="login-card">
+      <div class="login-card-top">
+        <div class="login-brand">
+          <span class="login-brand-mark">OM</span>
+          <span>OpexMetrix Systems</span>
+        </div>
+        <div class="login-subtitle">ТОВ «ТД «Алком» • Єдина ERP-система (Контур CEO та Бухгалтерії)</div>
+      </div>
+
+      <form class="login-body" id="login-form">
+        <div class="login-field">
+          <div class="login-label-row">
+            <label for="login-user">Логін доступу (рівно 20 символів)</label>
+            <span class="char-counter" id="login-char-count">0 / 20</span>
+          </div>
+          <div class="login-input-wrap">
+            <input type="text" id="login-user" class="login-input" maxlength="20" autocomplete="off" placeholder="00000000000000000000">
+          </div>
+        </div>
+
+        <div class="login-field">
+          <div class="login-label-row">
+            <label for="login-pass">Пароль (рівно 20 символів)</label>
+            <span class="char-counter" id="pass-char-count">0 / 20</span>
+          </div>
+          <div class="login-input-wrap">
+            <input type="password" id="login-pass" class="login-input" maxlength="20" autocomplete="off" placeholder="••••••••••••••••••••">
+            <button type="button" class="btn-eye" id="btn-toggle-pass">Показати</button>
+          </div>
+        </div>
+
+        <div class="login-error" id="login-error"></div>
+
+        <button type="submit" class="btn-login-submit">Увійти в систему &rarr;</button>
+
+        <div class="login-quick-box">
+          <div class="login-quick-title">Швидке автозаповнення (для демонстрації):</div>
+          <div class="login-quick-btns">
+            <button type="button" class="btn-quick-role" id="btn-quick-ceo">
+              Вхід: CEO (Керівник)
+              <span>Логін: 20 нулів | Пароль: 20 нулів</span>
+            </button>
+            <button type="button" class="btn-quick-role" id="btn-quick-cpa">
+              Вхід: Головбух
+              <span>Логін: 20 нулів | Пароль: 20 одиниць</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= ENTERPRISE HEADER ================= -->
   <header class="sys-header">
     <div class="sys-brand">
       <div class="sys-logo">
@@ -930,113 +1249,146 @@
 
     <div class="sys-search-box">
       <span class="sys-search-icon">&#128269;</span>
-      <input type="text" id="global-search" class="sys-search-input" placeholder="Пошук підтипу, звіту, рахунку або документа (Ctrl+K)...">
+      <input type="text" id="global-search" class="sys-search-input" placeholder="Пошук звіту, рахунку, SKU або партії (Ctrl+K)...">
     </div>
 
     <div class="sys-actions">
-      <button id="btn-toggle-numbers" class="btn-toggle-numbers" title="Перемикач: з цифрами або чиста структура">
+      <button id="btn-open-automation" class="btn-auto-header" title="Запустити автоматичні проводки та звірку">
+        <span>&#9889; Автоматика</span>
+      </button>
+
+      <button id="btn-toggle-numbers" class="btn-header" title="Режим показу: з цифрами або чиста структура">
         <span>Режим:</span>
         <strong id="label-num-mode">З цифрами</strong>
       </button>
 
-      <button id="btn-tasks-drawer" class="btn-tasks-drawer" title="Маршрутизація документів між працівниками">
-        <span>Маршрути та завдання</span>
+      <button id="btn-tasks-drawer" class="btn-header" title="Маршрутизація документів між працівниками">
+        <span>Маршрути</span>
         <span id="task-badge-count" class="task-counter-badge">4</span>
       </button>
 
-      <div class="user-pill">
-        <div class="user-avatar">ШО</div>
-        <span>Шевченко О. В. (Головбух)</span>
+      <div class="user-pill" id="active-user-pill">
+        <div class="user-avatar" id="user-avatar-initials">ШО</div>
+        <span id="user-role-label">Головбух (Шевченко О. В.)</span>
       </div>
 
-      <a href="./index.html" class="btn-back-dashboard" title="Повернутися на Головне табло">
-        <span>Головне табло</span>
-        <span>&rarr;</span>
-      </a>
+      <button id="btn-logout" class="btn-logout" title="Вийти та змінити роль (CEO / Головбух)">Вийти</button>
     </div>
   </header>
 
-  <!-- Layout Body -->
+  <!-- ================= MAIN LAYOUT ================= -->
   <div class="sys-layout">
     
-    <!-- Sidebar: Hierarchical Subtypes Tree -->
+    <!-- Sidebar -->
     <aside class="sys-sidebar">
+      <button class="sidebar-ceo-btn" id="btn-sidebar-ceo">
+        <span>Кабінет CEO (Зведена панель)</span>
+        <span>&rarr;</span>
+      </button>
+
       <div class="sidebar-search">
-        <input type="text" id="tree-search" placeholder="Фільтр підтипів діяльності...">
+        <input type="text" id="tree-search" placeholder="Фільтр підтипів (ОСВ, М-29, LOT...)">
       </div>
 
-      <div class="sidebar-tree" id="sidebar-tree-container">
-        <!-- Rendered dynamically or by accordion groups -->
-      </div>
+      <div class="sidebar-tree" id="sidebar-tree-container"></div>
     </aside>
 
-    <!-- Main Workspace -->
+    <!-- Workspace -->
     <main class="sys-workspace">
-      <!-- Control Topbar for active Subtype -->
-      <div class="ctrl-topbar">
-        <div class="ctrl-row-top">
+
+      <!-- 1. CEO COCKPIT VIEW -->
+      <section class="ceo-cockpit" id="ceo-cockpit-view">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <div class="ctrl-breadcrumb" id="ctrl-breadcrumb">Головна книга та Бухоблік &gt; Оборотно-сальдова відомість</div>
-            <h1 class="ctrl-title" id="ctrl-title">
-              <span>Оборотно-сальдова відомість (ОСВ)</span>
-              <span class="ctrl-tag" id="ctrl-tag">Рахунки 1–9 класу</span>
-            </h1>
+            <h1 style="font-size:18px; font-weight:800; color:#0F172A;">Єдиний контур управління CEO — ТОВ «ТД «Алком»</h1>
+            <div style="font-size:12px; color:#64748B;">Оперативна фінансова картина в реальному часі з прямим переходом у первинні таблиці</div>
           </div>
-          <div class="action-group">
-            <button class="btn-action-primary" id="btn-handoff-report">
-              <span>Передати звіт колезі</span>
-            </button>
-            <button class="btn-action-outline" id="btn-export-csv">
-              <span>Експорт Excel / CSV</span>
-            </button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-auto-header" onclick="window.__openAutomationModal()">&#9889; Авто-перерахунок балансу</button>
+            <button class="btn-action-primary" onclick="window.__switchToTable('osv')">Перейти до ОСВ &rarr;</button>
           </div>
         </div>
 
-        <div class="ctrl-row-bottom">
-          <div class="filter-group">
-            <div class="period-btn-group" id="period-btn-group">
-              <button class="period-btn" data-period="TODAY">Сьогодні</button>
-              <button class="period-btn active" data-period="CURRENT_MONTH">Поточний місяць</button>
-              <button class="period-btn" data-period="Q3">III Квартал</button>
-              <button class="period-btn" data-period="YEAR">2026 Рік</button>
+        <div class="ceo-kpi-grid" id="ceo-kpi-grid"></div>
+
+        <div class="ceo-split-grid">
+          <div class="ceo-panel">
+            <div class="ceo-panel-header">
+              <span>На погодженні у керівника (Документи та маршрути)</span>
+              <span class="status-badge status-warning" id="ceo-pending-count">Очікують рішення</span>
+            </div>
+            <div class="ceo-panel-body" id="ceo-approvals-list"></div>
+          </div>
+
+          <div class="ceo-panel">
+            <div class="ceo-panel-header">
+              <span>Стан аптечних мереж та виробництва</span>
+              <button class="btn-row-action" onclick="window.__switchToTable('sales-recon')">Детальна звірка &rarr;</button>
+            </div>
+            <div class="ceo-panel-body" id="ceo-summary-bars"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. EXCEL-GRID OPERATIONAL TABLE WORKSPACE -->
+      <section class="table-workspace" id="table-workspace-view">
+        <div class="ctrl-topbar">
+          <div class="ctrl-row-top">
+            <div>
+              <div class="ctrl-breadcrumb" id="ctrl-breadcrumb">Головна книга > ОСВ</div>
+              <h1 class="ctrl-title" id="ctrl-title">
+                <span>Оборотно-сальдова відомість (ОСВ)</span>
+                <span class="ctrl-tag" id="ctrl-tag">Синтетичний облік</span>
+              </h1>
+            </div>
+            <div class="action-group">
+              <button class="btn-action-outline" id="btn-add-row" title="Додати новий рядок в таблицю">+ Рядок</button>
+              <button class="btn-action-primary" id="btn-handoff-report">Передати колезі</button>
+              <button class="btn-action-excel" id="btn-export-csv">Експорт в Excel (.csv)</button>
+            </div>
+          </div>
+
+          <div class="ctrl-row-bottom">
+            <div class="filter-group">
+              <div class="period-btn-group">
+                <button class="period-btn" data-period="TODAY">Сьогодні</button>
+                <button class="period-btn active" data-period="CURRENT_MONTH">Поточний місяць</button>
+                <button class="period-btn" data-period="Q3">III Квартал</button>
+                <button class="period-btn" data-period="YEAR">2026 Рік</button>
+              </div>
+              <select id="filter-entity" class="ctrl-select">
+                <option value="ALKOM">ТОВ «ТД «Алком» (Основний)</option>
+                <option value="ALL">Всі філії та склади</option>
+              </select>
             </div>
 
-            <select id="filter-entity" class="ctrl-select">
-              <option value="ALKOM">ТОВ «ТД «Алком» (Основний)</option>
-              <option value="ALL">Всі філії та підрозділи</option>
-            </select>
-
-            <select id="filter-account" class="ctrl-select" style="display:none;">
-              <option value="361">361 - Розрахунки з вітчизняними покупцями</option>
-              <option value="631">631 - Розрахунки з вітчизняними постачальниками</option>
-              <option value="281">281 - Товари на складі</option>
-              <option value="26">26 - Готова продукція</option>
-              <option value="201">201 - Сировина й матеріали</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <input type="text" id="table-search" class="ctrl-input" placeholder="Пошук у таблиці..." style="width: 180px;">
+            <div class="filter-group">
+              <input type="text" id="table-search" class="ctrl-input" placeholder="Швидкий фільтр по таблиці..." style="width: 210px;">
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Content Area with Table -->
-      <div class="sys-content">
-        <div class="data-table-card">
-          <div class="table-container" id="table-viewport">
-            <!-- Dynamic Subtype Table Rendered Here -->
-          </div>
-          <div class="table-summary-bar" id="table-summary-bar">
-            <!-- Totals & Checksums -->
+        <!-- Excel Formula Bar (fx) -->
+        <div class="excel-fx-bar">
+          <div class="fx-cell-ref" id="fx-cell-ref">A1</div>
+          <div class="fx-label">fx</div>
+          <input type="text" id="fx-input" class="fx-input" placeholder="Оберіть клітинку для редагування (двічі клікніть по числу в таблиці)...">
+          <div class="fx-hint">Підказка: клікніть двічі на будь-яку клітинку — зміна автоматично перерахує підсумки</div>
+        </div>
+
+        <!-- Grid Table -->
+        <div class="sys-content">
+          <div class="data-table-card">
+            <div class="table-container" id="table-viewport"></div>
+            <div class="table-summary-bar" id="table-summary-bar"></div>
           </div>
         </div>
-      </div>
+      </section>
+
     </main>
-
   </div>
 
-  <!-- Slide-Over Tasks Drawer ("Маршрути та завдання") -->
+  <!-- ================= TASKS & ROUTING DRAWER ================= -->
   <div class="drawer-overlay" id="drawer-overlay"></div>
   <aside class="tasks-drawer" id="tasks-drawer">
     <div class="drawer-header">
@@ -1046,53 +1398,48 @@
       </div>
       <button class="btn-close-drawer" id="btn-close-drawer">&times;</button>
     </div>
-    <div class="drawer-body" id="drawer-tasks-list">
-      <!-- Dynamic Tasks Rendered Here -->
-    </div>
-    <div style="padding: 12px 16px; background: #FFFFFF; border-top: 1px solid var(--border);">
+    <div class="drawer-body" id="drawer-tasks-list"></div>
+    <div style="padding: 12px 16px; background: #FFFFFF; border-top: 1px solid var(--border-light);">
       <button class="btn-action-primary" style="width: 100%; justify-content: center;" id="btn-create-task-drawer">
         <span>+ Створити новий маршрут</span>
       </button>
     </div>
   </aside>
 
-  <!-- Handoff Modal ("Передати документ колезі") -->
+  <!-- ================= HANDOFF MODAL ================= -->
   <div class="modal-overlay" id="modal-handoff">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 id="handoff-modal-title">Передати звіт / документ колезі</h3>
+        <h3>Передати звіт / документ колезі</h3>
         <button class="btn-close-drawer" id="btn-close-handoff">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Документ або звіт:</label>
-          <input type="text" id="handoff-doc-name" class="form-control" readonly value="Оборотно-сальдова відомість (ОСВ)">
+          <label class="form-label">Документ або рядок таблиці:</label>
+          <input type="text" id="handoff-doc-name" class="form-control" readonly>
         </div>
-
         <div class="form-group">
-          <label class="form-label">Кому призначити (відповідальний):</label>
+          <label class="form-label">Кому призначити:</label>
           <select id="handoff-recipient" class="form-control">
-            <option value="Коваленко І. П. (Фінансовий директор)">Коваленко І. П. (Фінансовий директор)</option>
+            <option value="Коваленко І. П. (CEO / Фінансовий директор)">Коваленко І. П. (CEO / Фінансовий директор)</option>
+            <option value="Шевченко О. В. (Головний бухгалтер)">Шевченко О. В. (Головний бухгалтер)</option>
             <option value="Бондар В. А. (Зав. центральним складом)">Бондар В. А. (Зав. центральним складом)</option>
             <option value="Мельник С. М. (Начальник швейного цеху)">Мельник С. М. (Начальник швейного цеху)</option>
             <option value="Савченко Д. І. (Комерційний директор)">Савченко Д. І. (Комерційний директор)</option>
             <option value="Григоренко П. Т. (Начальник ВТК)">Григоренко П. Т. (Начальник ВТК)</option>
-            <option value="Шевченко О. В. (Головний бухгалтер)">Шевченко О. В. (Головний бухгалтер)</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label class="form-label">Пріоритет обробки:</label>
+          <label class="form-label">Пріоритет:</label>
           <select id="handoff-priority" class="form-control">
             <option value="NORMAL">Звичайний (в плановому порядку)</option>
-            <option value="URGENT">Терміново (вирішити протягом 2 годин)</option>
-            <option value="APPROVAL">На погодження (вимагає підпису керівника)</option>
+            <option value="URGENT">Терміново (до 2 годин)</option>
+            <option value="APPROVAL">На погодження (потрібен підпис CEO/Головбуха)</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label class="form-label">Коментар або доручення:</label>
-          <textarea id="handoff-comment" class="form-control" rows="3" placeholder="Вкажіть суть завдання або деталі перевірки розбіжностей..."></textarea>
+          <label class="form-label">Коментар:</label>
+          <textarea id="handoff-comment" class="form-control" rows="3" placeholder="Вкажіть суть доручення..."></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -1102,29 +1449,50 @@
     </div>
   </div>
 
-  <!-- Primary Document Preview Modal -->
-  <div class="modal-overlay" id="modal-doc-viewer">
-    <div class="modal-box modal-doc-box">
+  <!-- ================= AUTOMATION ENGINE MODAL ================= -->
+  <div class="modal-overlay" id="modal-automation">
+    <div class="modal-box">
       <div class="modal-header">
-        <h3 id="doc-viewer-header-title">Первинний обліковий документ</h3>
-        <button class="btn-close-drawer" id="btn-close-doc-viewer">&times;</button>
+        <h3>&#9889; Автоматика та Регламентні операції</h3>
+        <button class="btn-close-drawer" id="btn-close-auto">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 12px;">
-        <div class="doc-paper" id="doc-paper-content">
-          <!-- Dynamic Document Content -->
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn-action-primary" id="btn-run-auto-bank">1. Авто-звірка Банк &harr; 361</button>
+          <button class="btn-action-excel" id="btn-run-auto-cost">2. Авто-розрахунок собівартості</button>
+          <button class="btn-action-outline" id="btn-run-auto-vat">3. Перевірка ПДВ (ПЗ / ПК)</button>
+          <button class="btn-action-outline" id="btn-run-auto-close">4. Закриття місяця (Дт = Кт)</button>
+        </div>
+        <div class="auto-log-box" id="auto-log-box">
+          <div class="auto-log-line"><span class="auto-log-ok">[READY]</span><span>Система автоматичних проводок готова. Оберіть операцію вище.</span></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-action-outline" id="btn-print-doc">Друк / Експорт PDF</button>
+        <button class="btn-action-outline" id="btn-close-auto-footer">Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PRIMARY DOCUMENT VIEWER ================= -->
+  <div class="modal-overlay" id="modal-doc-viewer">
+    <div class="modal-box modal-doc-box">
+      <div class="modal-header">
+        <h3>Первинний обліковий документ</h3>
+        <button class="btn-close-drawer" id="btn-close-doc-viewer">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 12px;">
+        <div class="doc-paper" id="doc-paper-content"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-outline" id="btn-print-doc">Друк / Зберегти PDF</button>
         <button class="btn-action-primary" id="btn-doc-handoff">Передати на підпис &rarr;</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Toast -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- Script -->
   <script src="./systems.js"></script>
 </body>
 </html>
