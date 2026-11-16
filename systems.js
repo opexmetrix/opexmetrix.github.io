@@ -42,7 +42,11 @@
         { id: 'an-yoy', code: 'YOY', title: 'Порівняння 2025 vs 2026 + Прогноз', tag: 'Prediction +3 міс.' },
         { id: 'an-sku', code: 'ABC', title: 'ABC/XYZ Аналіз SKU та Попит', tag: 'Прогноз замовлень' },
         { id: 'an-chains', code: 'LTV', title: 'Аналітика мереж, DSO та Скоринг', tag: 'Прогноз оплат' },
-        { id: 'an-prod', code: 'OEE', title: 'Аналітика цеху (OEE та Запаси)', tag: 'Прогноз дефіциту' }
+        { id: 'an-prod', code: 'OEE', title: 'Аналітика цеху (OEE та Запаси)', tag: 'Прогноз дефіциту' },
+        { id: 'an-unit', code: 'BEP', title: 'Unit-економіка та Беззбитковість', tag: 'Маржинальність од.' },
+        { id: 'an-tax', code: 'TAX', title: 'Податкове навантаження (ПДВ/ФОП)', tag: 'Оптимізація 2026' },
+        { id: 'an-ccc', code: 'CCC', title: 'Цикл капіталу (DIO / DSO / DPO)', tag: 'Обігові кошти' },
+        { id: 'an-cohort', code: 'RET', title: 'Когортний аналіз аптечних точок', tag: 'Retention мереж' }
       ]
     },
     {
@@ -266,6 +270,114 @@
         { title: 'Мін. запас сировини', val: '11 днів (Lycra)' }
       ],
       summary: () => `<div>Ефективність цеху (OEE): <strong>86.3%</strong></div><div class="summary-checksum"><span class="checksum-badge">Норма браку &lt; 1.0% витримана</span></div>`
+    },
+
+    'an-unit': {
+      columns: [
+        { key: 'sku', label: 'SKU / Виріб', editable: true },
+        { key: 'price', label: 'Ціна реалізації', num: true, editable: true },
+        { key: 'varCost', label: 'Змінні витрати', num: true, editable: true },
+        { key: 'cm', label: 'Маржин. дохід/од.', num: true, computed: true },
+        { key: 'bepQty', label: 'Точка беззбитковості (шт)', num: true, editable: true },
+        { key: 'factQty', label: 'Факт продажів (шт)', num: true, editable: true },
+        { key: 'safety', label: 'Запас міцності %', num: true, computed: true }
+      ],
+      recalcRow: (r) => {
+        r.cm = Number(r.price) - Number(r.varCost);
+        r.safety = Number(r.factQty) > 0 ? ((Number(r.factQty) - Number(r.bepQty)) / Number(r.factQty) * 100) : 0;
+      },
+      rows: [
+        { id: 'UN-1', sku: 'Панчохи КЛ-2 (Чорні, M)', price: 540, varCost: 270, cm: 270, bepQty: 1450, factQty: 4200, safety: 65.5 },
+        { id: 'UN-2', sku: 'Бандаж поперековий БП-4', price: 890, varCost: 470, cm: 420, bepQty: 920, factQty: 2800, safety: 67.1 },
+        { id: 'UN-3', sku: 'Ортез колінний OR-2', price: 1280, varCost: 700, cm: 580, bepQty: 510, factQty: 1450, safety: 64.8 },
+        { id: 'UN-4', sku: 'Гольфи антиемболічні КЛ-1', price: 340, varCost: 180, cm: 160, bepQty: 2100, factQty: 6500, safety: 67.7 }
+      ],
+      kpis: () => [
+        { title: 'Середній запас міцності', val: '66.3%' },
+        { title: 'Точка беззбитковості', val: fmtInt(4980, 'шт/міс') },
+        { title: 'Маржинальний дохід', val: fmt(445) + ' грн/од' },
+        { title: 'Операційний важіль', val: '2.1x' }
+      ],
+      summary: () => `<div>Запас фінансової міцності: <strong>66.3%</strong></div><div class="summary-checksum"><span class="checksum-badge">Всі SKU вище точки беззбитковості</span></div>`
+    },
+
+    'an-tax': {
+      columns: [
+        { key: 'tax', label: 'Податок / Збір', editable: true },
+        { key: 'base', label: 'База оподаткування', num: true, editable: true },
+        { key: 'rate', label: 'Ефект. ставка %', num: true, editable: true },
+        { key: 'y2025', label: 'Нараховано 2025', num: true, editable: true },
+        { key: 'y2026', label: 'Нараховано 2026', num: true, editable: true },
+        { key: 'shareRev', label: '% від виручки', num: true, computed: true },
+        { key: 'status', label: 'Статус сплати', editable: true }
+      ],
+      recalcRow: (r) => { r.shareRev = Number(r.y2026) / 28500000 * 100; },
+      rows: [
+        { id: 'TX-1', tax: 'ПДВ (Медвироби 7% / Імпорт 20%)', base: 2150000, rate: 7.0, y2025: 128000, y2026: 150500, shareRev: 0.5, status: 'Оптимізовано (ПК 490k)' },
+        { id: 'TX-2', tax: 'Податок на прибуток (18%)', base: 7750000, rate: 18.0, y2025: 1000800, y2026: 1395000, shareRev: 4.9, status: 'Сплачується в строк' },
+        { id: 'TX-3', tax: 'ПДФО (18%) + Військовий збір (5%)', base: 3840000, rate: 23.0, y2025: 760000, y2026: 883200, shareRev: 3.1, status: 'Утримано з ФОП' },
+        { id: 'TX-4', tax: 'ЄСВ роботодавця (22%)', base: 3840000, rate: 22.0, y2025: 745000, y2026: 844800, shareRev: 3.0, status: 'Нараховано' }
+      ],
+      kpis: (rows) => {
+        const tot = rows.reduce((s, r) => s + Number(r.y2026), 0);
+        return [
+          { title: 'Податки за місяць', val: fmt(tot) + ' грн' },
+          { title: 'Податкове навантаження', val: '11.5% виручки' },
+          { title: 'Податковий кредит ПДВ', val: fmt(490000) + ' грн' },
+          { title: 'Ризик блокування ПН', val: '0.0% (Низький)' }
+        ];
+      },
+      summary: (rows) => `<div>Загальні податки: <strong>${fmt(rows.reduce((s, r) => s + Number(r.y2026), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Ефективне навантаження: 11.5%</span></div>`
+    },
+
+    'an-ccc': {
+      columns: [
+        { key: 'period', label: 'Період', editable: true },
+        { key: 'dio', label: 'DIO (Запаси, дн.)', num: true, editable: true },
+        { key: 'dso', label: 'DSO (Дебіторка, дн.)', num: true, editable: true },
+        { key: 'dpo', label: 'DPO (Постачальники, дн.)', num: true, editable: true },
+        { key: 'ccc', label: 'Цикл CCC (днів)', num: true, computed: true },
+        { key: 'frozen', label: 'Заморожено коштів (грн)', num: true, editable: true }
+      ],
+      recalcRow: (r) => { r.ccc = Number(r.dio) + Number(r.dso) - Number(r.dpo); },
+      rows: [
+        { id: 'CCC-1', period: 'Q1 2026', dio: 52.0, dso: 24.5, dpo: 19.0, ccc: 57.5, frozen: 18400000 },
+        { id: 'CCC-2', period: 'Q2 2026', dio: 48.0, dso: 21.0, dpo: 20.5, ccc: 48.5, frozen: 16200000 },
+        { id: 'CCC-3', period: 'Q3 2026', dio: 44.5, dso: 19.2, dpo: 21.0, ccc: 42.7, frozen: 14900000 },
+        { id: 'CCC-4', period: 'Листопад 2026', dio: 42.0, dso: 17.4, dpo: 22.0, ccc: 37.4, frozen: 13200000 },
+        { id: 'CCC-5', period: 'Прогноз Q1 2027', dio: 38.0, dso: 16.0, dpo: 23.0, ccc: 31.0, frozen: 11500000 }
+      ],
+      kpis: () => [
+        { title: 'Поточний цикл CCC', val: '37.4 днів' },
+        { title: 'Вивільнено за рік', val: '+5.20M грн' },
+        { title: 'Оборотність запасів DIO', val: '42.0 дн.' },
+        { title: 'Прогноз CCC Q1 2027', val: '31.0 дн.' }
+      ],
+      summary: () => `<div>Прискорення оборотності за 2026: <strong>-20.1 днів</strong></div><div class="summary-checksum"><span class="checksum-badge">Вивільнено в кеш: +5 200 000 грн</span></div>`
+    },
+
+    'an-cohort': {
+      columns: [
+        { key: 'chain', label: 'Мережа / Канал', editable: true },
+        { key: 'stores', label: 'Активних аптек', num: true, editable: true },
+        { key: 'ret3m', label: 'Retention 3 міс %', num: true, editable: true },
+        { key: 'ret6m', label: 'Retention 6 міс %', num: true, editable: true },
+        { key: 'skuPerStore', label: 'Середньо SKU/точку', num: true, editable: true },
+        { key: 'growth', label: 'Приріст чеку %', num: true, editable: true }
+      ],
+      rows: [
+        { id: 'COH-1', chain: 'ТОВ «Аптека АНЦ»', stores: 1120, ret3m: 98.4, ret6m: 96.2, skuPerStore: 18.5, growth: 14.2 },
+        { id: 'COH-2', chain: 'ТОВ «Подорожник»', stores: 1480, ret3m: 97.8, ret6m: 94.8, skuPerStore: 16.2, growth: 16.8 },
+        { id: 'COH-3', chain: 'Аптека 9-1-1', stores: 890, ret3m: 96.5, ret6m: 93.0, skuPerStore: 14.0, growth: 11.5 },
+        { id: 'COH-4', chain: 'ТОВ «ОРТОС» (Спецсалони)', stores: 64, ret3m: 100.0, ret6m: 98.4, skuPerStore: 42.0, growth: 22.4 }
+      ],
+      kpis: () => [
+        { title: 'Активних точок продажу', val: '3 554 аптек' },
+        { title: 'Середній Retention 6м', val: '95.6%' },
+        { title: 'Середньо SKU на точку', val: '22.7 поз.' },
+        { title: 'Лідер росту чеку', val: 'ОРТОС (+22.4%)' }
+      ],
+      summary: () => `<div>Покриття України: <strong>3 554 торгових точок</strong></div><div class="summary-checksum"><span class="checksum-badge">Retention 6 міс: 95.6%</span></div>`
     },
 
     'osv': {
@@ -961,11 +1073,60 @@
       <div class="ceo-kpi-card" onclick="window.__switchToTable('pnl-stat')"><div class="ceo-kpi-label">Чистий прибуток</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(6355000)}</div><div class="ceo-kpi-sub"><span>+39.4% vs 2025</span><span>P&amp;L &rarr;</span></div></div>
       <div class="ceo-kpi-card" onclick="window.__switchToTable('sales-margin')"><div class="ceo-kpi-label">Валова маржа</div><div class="ceo-kpi-val">${fmtPct(marginPct)}</div><div class="ceo-kpi-sub"><span>+2.5 п.п. vs 2025</span><span>SKU &rarr;</span></div></div>
       <div class="ceo-kpi-card" onclick="window.__switchToTable('treasury-stmt')"><div class="ceo-kpi-label">Вільні кошти</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(cashTot)}</div><div class="ceo-kpi-sub"><span>+30.1% ліквідність</span><span>Банк &rarr;</span></div></div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-chains')"><div class="ceo-kpi-label">Оборотність DSO/DIO</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '17.4 / 42 дн.'}</div><div class="ceo-kpi-sub"><span>Швидше на 8 дн.</span><span>Мережі &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-ccc')"><div class="ceo-kpi-label">Цикл капіталу (CCC)</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '37.4 дн.'}</div><div class="ceo-kpi-sub"><span>DIO 42 / DSO 17.4</span><span>Кеш &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-unit')"><div class="ceo-kpi-label">Запас міцності (BEP)</div><div class="ceo-kpi-val">${fmtPct(66.3)}</div><div class="ceo-kpi-sub"><span>Вище точки беззбитк.</span><span>Unit &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-tax')"><div class="ceo-kpi-label">Податкове навантаж.</div><div class="ceo-kpi-val">${fmtPct(11.5)}</div><div class="ceo-kpi-sub"><span>ПК ПДВ: 490 тис.</span><span>Податки &rarr;</span></div></div>
       <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')" style="border-color:#10B981; background:#ECFDF5;"><div class="ceo-kpi-label" style="color:#047857;">Prediction (Гру 2026)</div><div class="ceo-kpi-val" style="color:#065F46;">${state.noNumbersMode ? '—' : '₴ ' + fmt(31800000)}</div><div class="ceo-kpi-sub" style="color:#047857;"><span>Точність 94.2%</span><span>Прогноз &rarr;</span></div></div>
     `;
 
     renderAnalyticsChart();
+
+    // Cost Breakdown Chart
+    const costItems = [
+      { label: 'Сировина та матеріали (Lycra, PA, Неопрен)', pct: 44, sum: '9.74M', color: '#2563EB' },
+      { label: 'ЗП виробничого персоналу + ЄСВ', pct: 21, sum: '4.65M', color: '#10B981' },
+      { label: 'Загальновиробничі витрати (ЗВВ, Енергія)', pct: 12, sum: '2.66M', color: '#6366F1' },
+      { label: 'Збут, логістика та маркетинг мереж', pct: 10, sum: '2.21M', color: '#F59E0B' },
+      { label: 'Адміністративні витрати та Податки', pct: 13, sum: '2.88M', color: '#64748B' }
+    ];
+    document.getElementById('ceo-cost-breakdown-chart').innerHTML = costItems.map(c => `
+      <div style="display:flex; flex-direction:column; gap:4px;">
+        <div style="display:flex; justify-content:space-between; font-size:11.5px;">
+          <span style="font-weight:600; color:#334155;">${c.label}</span>
+          <span style="font-family:var(--font-mono); font-weight:700;">${state.noNumbersMode ? '—' : c.sum + ' (' + c.pct + '%)'}</span>
+        </div>
+        <div style="height:8px; background:#F1F5F9; border-radius:4px; overflow:hidden;">
+          <div style="width:${c.pct}%; height:100%; background:${c.color}; border-radius:4px;"></div>
+        </div>
+      </div>
+    `).join('');
+
+    // Weekly Cashflow Runway SVG
+    const weeks = [
+      { w: 'Тиж 1 (18.11)', inc: 5.9, out: 3.1 },
+      { w: 'Тиж 2 (25.11)', inc: 6.4, out: 4.8 },
+      { w: 'Тиж 3 (02.12)', inc: 7.2, out: 3.9 },
+      { w: 'Тиж 4 (09.12)', inc: 8.1, out: 4.2 }
+    ];
+    document.getElementById('ceo-cash-runway-chart').innerHTML = `
+      <svg viewBox="0 0 420 140" width="100%" height="140">
+        ${weeks.map((wk, i) => {
+          const x = 35 + i * 95;
+          const hIn = wk.inc * 11, hOut = wk.out * 11;
+          return `
+            <rect x="${x}" y="${110 - hIn}" width="26" height="${hIn}" rx="3" fill="#10B981"></rect>
+            <text x="${x + 13}" y="${105 - hIn}" font-size="9" text-anchor="middle" fill="#059669" font-family="JetBrains Mono" font-weight="700">${state.noNumbersMode ? '—' : '+' + wk.inc + 'M'}</text>
+            <rect x="${x + 30}" y="${110 - hOut}" width="26" height="${hOut}" rx="3" fill="#F59E0B"></rect>
+            <text x="${x + 43}" y="${105 - hOut}" font-size="9" text-anchor="middle" fill="#D97706" font-family="JetBrains Mono" font-weight="700">${state.noNumbersMode ? '—' : '-' + wk.out + 'M'}</text>
+            <text x="${x + 28}" y="128" font-size="9.5" text-anchor="middle" fill="#64748B">${wk.w}</text>
+          `;
+        }).join('')}
+      </svg>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748B; border-top:1px solid #E2E8F0; padding-top:8px;">
+        <span><strong style="color:#059669;">Зелений:</strong> Прогноз Cash-In (Мережі)</span>
+        <span><strong style="color:#D97706;">Оранжевий:</strong> Закупівля сировини + ФОП</span>
+      </div>
+    `;
 
     document.getElementById('ceo-predictions-list').innerHTML = `
       <div class="pred-card good" onclick="window.__switchToTable('an-sku')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Сезонний пік попиту: Компресійний трикотаж КЛ-2 (+18%)</div><div style="font-size:11px; color:#334155;">Прогноз на грудень: 5 400 пар/міс. Рекомендація: збільшити завантаження Merz CC4.</div></div><span class="status-badge status-ok">94.2%</span></div>
@@ -1046,8 +1207,10 @@
     document.getElementById('ctrl-title').innerHTML = `<span>${esc(meta.subtype.title)}</span><span class="ctrl-tag">${esc(meta.subtype.tag)}</span>`;
 
     const modeSwitch = document.getElementById('view-mode-switch');
+    const kanbanBtn = document.getElementById('btn-vmode-kanban');
     if (modeSwitch) {
-      modeSwitch.style.display = meta.subtype.hasKanban ? 'inline-flex' : 'none';
+      modeSwitch.style.display = 'inline-flex';
+      if (kanbanBtn) kanbanBtn.style.display = meta.subtype.hasKanban ? 'inline-block' : 'none';
       modeSwitch.querySelectorAll('.view-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.vmode === state.viewDisplayMode));
     }
 
@@ -1067,7 +1230,43 @@
     const viewport = document.getElementById('table-viewport');
     if (!viewport) return;
 
-    if (meta.subtype.hasKanban && state.viewDisplayMode === 'KANBAN' && dataset.kanbanStages) {
+    if (state.viewDisplayMode === 'GRAPH') {
+      const labelCol = dataset.columns.find(c => !c.num && c.key !== 'id') || dataset.columns[0];
+      const numCols = dataset.columns.filter(c => c.num);
+      const metricCol = numCols[numCols.length - 1] || numCols[0];
+      const maxVal = metricCol ? Math.max(...filteredRows.map(r => Math.abs(Number(r[metricCol.key] || 0))), 1) : 1;
+      const totalMetric = metricCol ? filteredRows.reduce((s, r) => s + Math.abs(Number(r[metricCol.key] || 0)), 0) : 0;
+
+      viewport.innerHTML = `
+        <div style="padding:20px 24px; display:flex; flex-direction:column; gap:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h3 style="font-size:15px; font-weight:800; color:#0F172A;">Візуальна аналітика модуля: ${esc(meta.subtype.title)}</h3>
+              <div style="font-size:12px; color:#64748B;">Розподіл за показником «${esc(metricCol ? metricCol.label : 'Значення')}» • Клікніть по позиції для відкриття картки</div>
+            </div>
+            <div style="font-family:var(--font-mono); font-size:13px; font-weight:700; color:#2563EB;">Разом: ${metricCol ? fmt(totalMetric) : filteredRows.length}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            ${filteredRows.map(r => {
+              const val = metricCol ? Math.abs(Number(r[metricCol.key] || 0)) : 1;
+              const pct = Math.max(3, (val / maxVal) * 100);
+              const share = totalMetric > 0 ? ((val / totalMetric) * 100).toFixed(1) : '0.0';
+              return `
+                <div onclick="window.__openInspector('${esc(r.id)}')" style="cursor:pointer; padding:8px 12px; border:1px solid #E2E8F0; border-radius:8px; background:#F8FAFC;">
+                  <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                    <span style="font-weight:700; color:#0F172A;">${esc(r[labelCol.key])}</span>
+                    <span style="font-family:var(--font-mono); font-weight:700;">${state.noNumbersMode ? '—' : fmt(r[metricCol.key]) + ' (' + share + '%)'}</span>
+                  </div>
+                  <div style="height:10px; background:#E2E8F0; border-radius:5px; overflow:hidden;">
+                    <div style="width:${pct.toFixed(1)}%; height:100%; background:linear-gradient(90deg, #2563EB, #10B981); border-radius:5px;"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else if (meta.subtype.hasKanban && state.viewDisplayMode === 'KANBAN' && dataset.kanbanStages) {
       viewport.innerHTML = `<div class="kanban-board">${dataset.kanbanStages.map(stage => {
         const cards = filteredRows.filter(r => r.status === stage);
         return `
