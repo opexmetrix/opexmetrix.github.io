@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpexMetrix Systems | Єдина ERP-система підприємства</title>
+  <title>OpexMetrix Systems | Операційна ERP-платформа</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-header: #0B1120;
+      --bg-header: #090E1A;
       --bg-sidebar: #0F172A;
       --bg-main: #F1F5F9;
       --bg-card: #FFFFFF;
       --border: #CBD5E1;
       --border-light: #E2E8F0;
-      --border-dark: #334155;
+      --border-dark: #1E293B;
       --text-main: #0F172A;
       --text-muted: #64748B;
       --text-light: #94A3B8;
@@ -28,7 +28,6 @@
       --danger: #DC2626;
       --danger-bg: #FEF2F2;
       --excel-green: #107C41;
-      --excel-green-bg: #E6F4EA;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'JetBrains Mono', Consolas, monospace;
     }
@@ -51,21 +50,19 @@
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: radial-gradient(circle at 20% 20%, #1E293B 0%, #0B1120 70%);
+      background: radial-gradient(circle at 25% 20%, #1E293B 0%, #090E1A 75%);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
-    .login-screen.hidden {
-      display: none;
-    }
+    .login-screen.hidden { display: none; }
     .login-card {
       background: #FFFFFF;
       width: 440px;
       max-width: 100%;
       border-radius: 12px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
       overflow: hidden;
       border: 1px solid #334155;
     }
@@ -95,21 +92,9 @@
       font-size: 12px;
       color: #FFFFFF;
     }
-    .login-subtitle {
-      font-size: 12px;
-      color: #94A3B8;
-    }
-    .login-body {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .login-field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
+    .login-subtitle { font-size: 12px; color: #94A3B8; }
+    .login-body { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+    .login-field { display: flex; flex-direction: column; gap: 5px; }
     .login-label-row {
       display: flex;
       justify-content: space-between;
@@ -118,26 +103,15 @@
       font-weight: 600;
       color: #334155;
     }
-    .char-counter {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: #64748B;
-    }
-    .char-counter.valid {
-      color: #059669;
-      font-weight: 700;
-    }
-    .login-input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
+    .char-counter { font-family: var(--font-mono); font-size: 11px; color: #64748B; }
+    .char-counter.valid { color: #059669; font-weight: 700; }
+    .login-input-wrap { position: relative; display: flex; align-items: center; }
     .login-input {
       width: 100%;
       font-family: var(--font-mono);
       font-size: 13px;
       letter-spacing: 0.5px;
-      padding: 9px 36px 9px 12px;
+      padding: 9px 64px 9px 12px;
       border: 1px solid #CBD5E1;
       border-radius: 6px;
       outline: none;
@@ -156,7 +130,7 @@
       border: none;
       cursor: pointer;
       color: #64748B;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
     .login-error {
@@ -168,9 +142,7 @@
       border-radius: 6px;
       display: none;
     }
-    .login-error.show {
-      display: block;
-    }
+    .login-error.show { display: block; }
     .btn-login-submit {
       background: #2563EB;
       color: #FFFFFF;
@@ -180,11 +152,8 @@
       font-weight: 700;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.15s;
     }
-    .btn-login-submit:hover {
-      background: #1D4ED8;
-    }
+    .btn-login-submit:hover { background: #1D4ED8; }
     .login-quick-box {
       border-top: 1px solid #E2E8F0;
       padding-top: 14px;
@@ -192,33 +161,20 @@
       flex-direction: column;
       gap: 8px;
     }
-    .login-quick-title {
-      font-size: 11px;
-      color: #64748B;
-      font-weight: 600;
-    }
-    .login-quick-btns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
+    .login-quick-title { font-size: 11px; color: #64748B; font-weight: 600; }
+    .login-quick-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-quick-role {
       background: #F8FAFC;
       border: 1px solid #CBD5E1;
-      padding: 7px 10px;
+      padding: 8px 10px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 600;
       color: #0F172A;
       cursor: pointer;
       text-align: left;
-      transition: all 0.15s;
     }
-    .btn-quick-role:hover {
-      border-color: #2563EB;
-      background: #EFF6FF;
-      color: #1D4ED8;
-    }
+    .btn-quick-role:hover { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; }
     .btn-quick-role span {
       display: block;
       font-family: var(--font-mono);
@@ -227,7 +183,7 @@
       margin-top: 2px;
     }
 
-    /* ================= ENTERPRISE HEADER ================= */
+    /* ================= HEADER ================= */
     .sys-header {
       background: var(--bg-header);
       color: #FFFFFF;
@@ -240,16 +196,11 @@
       flex-shrink: 0;
       z-index: 30;
     }
-    .sys-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .sys-brand { display: flex; align-items: center; gap: 10px; }
     .sys-logo {
       font-family: var(--font-mono);
-      font-weight: 700;
+      font-weight: 800;
       font-size: 14px;
-      letter-spacing: -0.4px;
       color: #FFFFFF;
       display: flex;
       align-items: center;
@@ -264,7 +215,6 @@
       align-items: center;
       justify-content: center;
       font-size: 10px;
-      font-weight: 800;
       color: #FFFFFF;
     }
     .sys-entity {
@@ -283,95 +233,92 @@
       height: 6px;
       border-radius: 50%;
       background: #10B981;
+      box-shadow: 0 0 6px #10B981;
     }
-    .sys-search-box {
-      flex: 1;
-      max-width: 320px;
-      margin: 0 14px;
-      position: relative;
-    }
+    .sys-search-box { flex: 1; max-width: 280px; margin: 0 12px; position: relative; }
     .sys-search-input {
       width: 100%;
       background: #1E293B;
       border: 1px solid #334155;
       color: #FFFFFF;
       border-radius: 5px;
-      padding: 5px 10px 5px 28px;
+      padding: 5px 10px 5px 26px;
       font-size: 12px;
       outline: none;
     }
-    .sys-search-input:focus {
-      border-color: #3B82F6;
-      background: #0F172A;
-    }
+    .sys-search-input:focus { border-color: #3B82F6; background: #0F172A; }
     .sys-search-icon {
       position: absolute;
-      left: 9px;
+      left: 8px;
       top: 50%;
       transform: translateY(-50%);
       color: #64748B;
-      font-size: 12px;
+      font-size: 11px;
       pointer-events: none;
     }
-    .sys-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .sys-actions { display: flex; align-items: center; gap: 6px; }
     .btn-header {
       background: #1E293B;
       border: 1px solid #334155;
       color: #CBD5E1;
       font-size: 11px;
       font-weight: 600;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s;
-    }
-    .btn-header:hover {
-      background: #334155;
-      color: #FFFFFF;
-    }
-    .btn-header.active {
-      background: #1E3A8A;
-      border-color: #3B82F6;
-      color: #93C5FD;
-    }
-    .btn-auto-header {
-      background: linear-gradient(135deg, #059669, #10B981);
-      border: none;
-      color: #FFFFFF;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 5px 11px;
+      padding: 5px 9px;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 5px;
     }
-    .btn-auto-header:hover {
-      filter: brightness(1.08);
+    .btn-header:hover { background: #334155; color: #FFFFFF; }
+    .btn-header.active { background: #1E3A8A; border-color: #3B82F6; color: #93C5FD; }
+    .btn-auto-header {
+      background: linear-gradient(135deg, #059669, #10B981);
+      border: none;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-auto-header:hover { filter: brightness(1.08); }
+    .btn-radar-header {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #FCD34D;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-radar-header.clean {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #6EE7B7;
     }
     .task-counter-badge {
       background: #DC2626;
       color: #FFFFFF;
       font-size: 10px;
       font-weight: 700;
-      padding: 1px 6px;
+      padding: 1px 5px;
       border-radius: 10px;
     }
     .user-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       font-size: 11px;
       color: #E2E8F0;
-      padding: 4px 8px;
+      padding: 3px 8px;
       border-radius: 5px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid #334155;
@@ -397,22 +344,14 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .btn-logout:hover {
-      color: #FFFFFF;
-      border-color: #EF4444;
-      background: rgba(239, 68, 68, 0.15);
-    }
+    .btn-logout:hover { color: #FFFFFF; border-color: #EF4444; background: rgba(239, 68, 68, 0.15); }
 
     /* ================= LAYOUT ================= */
-    .sys-layout {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
+    .sys-layout { display: flex; flex: 1; overflow: hidden; }
 
     /* Sidebar */
     .sys-sidebar {
-      width: 280px;
+      width: 275px;
       background: var(--bg-sidebar);
       color: #CBD5E1;
       display: flex;
@@ -422,7 +361,7 @@
       user-select: none;
     }
     .sidebar-ceo-btn {
-      margin: 10px 10px 4px;
+      margin: 10px 10px 6px;
       padding: 9px 12px;
       background: linear-gradient(135deg, #1E3A8A, #1D4ED8);
       color: #FFFFFF;
@@ -434,18 +373,10 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transition: all 0.15s;
     }
-    .sidebar-ceo-btn:hover {
-      filter: brightness(1.1);
-    }
-    .sidebar-ceo-btn.active {
-      box-shadow: 0 0 0 2px #93C5FD;
-    }
-    .sidebar-search {
-      padding: 8px 10px;
-      border-bottom: 1px solid #1E293B;
-    }
+    .sidebar-ceo-btn:hover { filter: brightness(1.1); }
+    .sidebar-ceo-btn.active { box-shadow: 0 0 0 2px #93C5FD; }
+    .sidebar-search { padding: 6px 10px 8px; border-bottom: 1px solid #1E293B; }
     .sidebar-search input {
       width: 100%;
       background: #1E293B;
@@ -456,14 +387,8 @@
       border-radius: 4px;
       outline: none;
     }
-    .sidebar-search input:focus {
-      border-color: #3B82F6;
-    }
-    .sidebar-tree {
-      flex: 1;
-      overflow-y: auto;
-      padding: 4px 0;
-    }
+    .sidebar-search input:focus { border-color: #3B82F6; }
+    .sidebar-tree { flex: 1; overflow-y: auto; padding: 4px 0; }
     .sidebar-tree::-webkit-scrollbar { width: 5px; }
     .sidebar-tree::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
@@ -520,12 +445,9 @@
       padding: 1px 5px;
       border-radius: 3px;
     }
-    .subtype-item.active .subtype-code {
-      color: #93C5FD;
-      background: rgba(255, 255, 255, 0.14);
-    }
+    .subtype-item.active .subtype-code { color: #93C5FD; background: rgba(255, 255, 255, 0.14); }
 
-    /* ================= MAIN WORKSPACE ================= */
+    /* ================= WORKSPACE ================= */
     .sys-workspace {
       flex: 1;
       display: flex;
@@ -534,23 +456,17 @@
       background: var(--bg-main);
     }
 
-    /* CEO Cockpit View */
+    /* CEO Cockpit */
     .ceo-cockpit {
       flex: 1;
       overflow-y: auto;
       padding: 16px 20px;
       display: none;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
-    .ceo-cockpit.active {
-      display: flex;
-    }
-    .ceo-kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
+    .ceo-cockpit.active { display: flex; }
+    .ceo-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .ceo-kpi-card {
       background: #FFFFFF;
       border: 1px solid var(--border-light);
@@ -560,18 +476,11 @@
       cursor: pointer;
       transition: border-color 0.15s, transform 0.1s;
     }
-    .ceo-kpi-card:hover {
-      border-color: #2563EB;
-      transform: translateY(-1px);
-    }
+    .ceo-kpi-card:hover { border-color: #2563EB; transform: translateY(-1px); }
     .ceo-kpi-label { font-size: 11px; font-weight: 600; color: #64748B; text-transform: uppercase; }
-    .ceo-kpi-val { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: #0F172A; margin: 6px 0 4px; }
+    .ceo-kpi-val { font-family: var(--font-mono); font-size: 21px; font-weight: 800; color: #0F172A; margin: 6px 0 4px; }
     .ceo-kpi-sub { font-size: 11px; color: #059669; font-weight: 600; }
-    .ceo-split-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 14px;
-    }
+    .ceo-split-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
     .ceo-panel {
       background: #FFFFFF;
       border: 1px solid var(--border-light);
@@ -590,12 +499,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    .ceo-panel-body {
-      padding: 12px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .ceo-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .ceo-approval-item {
       border: 1px solid #E2E8F0;
       border-radius: 6px;
@@ -618,69 +522,54 @@
     }
     .btn-approve-sm:hover { background: #047857; }
 
-    /* Table Workspace View */
-    .table-workspace {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    /* What-If Simulator */
+    .sim-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+    .sim-label-row { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: #334155; }
+    .sim-slider { width: 100%; accent-color: #2563EB; cursor: pointer; }
+    .sim-result-box {
+      background: #0F172A;
+      color: #FFFFFF;
+      border-radius: 6px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
     }
-    .table-workspace.hidden {
-      display: none;
-    }
+    .sim-res-item span { display: block; font-size: 10px; color: #94A3B8; }
+    .sim-res-item strong { font-family: var(--font-mono); font-size: 15px; color: #34D399; }
 
-    /* Control Topbar */
+    /* Table Workspace */
+    .table-workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .table-workspace.hidden { display: none; }
+
     .ctrl-topbar {
       background: #FFFFFF;
       border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
+      padding: 9px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
       flex-shrink: 0;
     }
-    .ctrl-row-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
+    .ctrl-row-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .ctrl-breadcrumb { font-size: 11px; color: var(--text-muted); }
-    .ctrl-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .ctrl-title { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
     .ctrl-tag {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       background: #EFF6FF;
       color: #1D4ED8;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
       border: 1px solid #DBEAFE;
     }
-    .ctrl-row-bottom {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .ctrl-row-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
     .filter-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .period-btn-group {
-      display: inline-flex;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      overflow: hidden;
-    }
+    .period-btn-group { display: inline-flex; border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
     .period-btn {
       border: none;
       background: #FFFFFF;
-      padding: 4px 9px;
+      padding: 4px 8px;
       font-size: 11px;
       font-weight: 600;
       color: var(--text-muted);
@@ -702,50 +591,51 @@
       background: #2563EB;
       color: #FFFFFF;
       border: none;
-      padding: 6px 11px;
-      font-size: 12px;
+      padding: 5px 10px;
+      font-size: 11px;
       font-weight: 600;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .btn-action-primary:hover { background: #1D4ED8; }
     .btn-action-excel {
       background: var(--excel-green);
       color: #FFFFFF;
       border: none;
-      padding: 6px 11px;
-      font-size: 12px;
+      padding: 5px 10px;
+      font-size: 11px;
       font-weight: 600;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .btn-action-excel:hover { filter: brightness(1.1); }
     .btn-action-outline {
       background: #FFFFFF;
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 5px 10px;
-      font-size: 12px;
-      font-weight: 500;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 600;
       border-radius: 5px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .btn-action-outline:hover { background: #F1F5F9; }
+    .btn-action-outline:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    /* ================= EXCEL FORMULA BAR ================= */
+    /* Excel Formula Bar */
     .excel-fx-bar {
       background: #F8FAFC;
       border-bottom: 1px solid var(--border);
-      padding: 5px 16px;
+      padding: 5px 14px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -759,17 +649,15 @@
       border: 1px solid var(--border);
       padding: 3px 8px;
       border-radius: 4px;
-      min-width: 64px;
+      min-width: 60px;
       text-align: center;
-      color: #0F172A;
     }
     .fx-label {
       font-family: Georgia, serif;
       font-style: italic;
       font-weight: 700;
-      color: #107C41;
+      color: var(--excel-green);
       font-size: 13px;
-      padding: 0 4px;
     }
     .fx-input {
       flex: 1;
@@ -781,23 +669,11 @@
       background: #FFFFFF;
       outline: none;
     }
-    .fx-input:focus {
-      border-color: var(--excel-green);
-    }
-    .fx-hint {
-      font-size: 11px;
-      color: #64748B;
-      white-space: nowrap;
-    }
+    .fx-input:focus { border-color: var(--excel-green); }
+    .fx-hint { font-size: 11px; color: #64748B; white-space: nowrap; }
 
-    /* ================= EXCEL-STYLE DATA GRID ================= */
-    .sys-content {
-      flex: 1;
-      overflow: hidden;
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-    }
+    /* Grid Table */
+    .sys-content { flex: 1; overflow: hidden; padding: 10px 14px; display: flex; flex-direction: column; }
     .data-table-card {
       background: #FFFFFF;
       border: 1px solid var(--border);
@@ -808,17 +684,8 @@
       flex: 1;
       overflow: hidden;
     }
-    .table-container {
-      flex: 1;
-      overflow: auto;
-      position: relative;
-    }
-    .op-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      white-space: nowrap;
-    }
+    .table-container { flex: 1; overflow: auto; position: relative; }
+    .op-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
     .op-table thead th.col-letter-row {
       background: #EEF2F6;
       color: #64748B;
@@ -832,7 +699,9 @@
       position: sticky;
       top: 0;
       z-index: 12;
+      cursor: pointer;
     }
+    .op-table thead th.col-letter-row:hover { background: #E2E8F0; color: #0F172A; }
     .op-table thead th.col-title-row {
       background: #F8FAFC;
       color: #334155;
@@ -845,11 +714,10 @@
       top: 21px;
       z-index: 11;
       user-select: none;
+      cursor: pointer;
     }
-    .op-table th.num, .op-table td.num {
-      text-align: right;
-      font-family: var(--font-mono);
-    }
+    .op-table thead th.col-title-row:hover { background: #F1F5F9; }
+    .op-table th.num, .op-table td.num { text-align: right; font-family: var(--font-mono); }
     .op-table td.row-index-cell {
       background: #EEF2F6;
       color: #64748B;
@@ -867,26 +735,16 @@
       border-bottom: 1px solid var(--border-light);
       border-right: 1px solid #F1F5F9;
       color: var(--text-main);
-      position: relative;
     }
-    .op-table td.editable-cell {
-      cursor: cell;
-    }
-    .op-table td.editable-cell:hover {
-      background: #F0FDF4;
-    }
+    .op-table td.editable-cell { cursor: cell; }
+    .op-table td.editable-cell:hover { background: #F0FDF4; }
     .op-table td.active-cell {
       outline: 2px solid var(--excel-green);
       outline-offset: -2px;
       background: #F0FDF4 !important;
     }
-    .op-table td.recalc-flash {
-      animation: recalcPulse 0.9s ease;
-    }
-    @keyframes recalcPulse {
-      0% { background: #BBF7D0; }
-      100% { background: transparent; }
-    }
+    .op-table td.recalc-flash { animation: recalcPulse 0.9s ease; }
+    @keyframes recalcPulse { 0% { background: #BBF7D0; } 100% { background: transparent; } }
     .cell-inline-input {
       width: 100%;
       border: none;
@@ -898,17 +756,8 @@
       color: #0F172A;
       padding: 0;
     }
-    .op-table tr:hover td:not(.row-index-cell):not(.active-cell) {
-      background: #F8FAFC;
-    }
-    .op-table tr.highlighted td:not(.row-index-cell) {
-      background: #EFF6FF !important;
-      animation: flashRow 2s ease;
-    }
-    @keyframes flashRow {
-      0% { background: #FEF08A !important; }
-      100% { background: #EFF6FF !important; }
-    }
+    .op-table tr:hover td:not(.row-index-cell):not(.active-cell) { background: #F8FAFC; }
+    .op-table tr.highlighted td:not(.row-index-cell) { background: #EFF6FF !important; }
     .row-actions { display: inline-flex; gap: 4px; }
     .btn-row-action {
       background: #F1F5F9;
@@ -920,34 +769,26 @@
       border-radius: 3px;
       cursor: pointer;
     }
-    .btn-row-action:hover {
-      background: #2563EB;
-      color: #FFFFFF;
-      border-color: #2563EB;
-    }
-    .status-badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 4px;
-      display: inline-block;
-    }
+    .btn-row-action:hover { background: #2563EB; color: #FFFFFF; border-color: #2563EB; }
+    .btn-row-del:hover { background: #DC2626; border-color: #DC2626; color: #FFFFFF; }
+    .status-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-block; }
     .status-ok { background: #ECFDF5; color: #059669; }
     .status-warning { background: #FFFBEB; color: #D97706; }
     .status-danger { background: #FEF2F2; color: #DC2626; }
     .status-info { background: #EFF6FF; color: #2563EB; }
 
-    /* Summary Status Bar */
+    /* Summary Bar with Excel Quick-Stats */
     .table-summary-bar {
       background: #F8FAFC;
       border-top: 2px solid var(--border);
-      padding: 7px 14px;
+      padding: 6px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       font-size: 12px;
       font-weight: 600;
       flex-shrink: 0;
+      gap: 12px;
     }
     .summary-checksum {
       display: flex;
@@ -966,24 +807,7 @@
       font-weight: 700;
     }
 
-    /* ================= AUTOMATION MODAL / PANEL ================= */
-    .auto-log-box {
-      background: #0B1120;
-      color: #E2E8F0;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      padding: 12px;
-      border-radius: 6px;
-      max-height: 220px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .auto-log-line { display: flex; gap: 8px; }
-    .auto-log-ok { color: #34D399; font-weight: 700; }
-
-    /* ================= DRAWERS & MODALS ================= */
+    /* Drawers & Modals */
     .drawer-overlay {
       position: fixed;
       inset: 0;
@@ -1018,13 +842,7 @@
       justify-content: space-between;
     }
     .drawer-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .btn-close-drawer {
-      background: transparent;
-      border: none;
-      color: #94A3B8;
-      font-size: 20px;
-      cursor: pointer;
-    }
+    .btn-close-drawer { background: transparent; border: none; color: #94A3B8; font-size: 20px; cursor: pointer; }
     .btn-close-drawer:hover { color: #FFFFFF; }
     .drawer-body {
       flex: 1;
@@ -1085,7 +903,7 @@
     .modal-box {
       background: #FFFFFF;
       border-radius: 8px;
-      width: 540px;
+      width: 560px;
       max-width: 92vw;
       box-shadow: 0 10px 25px rgba(0,0,0,0.22);
       overflow: hidden;
@@ -1101,16 +919,10 @@
       justify-content: space-between;
     }
     .modal-header h3 { font-size: 14px; font-weight: 700; }
-    .modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 12px; }
+    .modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; font-size: 12px; max-height: 75vh; overflow-y: auto; }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
     .form-label { font-weight: 600; color: #334155; font-size: 11px; }
-    .form-control {
-      padding: 6px 10px;
-      font-size: 12px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      outline: none;
-    }
+    .form-control { padding: 6px 10px; font-size: 12px; border: 1px solid var(--border); border-radius: 4px; outline: none; }
     .form-control:focus { border-color: var(--primary); }
     .modal-footer {
       padding: 12px 16px;
@@ -1120,6 +932,22 @@
       justify-content: flex-end;
       gap: 8px;
     }
+
+    .auto-log-box {
+      background: #090E1A;
+      color: #E2E8F0;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 12px;
+      border-radius: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .auto-log-line { display: flex; gap: 8px; }
+    .auto-log-ok { color: #34D399; font-weight: 700; }
 
     .modal-doc-box { width: 760px; max-height: 85vh; }
     .doc-paper {
@@ -1188,7 +1016,7 @@
           <span class="login-brand-mark">OM</span>
           <span>OpexMetrix Systems</span>
         </div>
-        <div class="login-subtitle">ТОВ «ТД «Алком» • Єдина ERP-система (Контур CEO та Бухгалтерії)</div>
+        <div class="login-subtitle">ТОВ «ТД «Алком» • Операційна ERP-платформа нового покоління</div>
       </div>
 
       <form class="login-body" id="login-form">
@@ -1218,14 +1046,14 @@
         <button type="submit" class="btn-login-submit">Увійти в систему &rarr;</button>
 
         <div class="login-quick-box">
-          <div class="login-quick-title">Швидке автозаповнення (для демонстрації):</div>
+          <div class="login-quick-title">Швидкий вхід (20-символьний ключ):</div>
           <div class="login-quick-btns">
             <button type="button" class="btn-quick-role" id="btn-quick-ceo">
-              Вхід: CEO (Керівник)
+              Увійти як CEO
               <span>Логін: 20 нулів | Пароль: 20 нулів</span>
             </button>
             <button type="button" class="btn-quick-role" id="btn-quick-cpa">
-              Вхід: Головбух
+              Увійти як Головбух
               <span>Логін: 20 нулів | Пароль: 20 одиниць</span>
             </button>
           </div>
@@ -1249,40 +1077,46 @@
 
     <div class="sys-search-box">
       <span class="sys-search-icon">&#128269;</span>
-      <input type="text" id="global-search" class="sys-search-input" placeholder="Пошук звіту, рахунку, SKU або партії (Ctrl+K)...">
+      <input type="text" id="global-search" class="sys-search-input" placeholder="Пошук по всіх таблицях (Ctrl+K)...">
     </div>
 
     <div class="sys-actions">
-      <button id="btn-open-automation" class="btn-auto-header" title="Запустити автоматичні проводки та звірку">
+      <button id="btn-audit-radar" class="btn-radar-header" title="Аудит-Радар 24/7: контроль розбіжностей, податків і маржі">
+        <span>Аудит-Радар:</span>
+        <strong id="radar-count">2 ризики</strong>
+      </button>
+
+      <button id="btn-open-import" class="btn-header" title="Миттєвий імпорт виписки Приват24 / 1С XML">
+        <span>Імпорт Банк / 1С</span>
+      </button>
+
+      <button id="btn-open-automation" class="btn-auto-header" title="Автоматичні проводки та закриття періоду">
         <span>&#9889; Автоматика</span>
       </button>
 
-      <button id="btn-toggle-numbers" class="btn-header" title="Режим показу: з цифрами або чиста структура">
-        <span>Режим:</span>
+      <button id="btn-toggle-numbers" class="btn-header" title="Режим без цифр">
         <strong id="label-num-mode">З цифрами</strong>
       </button>
 
-      <button id="btn-tasks-drawer" class="btn-header" title="Маршрутизація документів між працівниками">
+      <button id="btn-tasks-drawer" class="btn-header" title="Маршрутизація між працівниками">
         <span>Маршрути</span>
         <span id="task-badge-count" class="task-counter-badge">4</span>
       </button>
 
-      <div class="user-pill" id="active-user-pill">
+      <div class="user-pill">
         <div class="user-avatar" id="user-avatar-initials">ШО</div>
-        <span id="user-role-label">Головбух (Шевченко О. В.)</span>
+        <span id="user-role-label">Головбух</span>
       </div>
 
-      <button id="btn-logout" class="btn-logout" title="Вийти та змінити роль (CEO / Головбух)">Вийти</button>
+      <button id="btn-logout" class="btn-logout">Вийти</button>
     </div>
   </header>
 
   <!-- ================= MAIN LAYOUT ================= -->
   <div class="sys-layout">
-    
-    <!-- Sidebar -->
     <aside class="sys-sidebar">
       <button class="sidebar-ceo-btn" id="btn-sidebar-ceo">
-        <span>Кабінет CEO (Зведена панель)</span>
+        <span>Кабінет CEO + Симулятор</span>
         <span>&rarr;</span>
       </button>
 
@@ -1293,19 +1127,18 @@
       <div class="sidebar-tree" id="sidebar-tree-container"></div>
     </aside>
 
-    <!-- Workspace -->
     <main class="sys-workspace">
 
-      <!-- 1. CEO COCKPIT VIEW -->
+      <!-- 1. CEO COCKPIT + WHAT-IF SIMULATOR -->
       <section class="ceo-cockpit" id="ceo-cockpit-view">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <h1 style="font-size:18px; font-weight:800; color:#0F172A;">Єдиний контур управління CEO — ТОВ «ТД «Алком»</h1>
-            <div style="font-size:12px; color:#64748B;">Оперативна фінансова картина в реальному часі з прямим переходом у первинні таблиці</div>
+            <div style="font-size:12px; color:#64748B;">Живі показники з бухгалтерського ядра + сценарне моделювання What-If</div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="btn-auto-header" onclick="window.__openAutomationModal()">&#9889; Авто-перерахунок балансу</button>
-            <button class="btn-action-primary" onclick="window.__switchToTable('osv')">Перейти до ОСВ &rarr;</button>
+            <button class="btn-auto-header" onclick="window.__openAutomationModal()">&#9889; Авто-закриття</button>
+            <button class="btn-action-primary" onclick="window.__switchToTable('osv')">Відкрити ОСВ &rarr;</button>
           </div>
         </div>
 
@@ -1314,23 +1147,38 @@
         <div class="ceo-split-grid">
           <div class="ceo-panel">
             <div class="ceo-panel-header">
-              <span>На погодженні у керівника (Документи та маршрути)</span>
-              <span class="status-badge status-warning" id="ceo-pending-count">Очікують рішення</span>
+              <span>Симулятор прибутку та Cashflow (What-If до підписання угод)</span>
+              <span class="status-badge status-info">Модель реального часу</span>
             </div>
-            <div class="ceo-panel-body" id="ceo-approvals-list"></div>
+            <div class="ceo-panel-body">
+              <div class="sim-row">
+                <div class="sim-label-row"><span>Зміна відпускної ціни для мереж:</span><strong id="sim-price-val">0%</strong></div>
+                <input type="range" id="sim-price" class="sim-slider" min="-15" max="25" value="0">
+              </div>
+              <div class="sim-row">
+                <div class="sim-label-row"><span>Зміна вартості імпортної сировини (Lycra / PA):</span><strong id="sim-cost-val">0%</strong></div>
+                <input type="range" id="sim-cost" class="sim-slider" min="-15" max="25" value="0">
+              </div>
+              <div class="sim-row">
+                <div class="sim-label-row"><span>Відтермінування платежу мережам (днів):</span><strong id="sim-days-val">14 дн.</strong></div>
+                <input type="range" id="sim-days" class="sim-slider" min="0" max="60" value="14">
+              </div>
+              <div class="sim-result-box" id="sim-result-box"></div>
+              <div id="ceo-cashflow-chart" style="margin-top:4px;"></div>
+            </div>
           </div>
 
           <div class="ceo-panel">
             <div class="ceo-panel-header">
-              <span>Стан аптечних мереж та виробництва</span>
-              <button class="btn-row-action" onclick="window.__switchToTable('sales-recon')">Детальна звірка &rarr;</button>
+              <span>Черга на погодження CEO</span>
+              <span class="status-badge status-warning" id="ceo-pending-count">Очікують</span>
             </div>
-            <div class="ceo-panel-body" id="ceo-summary-bars"></div>
+            <div class="ceo-panel-body" id="ceo-approvals-list"></div>
           </div>
         </div>
       </section>
 
-      <!-- 2. EXCEL-GRID OPERATIONAL TABLE WORKSPACE -->
+      <!-- 2. EXCEL-GRID OPERATIONAL WORKSPACE -->
       <section class="table-workspace" id="table-workspace-view">
         <div class="ctrl-topbar">
           <div class="ctrl-row-top">
@@ -1342,9 +1190,10 @@
               </h1>
             </div>
             <div class="action-group">
-              <button class="btn-action-outline" id="btn-add-row" title="Додати новий рядок в таблицю">+ Рядок</button>
+              <button class="btn-action-outline" id="btn-undo" disabled title="Скасувати останню правку (Ctrl+Z)">&#8617; Скасувати</button>
+              <button class="btn-action-outline" id="btn-add-row">+ Рядок</button>
               <button class="btn-action-primary" id="btn-handoff-report">Передати колезі</button>
-              <button class="btn-action-excel" id="btn-export-csv">Експорт в Excel (.csv)</button>
+              <button class="btn-action-excel" id="btn-export-csv">Експорт Excel (.csv)</button>
             </div>
           </div>
 
@@ -1361,22 +1210,20 @@
                 <option value="ALL">Всі філії та склади</option>
               </select>
             </div>
-
             <div class="filter-group">
-              <input type="text" id="table-search" class="ctrl-input" placeholder="Швидкий фільтр по таблиці..." style="width: 210px;">
+              <input type="text" id="table-search" class="ctrl-input" placeholder="Фільтр у таблиці..." style="width: 200px;">
             </div>
           </div>
         </div>
 
-        <!-- Excel Formula Bar (fx) -->
+        <!-- Excel Formula Bar -->
         <div class="excel-fx-bar">
           <div class="fx-cell-ref" id="fx-cell-ref">A1</div>
           <div class="fx-label">fx</div>
-          <input type="text" id="fx-input" class="fx-input" placeholder="Оберіть клітинку для редагування (двічі клікніть по числу в таблиці)...">
-          <div class="fx-hint">Підказка: клікніть двічі на будь-яку клітинку — зміна автоматично перерахує підсумки</div>
+          <input type="text" id="fx-input" class="fx-input" placeholder="Клікніть клітинку або введіть формулу (напр. = 4500 * 1.2) і натисніть Enter...">
+          <div class="fx-hint" id="fx-col-stats">Оберіть колонку або клітинку для статистики</div>
         </div>
 
-        <!-- Grid Table -->
         <div class="sys-content">
           <div class="data-table-card">
             <div class="table-container" id="table-viewport"></div>
@@ -1386,6 +1233,42 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- ================= AUDIT RADAR MODAL ================= -->
+  <div class="modal-overlay" id="modal-radar">
+    <div class="modal-box" style="width:620px;">
+      <div class="modal-header">
+        <h3>Аудит-Радар 24/7 — Контроль ризиків та розбіжностей</h3>
+        <button class="btn-close-drawer" id="btn-close-radar">&times;</button>
+      </div>
+      <div class="modal-body" id="radar-list-body"></div>
+      <div class="modal-footer">
+        <button class="btn-action-outline" id="btn-close-radar-footer">Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BANK / 1C IMPORT MODAL ================= -->
+  <div class="modal-overlay" id="modal-import">
+    <div class="modal-box" style="width:600px;">
+      <div class="modal-header">
+        <h3>Швидкий імпорт: Банк-Клієнт / 1С XML</h3>
+        <button class="btn-close-drawer" id="btn-close-import">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Вставте виписку (1CClientBankExchange / CSV) або запустіть авто-синхронізацію:</label>
+          <textarea id="import-raw-text" class="form-control" rows="5" style="font-family:var(--font-mono); font-size:11px;">2026-11-16;UA483052990000026004016201124;ТОВ «Аптека АНЦ»;+1004000.00;Оплата згідно договору 402/26 ВН-004182
+2026-11-16;UA123808050000000026009481022;ТОВ «Подорожник»;+540000.00;Оплата за ортопедичні вироби згідно рах. 8819</textarea>
+        </div>
+        <div class="auto-log-box" id="import-log-box" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-action-outline" id="btn-close-import-footer">Скасувати</button>
+        <button class="btn-auto-header" id="btn-run-import" style="padding:7px 14px; font-size:12px;">&#9889; Розпізнати і провести в облік</button>
+      </div>
+    </div>
   </div>
 
   <!-- ================= TASKS & ROUTING DRAWER ================= -->
@@ -1415,7 +1298,7 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Документ або рядок таблиці:</label>
+          <label class="form-label">Документ або рядок:</label>
           <input type="text" id="handoff-doc-name" class="form-control" readonly>
         </div>
         <div class="form-group">
@@ -1432,9 +1315,9 @@
         <div class="form-group">
           <label class="form-label">Пріоритет:</label>
           <select id="handoff-priority" class="form-control">
-            <option value="NORMAL">Звичайний (в плановому порядку)</option>
+            <option value="NORMAL">Звичайний</option>
             <option value="URGENT">Терміново (до 2 годин)</option>
-            <option value="APPROVAL">На погодження (потрібен підпис CEO/Головбуха)</option>
+            <option value="APPROVAL">На погодження CEO / Головбуху</option>
           </select>
         </div>
         <div class="form-group">
@@ -1449,7 +1332,7 @@
     </div>
   </div>
 
-  <!-- ================= AUTOMATION ENGINE MODAL ================= -->
+  <!-- ================= AUTOMATION MODAL ================= -->
   <div class="modal-overlay" id="modal-automation">
     <div class="modal-box">
       <div class="modal-header">
@@ -1464,7 +1347,7 @@
           <button class="btn-action-outline" id="btn-run-auto-close">4. Закриття місяця (Дт = Кт)</button>
         </div>
         <div class="auto-log-box" id="auto-log-box">
-          <div class="auto-log-line"><span class="auto-log-ok">[READY]</span><span>Система автоматичних проводок готова. Оберіть операцію вище.</span></div>
+          <div class="auto-log-line"><span class="auto-log-ok">[READY]</span><span>Оберіть регламентну операцію для автоматичного виконання.</span></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1490,9 +1373,7 @@
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast-container" id="toast-container"></div>
-
   <script src="./systems.js"></script>
 </body>
 </html>
