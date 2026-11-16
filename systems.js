@@ -26,6 +26,16 @@
     undoStack: [],
     handoffContext: null,
     docContext: null,
+    openTabs: [
+      { id: 'acc-cockpit', title: 'Робочий стіл обліку', mode: 'ACC' },
+      { id: 'osv', title: 'ОСВ', mode: 'TABLE' }
+    ],
+    drillAccount: null,
+    drillPartner: null,
+    docFormLines: [
+      { item: 'Панчохи компресійні КЛ-2 (LOT-2026-TC112)', unit: 'пар', qty: 500, price: 640 },
+      { item: 'Гольфи компресійні КЛ-1 (LOT-2026-TC118)', unit: 'пар', qty: 300, price: 420 }
+    ],
     scanDraft: {
       fileName: 'Фото_накладної_телефон.jpg',
       previewUrl: null,
@@ -1412,6 +1422,7 @@
     document.getElementById('table-workspace-view').classList.add('hidden');
     document.getElementById('btn-sidebar-ceo').classList.add('active');
     document.getElementById('btn-sidebar-acc')?.classList.remove('active');
+    ensureOpenTab('ceo-cockpit', 'Огляд та Аналітика', 'CEO');
     renderSidebar();
     renderCEOCockpit();
   }
@@ -1423,6 +1434,7 @@
     document.getElementById('table-workspace-view').classList.add('hidden');
     document.getElementById('btn-sidebar-ceo').classList.remove('active');
     document.getElementById('btn-sidebar-acc')?.classList.add('active');
+    ensureOpenTab('acc-cockpit', 'Робочий стіл обліку', 'ACC');
     renderSidebar();
     renderAccountingCockpit();
   }
@@ -1534,6 +1546,70 @@
     `).join('');
   }
 
+  function renderOpenTabs() {
+    const bar = document.getElementById('open-tabs-bar');
+    if (!bar) return;
+    const currentTabId = state.activeMode === 'CEO' ? 'ceo-cockpit' : state.activeMode === 'ACC' ? 'acc-cockpit' : state.activeView;
+    bar.innerHTML = state.openTabs.map(tab => {
+      const isActive = tab.id === currentTabId;
+      return `
+        <div class="open-tab ${isActive ? 'active' : ''}" onclick="window.__activateTab('${esc(tab.id)}')">
+          <span>${esc(tab.title)}</span>
+          ${state.openTabs.length > 1 ? `<span class="open-tab-close" onclick="window.__closeTab('${esc(tab.id)}', event)">&times;</span>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function ensureOpenTab(id, title, mode) {
+    if (!state.openTabs.some(t => t.id === id)) {
+      state.openTabs.push({ id, title, mode });
+      if (state.openTabs.length > 9) state.openTabs.shift();
+    }
+    renderOpenTabs();
+  }
+
+  window.__activateTab = function(tabId) {
+    const tab = state.openTabs.find(t => t.id === tabId);
+    if (!tab) return;
+    if (tab.mode === 'CEO') switchToCEO();
+    else if (tab.mode === 'ACC') switchToAccountingCockpit();
+    else window.__switchToTable(tab.id);
+  };
+
+  window.__closeTab = function(tabId, e) {
+    if (e) e.stopPropagation();
+    const idx = state.openTabs.findIndex(t => t.id === tabId);
+    if (idx < 0 || state.openTabs.length <= 1) return;
+    const currentTabId = state.activeMode === 'CEO' ? 'ceo-cockpit' : state.activeMode === 'ACC' ? 'acc-cockpit' : state.activeView;
+    state.openTabs.splice(idx, 1);
+    if (tabId === currentTabId) {
+      const next = state.openTabs[Math.max(0, idx - 1)];
+      window.__activateTab(next.id);
+    } else {
+      renderOpenTabs();
+    }
+  };
+
+  window.__drillFromOSV = function(accCode) {
+    state.drillAccount = accCode;
+    state.drillPartner = null;
+    if (accCode === '361' || accCode === '631') {
+      window.__switchToTable('osv-acc');
+      showToast(`Деталізація ОСВ по рахунку ${accCode}`);
+    } else {
+      window.__switchToTable('card-acc');
+      showToast(`Картка рахунку ${accCode}`);
+    }
+  };
+
+  window.__drillToAccountCard = function(accCode, partnerName) {
+    state.drillAccount = accCode || '361';
+    state.drillPartner = partnerName || null;
+    window.__switchToTable('card-acc');
+    showToast(`Картка рахунку ${state.drillAccount}${partnerName ? ': ' + partnerName : ''}`);
+  };
+
   window.__switchToTable = function(viewId, highlightId = null) {
     state.activeMode = 'TABLE';
     state.activeView = viewId;
@@ -1546,6 +1622,8 @@
     document.getElementById('btn-sidebar-ceo').classList.remove('active');
     document.getElementById('btn-sidebar-acc')?.classList.remove('active');
     DOMAINS.forEach(d => { if (d.subtypes.some(s => s.id === viewId)) d.open = true; });
+    const meta = getActiveSubtypeMeta();
+    ensureOpenTab(viewId, meta.subtype.code ? `${meta.subtype.code}: ${meta.subtype.title}` : meta.subtype.title, 'TABLE');
     renderSidebar();
     renderActiveView();
   };
@@ -1771,8 +1849,16 @@
   function renderActiveView() {
     const meta = getActiveSubtypeMeta();
     const dataset = DATASETS[state.activeView] || DATASETS['osv'];
+    renderOpenTabs();
 
-    document.getElementById('ctrl-breadcrumb').textContent = `${meta.domain.title} > ${meta.subtype.title}`;
+    const bcEl = document.getElementById('ctrl-breadcrumb');
+    if (state.activeView === 'osv-acc' && state.drillAccount) {
+      bcEl.innerHTML = `<span class="drill-breadcrumb" onclick="window.__switchToTable('osv')">&larr; Назад до ОСВ</span> &rsaquo; Рахунок ${esc(state.drillAccount)}`;
+    } else if (state.activeView === 'card-acc' && state.drillAccount) {
+      bcEl.innerHTML = `<span class="drill-breadcrumb" onclick="window.__switchToTable('osv')">&larr; ОСВ</span> &rsaquo; <span class="drill-breadcrumb" onclick="window.__drillFromOSV('${esc(state.drillAccount)}')">Рахунок ${esc(state.drillAccount)}</span>${state.drillPartner ? ' &rsaquo; ' + esc(state.drillPartner) : ''}`;
+    } else {
+      bcEl.textContent = `${meta.domain.title} > ${meta.subtype.title}`;
+    }
     document.getElementById('ctrl-title').innerHTML = `<span>${esc(meta.subtype.title)}</span><span class="ctrl-tag">${esc(meta.subtype.tag)}</span>`;
 
     const modeSwitch = document.getElementById('view-mode-switch');
@@ -1995,7 +2081,11 @@
         filteredRows.forEach(row => {
           const isHighlighted = state.highlightedRowId === row.id ? 'highlighted' : '';
           const isSelected = state.inspectedRowId === row.id ? 'selected-row' : '';
-          tbody += `<tr class="${isHighlighted} ${isSelected}" id="row-${esc(row.id)}" onclick="window.__openInspector('${esc(row.id)}')">`;
+          let rowOnClick = `window.__openInspector('${esc(row.id)}')`;
+          if (state.activeView === 'osv') rowOnClick = `window.__drillFromOSV('${esc(row.acc)}')`;
+          else if (state.activeView === 'osv-acc') rowOnClick = `window.__drillToAccountCard('${esc(state.drillAccount || '361')}', '${esc(row.partner || row.name || '')}')`;
+          else if (state.activeView === 'card-acc') rowOnClick = `window.__openDocViewer('${esc(row.doc || row.id)}', '${esc(row.desc || row.partner || row.id)}')`;
+          tbody += `<tr class="${isHighlighted} ${isSelected}" id="row-${esc(row.id)}" onclick="${rowOnClick}">`;
 
           dataset.columns.forEach((col, cIdx) => {
             const val = row[col.key];
@@ -2018,9 +2108,16 @@
 
           const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
           const canStorno = state.activeView === 'ledger' && !String(row.status || '').includes('Сторно');
+          const primaryBtn = state.activeView === 'osv'
+            ? `<button class="btn-row-action" onclick="window.__drillFromOSV('${esc(row.acc)}')">Розгорнути &rarr;</button>`
+            : state.activeView === 'osv-acc'
+              ? `<button class="btn-row-action" onclick="window.__drillToAccountCard('${esc(state.drillAccount || '361')}', '${esc(row.partner || row.name || '')}')">Картка рах. &rarr;</button>`
+              : state.activeView === 'card-acc'
+                ? `<button class="btn-row-action" onclick="window.__openDocViewer('${esc(row.doc || row.id)}', '${esc(row.desc || row.partner || row.id)}')">Документ</button>`
+                : `<button class="btn-row-action" onclick="window.__openInspector('${esc(row.id)}')">Картка</button>`;
           tbody += `
             <td style="text-align:right;" onclick="event.stopPropagation();">
-              <button class="btn-row-action" onclick="window.__openInspector('${esc(row.id)}')">Картка</button>
+              ${primaryBtn}
               ${canStorno ? `<button class="btn-row-action" style="color:#DC2626; border-color:#FECACA;" onclick="window.__stornoLedgerEntry('${esc(row.id)}')">Сторно</button>` : `<button class="btn-row-action" onclick="window.__openHandoff('${esc(meta.subtype.title)}: ${esc(rowLabel)}', '${esc(row.id)}')">Передати</button>`}
             </td>
           </tr>`;
@@ -2347,11 +2444,114 @@
     window.__openHandoff(`${meta.subtype.title}: ${row.name || row.contract || row.id}`, row.id);
   });
 
-  // ================= CREATE & POST DOCUMENT FLOW =================
+  // ================= CREATE & POST DOCUMENT FLOW (MULTI-LINE ERP FORM) =================
+  function getDocFormTotals() {
+    const vatRate = parseFloat(document.getElementById('new-doc-vat-rate')?.value || '0.07');
+    const net = state.docFormLines.reduce((s, l) => s + (Number(l.qty || 0) * Number(l.price || 0)), 0);
+    const vat = Math.round(net * vatRate * 100) / 100;
+    const total = Math.round((net + vat) * 100) / 100;
+    return { net, vat, total, vatRate };
+  }
+
+  function renderDocFormPostings() {
+    const tbody = document.getElementById('doc-postings-preview-tbody');
+    if (!tbody) return;
+    const type = document.getElementById('new-doc-type')?.value || 'SALE';
+    const { net, vat, total, vatRate } = getDocFormTotals();
+    const rows = [];
+    if (type === 'SALE') {
+      rows.push({ dt: '361', ct: '701', sum: total, desc: 'Визнано дохід від реалізації покупцю (з ПДВ)' });
+      if (vat > 0) rows.push({ dt: '701', ct: '6412', sum: vat, desc: `Податкові зобов'язання з ПДВ (${Math.round(vatRate * 100)}%)` });
+    } else if (type === 'PURCHASE') {
+      rows.push({ dt: '201', ct: '631', sum: net, desc: 'Оприбутковано сировину/ТМЦ на склад (без ПДВ)' });
+      if (vat > 0) rows.push({ dt: '6412', ct: '631', sum: vat, desc: `Податковий кредит з ПДВ (${Math.round(vatRate * 100)}%)` });
+    } else if (type === 'PAYMENT') {
+      rows.push({ dt: '311', ct: '361', sum: total, desc: 'Надходження коштів на поточний рахунок від покупця' });
+    } else {
+      rows.push({ dt: '23', ct: '201', sum: net, desc: 'Списання сировини у виробництво (Merz CC4)' });
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td style="font-family:var(--font-mono); font-weight:700;">${esc(r.dt)}</td>
+        <td style="font-family:var(--font-mono); font-weight:700;">${esc(r.ct)}</td>
+        <td style="text-align:right; font-family:var(--font-mono); font-weight:700;">${fmt(r.sum)}</td>
+        <td>${esc(r.desc)}</td>
+      </tr>
+    `).join('');
+  }
+
+  window.__renderDocLines = function() {
+    const tbody = document.getElementById('doc-lines-tbody');
+    const totalsEl = document.getElementById('doc-lines-totals');
+    if (!tbody || !totalsEl) return;
+    const { net, vat, total, vatRate } = getDocFormTotals();
+    tbody.innerHTML = state.docFormLines.map((line, idx) => {
+      const lineTotal = (Number(line.qty || 0) * Number(line.price || 0)) * (1 + vatRate);
+      return `
+        <tr>
+          <td style="text-align:center; color:#64748B;">${idx + 1}</td>
+          <td><input type="text" value="${esc(line.item)}" onchange="window.__updateDocLine(${idx}, 'item', this.value)"></td>
+          <td><input type="text" value="${esc(line.unit)}" style="text-align:center;" onchange="window.__updateDocLine(${idx}, 'unit', this.value)"></td>
+          <td><input type="number" value="${Number(line.qty || 0)}" style="text-align:right; font-family:var(--font-mono);" oninput="window.__updateDocLine(${idx}, 'qty', this.value)"></td>
+          <td><input type="number" value="${Number(line.price || 0)}" style="text-align:right; font-family:var(--font-mono);" oninput="window.__updateDocLine(${idx}, 'price', this.value)"></td>
+          <td style="text-align:right; font-family:var(--font-mono); font-weight:700;">${fmt(lineTotal)}</td>
+          <td style="text-align:center;"><button type="button" class="btn-row-action" style="color:#DC2626; padding:2px 6px;" onclick="window.__removeDocLine(${idx})">&times;</button></td>
+        </tr>
+      `;
+    }).join('');
+    totalsEl.innerHTML = `
+      <span>Без ПДВ: <strong>${fmt(net)} грн</strong></span>
+      <span>ПДВ (${Math.round(vatRate * 100)}%): <strong>${fmt(vat)} грн</strong></span>
+      <span style="color:#2563EB;">Разом: <strong>${fmt(total)} грн</strong></span>
+    `;
+    renderDocFormPostings();
+  };
+
+  window.__addDocLine = function() {
+    state.docFormLines.push({ item: 'Нова номенклатура / послуга', unit: 'шт', qty: 100, price: 350 });
+    window.__renderDocLines();
+  };
+
+  window.__removeDocLine = function(idx) {
+    if (state.docFormLines.length <= 1) return;
+    state.docFormLines.splice(idx, 1);
+    window.__renderDocLines();
+  };
+
+  window.__updateDocLine = function(idx, field, val) {
+    if (!state.docFormLines[idx]) return;
+    state.docFormLines[idx][field] = (field === 'qty' || field === 'price') ? (parseFloat(val) || 0) : val;
+    window.__renderDocLines();
+  };
+
+  window.__switchDocFormTab = function(tab) {
+    const lBox = document.getElementById('doc-form-tab-lines');
+    const pBox = document.getElementById('doc-form-tab-postings');
+    const lBtn = document.getElementById('btn-doc-form-lines');
+    const pBtn = document.getElementById('btn-doc-form-postings');
+    if (!lBox || !pBox) return;
+    if (tab === 'POSTINGS') {
+      renderDocFormPostings();
+      lBox.style.display = 'none';
+      pBox.style.display = 'block';
+      lBtn?.classList.remove('active');
+      pBtn?.classList.add('active');
+    } else {
+      lBox.style.display = 'block';
+      pBox.style.display = 'none';
+      lBtn?.classList.add('active');
+      pBtn?.classList.remove('active');
+    }
+  };
+
   window.__openCreateDocModal = function() {
+    window.__switchDocFormTab('LINES');
+    window.__renderDocLines();
     document.getElementById('modal-create-doc').classList.add('open');
   };
 
+  document.getElementById('new-doc-type')?.addEventListener('change', renderDocFormPostings);
+  document.getElementById('new-doc-vat-rate')?.addEventListener('change', window.__renderDocLines);
   document.getElementById('btn-create-doc')?.addEventListener('click', window.__openCreateDocModal);
   document.getElementById('btn-close-create-doc')?.addEventListener('click', () => document.getElementById('modal-create-doc').classList.remove('open'));
   document.getElementById('btn-cancel-create-doc')?.addEventListener('click', () => document.getElementById('modal-create-doc').classList.remove('open'));
@@ -2359,19 +2559,30 @@
   document.getElementById('btn-submit-create-doc')?.addEventListener('click', () => {
     const type = document.getElementById('new-doc-type').value;
     const partner = document.getElementById('new-doc-partner').value;
-    const desc = document.getElementById('new-doc-desc').value.trim() || 'Операція ТОВ «ТД «Алком»';
-    const amt = parseFloat(document.getElementById('new-doc-amount').value) || 0;
-    const docId = (type === 'SALE' ? 'ВН-' : type === 'PAYMENT' ? 'БВ-' : 'WO-2026-') + Math.floor(4200 + Math.random() * 5000);
+    const { net, vat, total, vatRate } = getDocFormTotals();
+    const totalQty = state.docFormLines.reduce((s, l) => s + Number(l.qty || 0), 0);
+    const desc = state.docFormLines.map(l => `${l.item} (${l.qty} ${l.unit})`).join('; ');
+    const docId = (type === 'SALE' ? 'ВН-' : type === 'PURCHASE' ? 'ПН-' : type === 'PAYMENT' ? 'БВ-' : 'WO-2026-') + Math.floor(4200 + Math.random() * 5000);
 
     if (type === 'SALE') {
-      DATASETS['sales-orders'].rows.unshift({ id: docId, date: '16.11.2026', client: partner, items: 24, sum: amt, status: 'Відвантажено' });
-      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Видаткова накладна', partner, channel: 'Вчасно.ЕДО / API', sum: amt, status: 'Проведено (Дт 361 Кт 701)' });
-      postUniversalEntry({ doc: docId, dt: '361', ct: '701', amount: amt, partner, desc: `${partner}: ${desc}`, source: 'Авто-проводка' });
+      DATASETS['sales-orders'].rows.unshift({ id: docId, date: '16.11.2026', client: partner.split(' (')[0], items: totalQty, sum: total, status: 'Відвантажено' });
+      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Видаткова накладна', partner, channel: 'Вчасно.ЕДО / API', sum: total, status: 'Проведено (Дт 361 Кт 701)' });
+      postUniversalEntry({ doc: docId, dt: '361', ct: '701', amount: total, partner, desc: `${partner}: ${desc}`, source: 'Авто-проводка' });
+      if (vat > 0) {
+        postUniversalEntry({ doc: docId, dt: '701', ct: '641', amount: vat, partner, desc: `ПЗ з ПДВ ${Math.round(vatRate * 100)}% по ${docId}`, source: 'ПДВ (Авто)' });
+        DATASETS['vat-decl']?.rows.unshift({ id: 'VAT-' + Math.floor(100 + Math.random() * 899), num: 'ПН-' + docId.replace(/\D/g, ''), date: '16.11.2026', partner: partner.split(' (')[0], type: `ПЗ (${Math.round(vatRate * 100)}%)`, base: net, vat, status: 'Зареєстровано' });
+      }
+    } else if (type === 'PURCHASE') {
+      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Прибуткова накладна', partner, channel: 'Вчасно.ЕДО / API', sum: total, status: 'Проведено (Дт 201 Кт 631)' });
+      postUniversalEntry({ doc: docId, dt: '201', ct: '631', amount: net, partner, desc: `Оприбуткування: ${desc}`, source: 'Авто-проводка' });
+      if (vat > 0) {
+        postUniversalEntry({ doc: docId, dt: '641', ct: '631', amount: vat, partner, desc: `ПК з ПДВ ${Math.round(vatRate * 100)}% по ${docId}`, source: 'ПДВ (Авто)' });
+      }
     } else if (type === 'PAYMENT') {
-      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Банківська виписка', partner, channel: 'Open Banking API', sum: amt, status: 'Проведено (Дт 311 Кт 361)' });
-      postUniversalEntry({ doc: docId, dt: '311', ct: '361', amount: amt, partner, desc: `Оплата від ${partner}`, source: 'Банк-Клієнт' });
+      DATASETS['doc-flow'].rows.unshift({ id: docId, date: '16.11.2026', type: 'Банківська виписка', partner, channel: 'Open Banking API', sum: total, status: 'Проведено (Дт 311 Кт 361)' });
+      postUniversalEntry({ doc: docId, dt: '311', ct: '361', amount: total, partner, desc: `Оплата від ${partner}`, source: 'Банк-Клієнт' });
     } else {
-      DATASETS['mes-orders'].rows.unshift({ id: docId, product: desc, workshop: partner, plan: amt, done: 0, pct: 0, status: 'В роботі' });
+      DATASETS['mes-orders'].rows.unshift({ id: docId, product: desc, workshop: partner, plan: totalQty, done: 0, pct: 0, status: 'В роботі' });
       updateAuditRadar();
     }
 
@@ -2379,7 +2590,7 @@
     if (state.activeMode === 'CEO') renderCEOCockpit();
     else if (state.activeMode === 'ACC') renderAccountingCockpit();
     else renderActiveView();
-    showToast(`Документ ${docId} проведено в облік та Журнал проводок!`);
+    showToast(`Документ ${docId} (${state.docFormLines.length} поз., ${fmt(total)} грн) проведено в облік!`);
   });
 
   // ================= IMPORT, AUTOMATION, HANDOFF, DRAWER, DOC VIEWER =================

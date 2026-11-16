@@ -597,6 +597,49 @@
       background: #0F172A; color: #FFFFFF; padding: 11px 16px; border-radius: 8px;
       font-size: 12px; font-weight: 600; box-shadow: var(--shadow-lg); border-left: 4px solid #10B981; pointer-events: auto;
     }
+
+    /* Open Tabs Bar & Multi-line Document Form */
+    .open-tabs-bar {
+      display: flex; align-items: center; gap: 4px; padding: 6px 18px 0;
+      background: #F1F5F9; border-bottom: 1px solid var(--border);
+      overflow-x: auto; flex-shrink: 0; min-height: 36px;
+    }
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+      font-size: 11.5px; font-weight: 600; color: var(--text-secondary);
+      background: #E2E8F0; border: 1px solid var(--border); border-bottom: none;
+      border-radius: 6px 6px 0 0; cursor: pointer; white-space: nowrap;
+      transition: background 0.12s, color 0.12s;
+    }
+    .open-tab:hover { background: #FFFFFF; color: var(--text-main); }
+    .open-tab.active {
+      background: #FFFFFF; color: var(--primary); font-weight: 700;
+      border-color: var(--border-strong); position: relative; top: 1px; padding-bottom: 7px;
+    }
+    .open-tab-close {
+      font-size: 13px; line-height: 1; color: var(--text-muted); padding: 0 2px; border-radius: 3px;
+    }
+    .open-tab-close:hover { background: #FEE2E2; color: #DC2626; }
+    .doc-modal-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .doc-modal-tab {
+      padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: 6px;
+      border: 1px solid var(--border); background: #F8FAFC; color: var(--text-secondary); cursor: pointer;
+    }
+    .doc-modal-tab.active { background: #0F172A; color: #FFFFFF; border-color: #0F172A; }
+    .doc-lines-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .doc-lines-table th {
+      background: #F8FAFC; color: var(--text-secondary); font-weight: 700; font-size: 11px;
+      text-align: left; padding: 7px 8px; border: 1px solid var(--border);
+    }
+    .doc-lines-table td { padding: 5px 6px; border: 1px solid var(--border); }
+    .doc-lines-table input {
+      width: 100%; padding: 4px 6px; font-size: 12px; border: 1px solid transparent; border-radius: 4px; outline: none;
+    }
+    .doc-lines-table input:focus { border-color: var(--primary); background: #F8FAFC; }
+    .drill-breadcrumb {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px;
+      color: var(--primary); font-weight: 700; margin-bottom: 4px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -710,6 +753,7 @@
     </aside>
 
     <main class="sys-workspace">
+      <div class="open-tabs-bar" id="open-tabs-bar"></div>
 
       <!-- 1. EXECUTIVE ANALYTICS & PREDICTION COCKPIT -->
       <section class="ceo-cockpit" id="ceo-cockpit-view">
@@ -886,39 +930,83 @@
     </div>
   </aside>
 
-  <!-- ================= CREATE DOCUMENT MODAL ================= -->
+  <!-- ================= CREATE DOCUMENT MODAL (MULTI-LINE ERP FORM) ================= -->
   <div class="modal-overlay" id="modal-create-doc">
-    <div class="modal-box" style="width:520px;">
+    <div class="modal-box" style="width:780px;">
       <div class="modal-header">
-        <h3>Створити та провести документ (Live)</h3>
+        <h3>Первинний документ (Таблична частина + Проводки Дт/Кт)</h3>
         <button class="btn-close-drawer" id="btn-close-create-doc">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Тип операції:</label>
-          <select id="new-doc-type" class="form-control">
-            <option value="SALE">Видаткова накладна (Реалізація мережі, Дт 361 Кт 701)</option>
-            <option value="PAYMENT">Банківське надходження (Оплата від мережі, Дт 311 Кт 361)</option>
-            <option value="PROD">Виробничий наряд у цех (Запуск партії Merz CC4)</option>
-          </select>
+        <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Вид документа:</label>
+            <select id="new-doc-type" class="form-control">
+              <option value="SALE">Видаткова накладна (Реалізація, 361/701)</option>
+              <option value="PURCHASE">Прибуткова накладна (Закупівля, 201/631)</option>
+              <option value="PAYMENT">Банківське надходження (Оплата, 311/361)</option>
+              <option value="PROD">Виробничий наряд у цех (Merz CC4)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Контрагент / Дільниця:</label>
+            <select id="new-doc-partner" class="form-control">
+              <option value="ТОВ «Аптека АНЦ» (ЄДРПОУ 38910421)">ТОВ «Аптека АНЦ» (ЄДРПОУ 38910421)</option>
+              <option value="ТОВ «Подорожник» (ЄДРПОУ 39481011)">ТОВ «Подорожник» (ЄДРПОУ 39481011)</option>
+              <option value="ТОВ «ОРТОС» (ЄДРПОУ 35102944)">ТОВ «ОРТОС» (ЄДРПОУ 35102944)</option>
+              <option value="ММ «Добробут» (ЄДРПОУ 36194022)">ММ «Добробут» (ЄДРПОУ 36194022)</option>
+              <option value="ТОВ «Текстиль-Імпорт» (ЄДРПОУ 38491022)">ТОВ «Текстиль-Імпорт» (ЄДРПОУ 38491022)</option>
+              <option value="Цех Merz CC4 #1-4">Цех Merz CC4 #1-4 (Панчохи КЛ-2)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Договір / Ставка ПДВ:</label>
+            <select id="new-doc-vat-rate" class="form-control">
+              <option value="0.07">ПДВ 7% (Медвироби) • Дог. №402/26</option>
+              <option value="0.20">ПДВ 20% (Загальна ставка) • Дог. №118/26</option>
+              <option value="0">Без ПДВ (0% / Звільнено)</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Контрагент / Дільниця:</label>
-          <select id="new-doc-partner" class="form-control">
-            <option value="ТОВ «Аптека АНЦ»">ТОВ «Аптека АНЦ»</option>
-            <option value="ТОВ «Подорожник»">ТОВ «Подорожник»</option>
-            <option value="ТОВ «ОРТОС»">ТОВ «ОРТОС»</option>
-            <option value="ММ «Добробут»">ММ «Добробут»</option>
-            <option value="Цех Merz CC4 #1-4">Цех Merz CC4 #1-4 (Панчохи КЛ-2)</option>
-          </select>
+
+        <div class="doc-modal-tabs">
+          <button type="button" class="doc-modal-tab active" id="btn-doc-form-lines" onclick="window.__switchDocFormTab('LINES')">Таблична частина (Товари / Послуги)</button>
+          <button type="button" class="doc-modal-tab" id="btn-doc-form-postings" onclick="window.__switchDocFormTab('POSTINGS')">Проводки документа (Дт / Кт)</button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Номенклатура / Коментар:</label>
-          <input type="text" id="new-doc-desc" class="form-control" value="Панчохи компресійні КЛ-2 (Партія LOT-2026-TC112)">
+
+        <div id="doc-form-tab-lines">
+          <table class="doc-lines-table">
+            <thead>
+              <tr>
+                <th style="width:36px;">№</th>
+                <th>Номенклатура / Артикул / Послуга</th>
+                <th style="width:65px;">Од.</th>
+                <th style="width:85px; text-align:right;">Кількість</th>
+                <th style="width:110px; text-align:right;">Ціна без ПДВ</th>
+                <th style="width:120px; text-align:right;">Сума з ПДВ</th>
+                <th style="width:36px;"></th>
+              </tr>
+            </thead>
+            <tbody id="doc-lines-tbody"></tbody>
+          </table>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <button type="button" class="btn-action-outline" onclick="window.__addDocLine()" style="font-size:11.5px; padding:5px 10px;">+ Додати рядок</button>
+            <div style="display:flex; gap:18px; font-family:var(--font-mono); font-size:12px;" id="doc-lines-totals"></div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Сума (грн) або Кількість (шт):</label>
-          <input type="number" id="new-doc-amount" class="form-control" value="450000">
+
+        <div id="doc-form-tab-postings" style="display:none;">
+          <table class="doc-lines-table">
+            <thead>
+              <tr>
+                <th>Рахунок Дт</th>
+                <th>Рахунок Кт</th>
+                <th style="text-align:right;">Сума (грн)</th>
+                <th>Зміст господарської операції</th>
+              </tr>
+            </thead>
+            <tbody id="doc-postings-preview-tbody"></tbody>
+          </table>
         </div>
       </div>
       <div class="modal-footer">
