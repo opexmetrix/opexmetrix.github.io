@@ -1,92 +1,35 @@
 /**
- * OpexMetrix Systems — Аналітика, Прогнозування (Prediction) та Єдина ERP
+ * OpexMetrix Systems — Odoo-style Enterprise ERP + Analytics & Prediction
  */
 
 (function () {
   'use strict';
 
   const CREDENTIALS = {
-    CEO: {
-      login: '00000000000000000000',
-      pass:  '00000000000000000000',
-      name:  'Коваленко І. П.',
-      title: 'CEO (Керівник)',
-      initials: 'КІ'
-    },
-    CPA: {
-      login: '00000000000000000000',
-      pass:  '11111111111111111111',
-      name:  'Шевченко О. В.',
-      title: 'Головний бухгалтер',
-      initials: 'ШО'
-    }
+    CEO: { login: '00000000000000000000', pass: '00000000000000000000', name: 'Коваленко І. П.', title: 'CEO (Керівник)', initials: 'КІ' },
+    CPA: { login: '00000000000000000000', pass: '11111111111111111111', name: 'Шевченко О. В.', title: 'Головний бухгалтер', initials: 'ШО' }
   };
 
   const state = {
     role: null,
     activeMode: 'TABLE',
     activeView: 'osv',
+    viewDisplayMode: 'LIST', // 'LIST' | 'KANBAN'
     chartMetric: 'rev',
-    entity: 'ALKOM',
-    period: 'CURRENT_MONTH',
     noNumbersMode: false,
     searchQuery: '',
     highlightedRowId: null,
-    activeCell: null,
+    inspectedRowId: null,
     sortCol: null,
     sortDir: 1,
     undoStack: [],
     handoffContext: null,
     docContext: null,
     tasks: [
-      {
-        id: 'TSK-101',
-        title: 'Акт звірки: Аптечна мережа АНЦ (Договір №402/26)',
-        sender: 'Савченко Д. І. (Комерційний директор)',
-        recipient: 'Шевченко О. В. (Головний бухгалтер)',
-        priority: 'URGENT',
-        date: '16.11.2026 11:45',
-        view: 'sales-recon',
-        rowId: 'REC-ANC',
-        status: 'ACTIVE',
-        comment: 'Перевірити зарахування оплати на 1 004 000 грн по накладній ВН-004182.'
-      },
-      {
-        id: 'TSK-102',
-        title: 'Списання сировини М-29: Наряд WO-2026-4402',
-        sender: 'Мельник С. М. (Нач. швейного цеху)',
-        recipient: 'Коваленко І. П. (CEO / Фінансовий директор)',
-        priority: 'APPROVAL',
-        date: '16.11.2026 10:15',
-        view: 'mes-m29',
-        rowId: 'M29-LYCRA',
-        status: 'ACTIVE',
-        comment: 'Перевитрата пряжі Lycra 70 DEN (+1.8 кг) через переналагодження Merz CC4.'
-      },
-      {
-        id: 'TSK-103',
-        title: 'Партія LOT-2026-TC112 (Панчохи компресійні КЛ-2)',
-        sender: 'Григоренко П. Т. (Нач. ВТК)',
-        recipient: 'Бондар В. А. (Зав. складом)',
-        priority: 'URGENT',
-        date: '16.11.2026 09:30',
-        view: 'wms-batch',
-        rowId: 'LOT-2026-TC112',
-        status: 'ACTIVE',
-        comment: 'Контрольний тиск 26.4 мм рт. ст. підтверджено.'
-      },
-      {
-        id: 'TSK-104',
-        title: 'Замовлення ПД-8812 (ОРТОС — 685 000 грн)',
-        sender: 'Савченко Д. І. (Комерційний директор)',
-        recipient: 'Коваленко І. П. (CEO / Фінансовий директор)',
-        priority: 'APPROVAL',
-        date: '15.11.2026 17:20',
-        view: 'sales-orders',
-        rowId: 'ORD-8812',
-        status: 'ACTIVE',
-        comment: 'Погодити відвантаження без передоплати в межах кредитного ліміту.'
-      }
+      { id: 'TSK-101', title: 'Акт звірки: Аптечна мережа АНЦ (Договір №402/26)', sender: 'Савченко Д. І. (Комерційний директор)', recipient: 'Шевченко О. В. (Головний бухгалтер)', priority: 'URGENT', date: '16.11.2026 11:45', view: 'sales-recon', rowId: 'REC-ANC', status: 'ACTIVE', comment: 'Перевірити зарахування оплати на 1 004 000 грн по накладній ВН-004182.' },
+      { id: 'TSK-102', title: 'Списання сировини М-29: Наряд WO-2026-4402', sender: 'Мельник С. М. (Нач. швейного цеху)', recipient: 'Коваленко І. П. (CEO)', priority: 'APPROVAL', date: '16.11.2026 10:15', view: 'mes-m29', rowId: 'M29-LYCRA', status: 'ACTIVE', comment: 'Перевитрата пряжі Lycra 70 DEN (+1.8 кг) через переналагодження Merz CC4.' },
+      { id: 'TSK-103', title: 'Партія LOT-2026-TC112 (Панчохи КЛ-2)', sender: 'Григоренко П. Т. (Нач. ВТК)', recipient: 'Бондар В. А. (Зав. складом)', priority: 'URGENT', date: '16.11.2026 09:30', view: 'wms-batch', rowId: 'LOT-2026-TC112', status: 'ACTIVE', comment: 'Контрольний тиск 26.4 мм рт. ст. підтверджено.' },
+      { id: 'TSK-104', title: 'Замовлення ПД-8812 (ОРТОС — 685 000 грн)', sender: 'Савченко Д. І. (Комерційний директор)', recipient: 'Коваленко І. П. (CEO)', priority: 'APPROVAL', date: '15.11.2026 17:20', view: 'sales-orders', rowId: 'ORD-8812', status: 'ACTIVE', comment: 'Погодити відвантаження в межах кредитного ліміту.' }
     ]
   };
 
@@ -123,7 +66,7 @@
       subtypes: [
         { id: 'mes-cost', code: 'СВ', title: 'Калькуляція собівартості', tag: 'Прямі + ЗВВ' },
         { id: 'mes-m29', code: 'М-29', title: 'Списання матеріалів (М-29)', tag: 'Норма / Факт' },
-        { id: 'mes-orders', code: 'ВЗ', title: 'Виробничі замовлення', tag: 'Цех / Дільниці' },
+        { id: 'mes-orders', code: 'ВЗ', title: 'Виробничі замовлення', tag: 'Канбан / Цех', hasKanban: true },
         { id: 'mes-boms', code: 'BOM', title: 'Специфікації виробів (BOM)', tag: 'Техкарти' },
         { id: 'mes-scrap', code: 'ВТК', title: 'Акти браку та відхилень', tag: 'Якість' }
       ]
@@ -146,7 +89,7 @@
       subtypes: [
         { id: 'sales-recon', code: 'АЗВ', title: 'Акт звірки взаєморозрахунків', tag: 'Мережі' },
         { id: 'sales-aging', code: 'AGE', title: 'Старіння дебіторки (Aging)', tag: 'Прострочення' },
-        { id: 'sales-orders', code: 'ЗП', title: 'Реєстр замовлень (EDI)', tag: 'Замовлення' },
+        { id: 'sales-orders', code: 'ЗП', title: 'Реєстр замовлень (EDI)', tag: 'Канбан / EDI', hasKanban: true },
         { id: 'sales-margin', code: 'МРЖ', title: 'Маржинальність продажів', tag: 'SKU / Канали' }
       ]
     },
@@ -169,33 +112,12 @@
     }
   ];
 
-  // Time-series data for 2025 vs 2026 + Prediction (+3 months)
   const TIME_SERIES = {
     labels: ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру*', 'Січ27*', 'Лют27*'],
-    rev: {
-      y2025: [16.2, 17.1, 18.4, 18.0, 17.5, 16.8, 17.2, 18.9, 20.4, 22.1, 23.4, 26.2, null, null],
-      y2026: [19.4, 20.8, 22.1, 21.6, 21.2, 20.5, 21.4, 23.1, 25.0, 27.1, 28.5, null, null, null],
-      pred:  [null, null, null, null, null, null, null, null, null, null, 28.5, 31.8, 29.4, 30.6],
-      unit: 'млн грн'
-    },
-    profit: {
-      y2025: [2.8, 3.0, 3.3, 3.2, 3.0, 2.9, 3.0, 3.4, 3.8, 4.2, 4.56, 5.2, null, null],
-      y2026: [3.9, 4.2, 4.6, 4.4, 4.3, 4.1, 4.4, 4.9, 5.4, 5.9, 6.36, null, null, null],
-      pred:  [null, null, null, null, null, null, null, null, null, null, 6.36, 7.25, 6.60, 6.95],
-      unit: 'млн грн'
-    },
-    cash: {
-      y2025: [7.2, 7.8, 8.1, 8.5, 8.3, 8.0, 8.4, 9.1, 9.8, 10.6, 11.4, 12.8, null, null],
-      y2026: [11.5, 11.9, 12.4, 12.1, 12.6, 12.9, 13.2, 13.6, 14.0, 14.4, 14.91, null, null, null],
-      pred:  [null, null, null, null, null, null, null, null, null, null, 14.91, 16.4, 17.1, 18.2],
-      unit: 'млн грн'
-    },
-    units: {
-      y2025: [32.0, 34.1, 36.5, 35.2, 34.0, 32.5, 33.8, 36.9, 40.1, 43.0, 45.2, 50.4, null, null],
-      y2026: [38.5, 41.2, 43.8, 42.4, 41.5, 40.2, 41.9, 45.6, 49.2, 52.8, 55.4, null, null, null],
-      pred:  [null, null, null, null, null, null, null, null, null, null, 55.4, 61.5, 56.8, 58.9],
-      unit: 'тис. шт'
-    }
+    rev: { y2025: [16.2, 17.1, 18.4, 18.0, 17.5, 16.8, 17.2, 18.9, 20.4, 22.1, 23.4, 26.2, null, null], y2026: [19.4, 20.8, 22.1, 21.6, 21.2, 20.5, 21.4, 23.1, 25.0, 27.1, 28.5, null, null, null], pred: [null, null, null, null, null, null, null, null, null, null, 28.5, 31.8, 29.4, 30.6] },
+    profit: { y2025: [2.8, 3.0, 3.3, 3.2, 3.0, 2.9, 3.0, 3.4, 3.8, 4.2, 4.56, 5.2, null, null], y2026: [3.9, 4.2, 4.6, 4.4, 4.3, 4.1, 4.4, 4.9, 5.4, 5.9, 6.36, null, null, null], pred: [null, null, null, null, null, null, null, null, null, null, 6.36, 7.25, 6.60, 6.95] },
+    cash: { y2025: [7.2, 7.8, 8.1, 8.5, 8.3, 8.0, 8.4, 9.1, 9.8, 10.6, 11.4, 12.8, null, null], y2026: [11.5, 11.9, 12.4, 12.1, 12.6, 12.9, 13.2, 13.6, 14.0, 14.4, 14.91, null, null, null], pred: [null, null, null, null, null, null, null, null, null, null, 14.91, 16.4, 17.1, 18.2] },
+    units: { y2025: [32.0, 34.1, 36.5, 35.2, 34.0, 32.5, 33.8, 36.9, 40.1, 43.0, 45.2, 50.4, null, null], y2026: [38.5, 41.2, 43.8, 42.4, 41.5, 40.2, 41.9, 45.6, 49.2, 52.8, 55.4, null, null, null], pred: [null, null, null, null, null, null, null, null, null, null, 55.4, 61.5, 56.8, 58.9] }
   };
 
   function fmt(val) {
@@ -220,24 +142,7 @@
 
   function esc(str) {
     if (str === null || str === undefined) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function colLetter(idx) { return String.fromCharCode(65 + idx); }
-
-  function evalMathExpr(raw) {
-    const s = String(raw).trim();
-    if (!s.startsWith('=')) return null;
-    const expr = s.slice(1).replace(/\s+/g, '').replace(/,/g, '.');
-    if (!/^[0-9+\-*/().]+$/.test(expr)) return null;
-    try {
-      const res = Function('"use strict"; return (' + expr + ')')();
-      return (typeof res === 'number' && isFinite(res)) ? res : null;
-    } catch (_) { return null; }
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   function showToast(msg) {
@@ -258,12 +163,12 @@
     'an-yoy': {
       columns: [
         { key: 'month', label: 'Період / Місяць', editable: true },
-        { key: 'rev25', label: 'Виручка 2025 (схожий період)', num: true, editable: true },
-        { key: 'rev26', label: 'Виручка 2026 (Факт / Прогноз)', num: true, editable: true },
+        { key: 'rev25', label: 'Виручка 2025', num: true, editable: true },
+        { key: 'rev26', label: 'Виручка 2026', num: true, editable: true },
         { key: 'growth', label: 'Приріст YoY %', num: true, computed: true },
         { key: 'prof25', label: 'Прибуток 2025', num: true, editable: true },
         { key: 'prof26', label: 'Прибуток 2026', num: true, editable: true },
-        { key: 'conf', label: 'Точність моделі %', num: true, editable: true },
+        { key: 'conf', label: 'Точність %', num: true, editable: true },
         { key: 'status', label: 'Тип даних', editable: true }
       ],
       recalcRow: (r) => { r.growth = r.rev25 > 0 ? ((r.rev26 - r.rev25) / r.rev25 * 100) : 0; },
@@ -273,34 +178,43 @@
         { id: 'YOY-10', month: 'Жовтень 2026', rev25: 22100000, rev26: 27100000, growth: 22.6, prof25: 4200000, prof26: 5900000, conf: 100.0, status: 'Факт (Закрито)' },
         { id: 'YOY-11', month: 'Листопад 2026', rev25: 23400000, rev26: 28500000, growth: 21.8, prof25: 4560000, prof26: 6355000, conf: 100.0, status: 'Поточний місяць' },
         { id: 'YOY-12', month: 'Грудень 2026 (Prediction)', rev25: 26200000, rev26: 31800000, growth: 21.4, prof25: 5200000, prof26: 7250000, conf: 94.2, status: 'Прогноз (Зимовий пік)' },
-        { id: 'YOY-01', month: 'Січень 2027 (Prediction)', rev25: 19400000, rev26: 29400000, growth: 51.5, prof25: 3900000, prof26: 6600000, conf: 89.5, status: 'Прогноз (Тренд + Контракти)' },
+        { id: 'YOY-01', month: 'Січень 2027 (Prediction)', rev25: 19400000, rev26: 29400000, growth: 51.5, prof25: 3900000, prof26: 6600000, conf: 89.5, status: 'Прогноз (Тренд)' },
         { id: 'YOY-02', month: 'Лютий 2027 (Prediction)', rev25: 20800000, rev26: 30600000, growth: 47.1, prof25: 4200000, prof26: 6950000, conf: 87.0, status: 'Прогноз (Модель)' }
       ],
-      summary: (rows) => {
-        const avgGrowth = rows.reduce((s, r) => s + Number(r.growth), 0) / rows.length;
-        return `<div>Середній приріст до аналогічного періоду 2025: <strong>+${fmtPct(avgGrowth)}</strong></div><div class="summary-checksum"><span class="checksum-badge">Прогноз Гру 2026: ${fmt(31800000)} грн</span></div>`;
-      }
+      kpis: (rows) => [
+        { title: 'Виручка (Лис 2026)', val: fmt(28500000) + ' грн' },
+        { title: 'Аналог. період 2025', val: fmt(23400000) + ' грн' },
+        { title: 'Приріст YoY', val: '+21.8%' },
+        { title: 'Прогноз Гру 2026', val: fmt(31800000) + ' грн' }
+      ],
+      summary: (rows) => `<div>Періодів: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Модель точності: 94.2%</span></div>`
     },
 
     'an-sku': {
       columns: [
-        { key: 'sku', label: 'SKU / Група', editable: true },
+        { key: 'sku', label: 'SKU', editable: true },
         { key: 'name', label: 'Номенклатура', editable: true },
         { key: 'rev', label: 'Виручка (міс)', num: true, editable: true },
         { key: 'share', label: 'Частка %', num: true, editable: true },
         { key: 'abc', label: 'ABC / XYZ', editable: true },
-        { key: 'predQty', label: 'Прогноз попиту (Гру, шт)', num: true, editable: true },
-        { key: 'recStock', label: 'Рек. страховий запас', num: true, editable: true },
+        { key: 'predQty', label: 'Прогноз попиту (Гру)', num: true, editable: true },
+        { key: 'recStock', label: 'Рек. запас', num: true, editable: true },
         { key: 'status', label: 'Рекомендація', editable: true }
       ],
       rows: [
         { id: 'SKU-1', sku: 'ALK-C2-M-BLK', name: 'Панчохи компресійні КЛ-2 (Чорні)', rev: 9400000, share: 33.0, abc: 'AX (Хіт)', predQty: 5400, recStock: 1800, status: 'Збільшити випуск +18%' },
         { id: 'SKU-2', sku: 'ALK-BP4-L', name: 'Бандаж попереково-крижовий БП-4', rev: 6800000, share: 23.9, abc: 'AX (Стабільний)', predQty: 3400, recStock: 1100, status: 'Норма запасу ОК' },
-        { id: 'SKU-3', sku: 'ALK-GL1-L', name: 'Гольфи антиемболічні КЛ-1', rev: 5100000, share: 17.9, abc: 'AY (Клініки)', predQty: 7200, recStock: 2400, status: 'Тендерний пік у грудні' },
-        { id: 'SKU-4', sku: 'ALK-OR2-S', name: 'Ортез колінний шарнірний OR-2', rev: 4200000, share: 14.7, abc: 'BX (Сезонний)', predQty: 1950, recStock: 650, status: 'Ризик ожеледиці (+25% попит)' },
+        { id: 'SKU-3', sku: 'ALK-GL1-L', name: 'Гольфи антиемболічні КЛ-1', rev: 5100000, share: 17.9, abc: 'AY (Клініки)', predQty: 7200, recStock: 2400, status: 'Тендерний пік' },
+        { id: 'SKU-4', sku: 'ALK-OR2-S', name: 'Ортез колінний шарнірний OR-2', rev: 4200000, share: 14.7, abc: 'BX (Сезонний)', predQty: 1950, recStock: 650, status: 'Ризик попиту +25%' },
         { id: 'SKU-5', sku: 'ALK-INS-41', name: 'Устілки ортопедичні (Зима)', rev: 3000000, share: 10.5, abc: 'CY (Імпульс)', predQty: 3100, recStock: 900, status: 'Підтримати залишок' }
       ],
-      summary: (rows) => `<div>Товарів групи A (75% виручки): <strong>3 позиції</strong></div><div class="summary-checksum"><span class="checksum-badge">Прогноз випуску на Грудень: ${fmtInt(21050, 'шт')}</span></div>`
+      kpis: (rows) => [
+        { title: 'Група A (Локомотиви)', val: '3 SKU (74.8%)' },
+        { title: 'Прогноз випуску Гру', val: fmtInt(21050, 'шт') },
+        { title: 'Страховий запас', val: fmtInt(6850, 'шт') },
+        { title: 'Лідер виручки', val: 'КЛ-2 (33.0%)' }
+      ],
+      summary: () => `<div>ABC/XYZ Матриця</div><div class="summary-checksum"><span class="checksum-badge">74.8% виручки дають 3 категорії</span></div>`
     },
 
     'an-chains': {
@@ -308,11 +222,11 @@
         { key: 'chain', label: 'Аптечна мережа', editable: true },
         { key: 'rev', label: 'Оборот (міс)', num: true, editable: true },
         { key: 'margin', label: 'Маржа %', num: true, editable: true },
-        { key: 'avgCheck', label: 'Середнє замовлення', num: true, editable: true },
-        { key: 'dso', label: 'Факт. DSO (днів)', num: true, editable: true },
-        { key: 'predPay', label: 'Прогноз оплати (сума)', num: true, editable: true },
-        { key: 'payDate', label: 'Очікувана дата', editable: true },
-        { key: 'status', label: 'Скоринг надійності', editable: true }
+        { key: 'avgCheck', label: 'Середнє замовл.', num: true, editable: true },
+        { key: 'dso', label: 'DSO (днів)', num: true, editable: true },
+        { key: 'predPay', label: 'Прогноз оплати', num: true, editable: true },
+        { key: 'payDate', label: 'Дата оплати', editable: true },
+        { key: 'status', label: 'Скоринг', editable: true }
       ],
       rows: [
         { id: 'CH-1', chain: 'ТОВ «Аптека АНЦ»', rev: 9450000, margin: 41.2, avgCheck: 1420000, dso: 16, predPay: 1950000, payDate: '20.11.2026', status: 'AAA (Надійний)' },
@@ -321,40 +235,49 @@
         { id: 'CH-4', chain: 'Аптека 9-1-1', rev: 3650000, margin: 38.4, avgCheck: 740000, dso: 15, predPay: 900000, payDate: '19.11.2026', status: 'AAA (Надійний)' },
         { id: 'CH-5', chain: 'ММ «Добробут»', rev: 2980000, margin: 44.0, avgCheck: 490000, dso: 14, predPay: 630000, payDate: '18.11.2026', status: 'AAA (Надійний)' }
       ],
-      summary: (rows) => {
-        const totPay = rows.reduce((s, r) => s + Number(r.predPay), 0);
-        return `<div>Середній DSO по мережах: <strong>17.4 днів</strong></div><div class="summary-checksum"><span class="checksum-badge">Прогноз надходжень до 25.11: ${fmt(totPay)} грн</span></div>`;
-      }
+      kpis: (rows) => [
+        { title: 'Активних мереж', val: rows.length + ' мереж' },
+        { title: 'Середній DSO', val: '17.4 дн.' },
+        { title: 'Середня маржа', val: '41.4%' },
+        { title: 'Прогноз Cash-In', val: fmt(5930000) + ' грн' }
+      ],
+      summary: (rows) => `<div>Прогноз надходжень: <strong>${fmt(rows.reduce((s, r) => s + Number(r.predPay), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Скоринг портфеля: AAA</span></div>`
     },
 
     'an-prod': {
       columns: [
         { key: 'line', label: 'Дільниця / Лінія', editable: true },
-        { key: 'oee', label: 'Ефективність OEE %', num: true, editable: true },
-        { key: 'output', label: 'Випуск (шт/міс)', num: true, editable: true },
+        { key: 'oee', label: 'OEE %', num: true, editable: true },
+        { key: 'output', label: 'Випуск (шт)', num: true, editable: true },
         { key: 'scrap', label: 'Брак %', num: true, editable: true },
-        { key: 'matDays', label: 'Запас сировини (днів)', num: true, editable: true },
+        { key: 'matDays', label: 'Запас сировини (дн)', num: true, editable: true },
         { key: 'status', label: 'Прогноз та Ризики', editable: true }
       ],
       rows: [
-        { id: 'PR-1', line: 'В’язальний цех (Merz CC4 #1-4)', oee: 89.4, output: 18500, scrap: 0.31, matDays: 11, status: 'УВАГА: Замовити Lycra 70D до 22.11' },
+        { id: 'PR-1', line: 'В’язальний цех (Merz CC4 #1-4)', oee: 89.4, output: 18500, scrap: 0.31, matDays: 11, status: 'УВАГА: Замовити Lycra 70D' },
         { id: 'PR-2', line: 'В’язальний цех (Merz CC4 #5-8)', oee: 91.2, output: 21400, scrap: 0.24, matDays: 19, status: 'Завантажено оптимально' },
-        { id: 'PR-3', line: 'Розкрійний комплекс CAD/CAM', oee: 86.0, output: 11200, scrap: 0.40, matDays: 24, status: 'ОК (Резерв потужності +14%)' },
-        { id: 'PR-4', line: 'Складальна дільниця (Ортези)', oee: 78.5, output: 4300, scrap: 0.52, matDays: 16, status: 'Потрібна 2-га зміна у грудні' }
+        { id: 'PR-3', line: 'Розкрійний комплекс CAD/CAM', oee: 86.0, output: 11200, scrap: 0.40, matDays: 24, status: 'ОК (Резерв +14%)' },
+        { id: 'PR-4', line: 'Складальна дільниця (Ортези)', oee: 78.5, output: 4300, scrap: 0.52, matDays: 16, status: 'Потрібна 2-га зміна' }
       ],
-      summary: () => `<div>Середній OEE виробництва: <strong>86.3%</strong> (Світовий бенчмарк >85%)</div><div class="summary-checksum"><span class="checksum-badge">Критична сировина: Lycra 70D (11 дн.)</span></div>`
+      kpis: () => [
+        { title: 'Середній OEE', val: '86.3%' },
+        { title: 'Випуск за місяць', val: fmtInt(55400, 'шт') },
+        { title: 'Середній брак', val: '0.32%' },
+        { title: 'Мін. запас сировини', val: '11 днів (Lycra)' }
+      ],
+      summary: () => `<div>Ефективність цеху (OEE): <strong>86.3%</strong></div><div class="summary-checksum"><span class="checksum-badge">Норма браку &lt; 1.0% витримана</span></div>`
     },
 
     'osv': {
       columns: [
         { key: 'acc', label: 'Рахунок', editable: true },
         { key: 'name', label: 'Найменування рахунку', editable: true },
-        { key: 'begDt', label: 'Сальдо поч. Дт', num: true, editable: true },
-        { key: 'begCt', label: 'Сальдо поч. Кт', num: true, editable: true },
-        { key: 'turnDt', label: 'Обороти Дт', num: true, editable: true },
-        { key: 'turnCt', label: 'Обороти Кт', num: true, editable: true },
-        { key: 'endDt', label: 'Сальдо кін. Дт', num: true, computed: true },
-        { key: 'endCt', label: 'Сальдо кін. Кт', num: true, computed: true }
+        { key: 'begDt', label: 'Поч. Дт', num: true, editable: true },
+        { key: 'begCt', label: 'Поч. Кт', num: true, editable: true },
+        { key: 'turnDt', label: 'Оборот Дт', num: true, editable: true },
+        { key: 'turnCt', label: 'Оборот Кт', num: true, editable: true },
+        { key: 'endDt', label: 'Кін. Дт', num: true, computed: true },
+        { key: 'endCt', label: 'Кін. Кт', num: true, computed: true }
       ],
       recalcRow: (r) => {
         const net = (Number(r.begDt) - Number(r.begCt)) + (Number(r.turnDt) - Number(r.turnCt));
@@ -362,33 +285,36 @@
         r.endCt = net < 0 ? Math.abs(net) : 0;
       },
       rows: [
-        { id: '10', acc: '10', name: 'Основні засоби (Верстати Merz CC4, CAD/CAM)', begDt: 18450000, begCt: 0, turnDt: 420000, turnCt: 0, endDt: 18870000, endCt: 0 },
+        { id: '10', acc: '10', name: 'Основні засоби (Merz CC4, CAD/CAM)', begDt: 18450000, begCt: 0, turnDt: 420000, turnCt: 0, endDt: 18870000, endCt: 0 },
         { id: '131', acc: '131', name: 'Знос основних засобів', begDt: 0, begCt: 4120000, turnDt: 0, turnCt: 185000, endDt: 0, endCt: 4305000 },
-        { id: '201', acc: '201', name: 'Сировина й матеріали (Пряжа Lycra, Поліамід)', begDt: 4820000, begCt: 0, turnDt: 3150000, turnCt: 2940000, endDt: 5030000, endCt: 0 },
+        { id: '201', acc: '201', name: 'Сировина й матеріали (Lycra, PA 6.6)', begDt: 4820000, begCt: 0, turnDt: 3150000, turnCt: 2940000, endDt: 5030000, endCt: 0 },
         { id: '23', acc: '23', name: 'Виробництво (НЗВ цеху)', begDt: 1120000, begCt: 0, turnDt: 6840000, turnCt: 6590000, endDt: 1370000, endCt: 0 },
-        { id: '26', acc: '26', name: 'Готова продукція (Трикотаж, бандажі)', begDt: 6410000, begCt: 0, turnDt: 6590000, turnCt: 7120000, endDt: 5880000, endCt: 0 },
-        { id: '281', acc: '281', name: 'Товари на складі (Взуття, устілки)', begDt: 2150000, begCt: 0, turnDt: 1890000, turnCt: 1740000, endDt: 2300000, endCt: 0 },
-        { id: '301', acc: '301', name: 'Готівка в національній валюті', begDt: 42500, begCt: 0, turnDt: 180000, turnCt: 165000, endDt: 57500, endCt: 0 },
+        { id: '26', acc: '26', name: 'Готова продукція', begDt: 6410000, begCt: 0, turnDt: 6590000, turnCt: 7120000, endDt: 5880000, endCt: 0 },
+        { id: '281', acc: '281', name: 'Товари на складі', begDt: 2150000, begCt: 0, turnDt: 1890000, turnCt: 1740000, endDt: 2300000, endCt: 0 },
+        { id: '301', acc: '301', name: 'Готівка в касі', begDt: 42500, begCt: 0, turnDt: 180000, turnCt: 165000, endDt: 57500, endCt: 0 },
         { id: '311', acc: '311', name: 'Поточні рахунки в банках', begDt: 11420000, begCt: 0, turnDt: 29450000, turnCt: 26020000, endDt: 14850000, endCt: 0 },
-        { id: '361', acc: '361', name: 'Розрахунки з покупцями (Аптечні мережі)', begDt: 5640000, begCt: 0, turnDt: 28500000, turnCt: 27140000, endDt: 7000000, endCt: 0 },
+        { id: '361', acc: '361', name: 'Розрахунки з покупцями (Мережі)', begDt: 5640000, begCt: 0, turnDt: 28500000, turnCt: 27140000, endDt: 7000000, endCt: 0 },
         { id: '631', acc: '631', name: 'Розрахунки з постачальниками', begDt: 0, begCt: 3180000, turnDt: 4920000, turnCt: 5410000, endDt: 0, endCt: 3670000 },
-        { id: '641', acc: '641', name: 'Розрахунки за податками (ПДВ, Прибуток)', begDt: 0, begCt: 1420000, turnDt: 1420000, turnCt: 1680000, endDt: 0, endCt: 1680000 },
-        { id: '661', acc: '661', name: 'Розрахунки за заробітною платою', begDt: 0, begCt: 1850000, turnDt: 1850000, turnCt: 1940000, endDt: 0, endCt: 1940000 },
-        { id: '701', acc: '701', name: 'Дохід від реалізації продукції', begDt: 0, begCt: 0, turnDt: 28500000, turnCt: 28500000, endDt: 0, endCt: 0 },
-        { id: '901', acc: '901', name: 'Собівартість реалізованої продукції', begDt: 0, begCt: 0, turnDt: 17120000, turnCt: 17120000, endDt: 0, endCt: 0 }
+        { id: '641', acc: '641', name: 'Розрахунки за податками', begDt: 0, begCt: 1420000, turnDt: 1420000, turnCt: 1680000, endDt: 0, endCt: 1680000 },
+        { id: '661', acc: '661', name: 'Розрахунки за зарплатою', begDt: 0, begCt: 1850000, turnDt: 1850000, turnCt: 1940000, endDt: 0, endCt: 1940000 },
+        { id: '701', acc: '701', name: 'Дохід від реалізації', begDt: 0, begCt: 0, turnDt: 28500000, turnCt: 28500000, endDt: 0, endCt: 0 },
+        { id: '901', acc: '901', name: 'Собівартість реалізації', begDt: 0, begCt: 0, turnDt: 17120000, turnCt: 17120000, endDt: 0, endCt: 0 }
       ],
+      kpis: (rows) => {
+        const dt = rows.reduce((s, r) => s + Number(r.turnDt || 0), 0);
+        const ct = rows.reduce((s, r) => s + Number(r.turnCt || 0), 0);
+        const endDt = rows.reduce((s, r) => s + Number(r.endDt || 0), 0);
+        return [
+          { title: 'Активних рахунків', val: rows.length },
+          { title: 'Обороти Дт', val: fmt(dt) + ' грн' },
+          { title: 'Сальдо Дт', val: fmt(endDt) + ' грн' },
+          { title: 'Контроль Дт=Кт', val: Math.abs(dt - ct) < 0.01 ? '0.00 (OK)' : fmt(Math.abs(dt - ct)) }
+        ];
+      },
       summary: (rows) => {
-        const totTurnDt = rows.reduce((s, r) => s + Number(r.turnDt || 0), 0);
-        const totTurnCt = rows.reduce((s, r) => s + Number(r.turnCt || 0), 0);
-        const totEndDt = rows.reduce((s, r) => s + Number(r.endDt || 0), 0);
-        const diff = Math.abs(totTurnDt - totTurnCt);
-        return `
-          <div>Обороти Дт: <strong>${fmt(totTurnDt)}</strong> | Обороти Кт: <strong>${fmt(totTurnCt)}</strong></div>
-          <div class="summary-checksum">
-            <span>Сальдо Дт: ${fmt(totEndDt)}</span>
-            <span class="checksum-badge">${diff < 0.01 ? 'Контроль Дт=Кт: OK (0.00)' : 'Різниця Дт/Кт: ' + fmt(diff)}</span>
-          </div>
-        `;
+        const dt = rows.reduce((s, r) => s + Number(r.turnDt || 0), 0);
+        const ct = rows.reduce((s, r) => s + Number(r.turnCt || 0), 0);
+        return `<div>Обороти Дт: <strong>${fmt(dt)}</strong> | Кт: <strong>${fmt(ct)}</strong></div><div class="summary-checksum"><span class="checksum-badge">${Math.abs(dt - ct) < 0.01 ? 'Баланс Дт=Кт: OK' : 'Різниця: ' + fmt(Math.abs(dt - ct))}</span></div>`;
       }
     },
 
@@ -396,10 +322,10 @@
       columns: [
         { key: 'time', label: 'Час', editable: true },
         { key: 'doc', label: 'Документ', editable: true },
-        { key: 'dt', label: 'Дебет (Дт)', editable: true },
-        { key: 'ct', label: 'Кредит (Кт)', editable: true },
+        { key: 'dt', label: 'Дебет', editable: true },
+        { key: 'ct', label: 'Кредит', editable: true },
         { key: 'sum', label: 'Сума (грн)', num: true, editable: true },
-        { key: 'desc', label: 'Зміст господарської операції', editable: true },
+        { key: 'desc', label: 'Зміст операції', editable: true },
         { key: 'status', label: 'Джерело', editable: true }
       ],
       rows: [
@@ -408,17 +334,14 @@
         { id: 'JRN-3', time: '15.11 16:40', doc: 'БВ-009310', dt: '311', ct: '361', sum: 1004000, desc: 'Надходження оплати від ТОВ «Аптека АНЦ»', status: 'Банк-Клієнт' },
         { id: 'JRN-4', time: '15.11 14:10', doc: 'НВ-4411', dt: '26', ct: '23', sum: 1170000, desc: 'Оприбуткування гольфів КЛ-1 на склад ГП', status: 'Цех Merz CC4' }
       ],
-      summary: (rows) => {
-        const tot = rows.reduce((s, r) => s + Number(r.sum || 0), 0);
-        return `<div>Проводок у журналі: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Оборот Дт=Кт: ${fmt(tot)}</span></div>`;
-      }
+      summary: (rows) => `<div>Проводок: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Сума: ${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))}</span></div>`
     },
 
     'osv-acc': {
       columns: [
         { key: 'sub', label: 'Контрагент / Мережа', editable: true },
         { key: 'code', label: 'ЄДРПОУ', editable: true },
-        { key: 'begDt', label: 'Поч. сальдо Дт', num: true, editable: true },
+        { key: 'begDt', label: 'Поч. Дт', num: true, editable: true },
         { key: 'turnDt', label: 'Відвантажено (Дт)', num: true, editable: true },
         { key: 'turnCt', label: 'Оплачено (Кт)', num: true, editable: true },
         { key: 'endDt', label: 'Кін. сальдо Дт', num: true, computed: true }
@@ -431,10 +354,7 @@
         { id: '361-DOB', sub: 'ММ «Добробут»', code: '33219844', begDt: 540000, turnDt: 2980000, turnCt: 2890000, endDt: 630000 },
         { id: '361-911', sub: 'Аптека 9-1-1', code: '37820115', begDt: 880000, turnDt: 3650000, turnCt: 3540000, endDt: 990000 }
       ],
-      summary: (rows) => {
-        const endDt = rows.reduce((s, r) => s + Number(r.endDt || 0), 0);
-        return `<div>Залишок по рахунку 361: <strong>${fmt(endDt)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Авто-баланс</span></div>`;
-      }
+      summary: (rows) => `<div>Залишок по рахунку 361: <strong>${fmt(rows.reduce((s, r) => s + Number(r.endDt), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Авто-баланс</span></div>`
     },
 
     'card-acc': {
@@ -460,21 +380,21 @@
     'balance': {
       columns: [
         { key: 'code', label: 'Код', editable: true },
-        { key: 'article', label: 'Стаття балансу (Актив / Пасив)', editable: true },
-        { key: 'beg', label: 'На початок року', num: true, editable: true },
+        { key: 'article', label: 'Стаття балансу', editable: true },
+        { key: 'beg', label: 'На поч. року', num: true, editable: true },
         { key: 'end', label: 'На кінець періоду', num: true, editable: true },
-        { key: 'diff', label: 'Зміна (+/-)', num: true, computed: true }
+        { key: 'diff', label: 'Зміна', num: true, computed: true }
       ],
       recalcRow: (r) => { r.diff = Number(r.end) - Number(r.beg); },
       rows: [
-        { id: 'B-1010', code: '1010', article: 'Основні засоби (залишкова вартість)', beg: 14120000, end: 14565000, diff: 445000 },
-        { id: 'B-1100', code: '1100', article: 'Запаси (Сировина, НЗВ, Готова продукція)', beg: 12950000, end: 14580000, diff: 1630000 },
+        { id: 'B-1010', code: '1010', article: 'Основні засоби', beg: 14120000, end: 14565000, diff: 445000 },
+        { id: 'B-1100', code: '1100', article: 'Запаси (Сировина, НЗВ, ГП)', beg: 12950000, end: 14580000, diff: 1630000 },
         { id: 'B-1125', code: '1125', article: 'Дебіторська заборгованість', beg: 5640000, end: 7000000, diff: 1360000 },
-        { id: 'B-1165', code: '1165', article: 'Гроші та їх еквіваленти', beg: 11462500, end: 14907500, diff: 3445000 },
+        { id: 'B-1165', code: '1165', article: 'Гроші та еквіваленти', beg: 11462500, end: 14907500, diff: 3445000 },
         { id: 'B-1400', code: '1400', article: 'Власний капітал (Пасив)', beg: 37722500, end: 43762500, diff: 6040000 },
-        { id: 'B-1615', code: '1615', article: 'Кредиторська заборгованість постачальникам', beg: 3180000, end: 3670000, diff: 490000 },
+        { id: 'B-1615', code: '1615', article: 'Кредиторська заборгованість', beg: 3180000, end: 3670000, diff: 490000 },
         { id: 'B-1620', code: '1620', article: 'Зобов’язання перед бюджетом', beg: 1420000, end: 1680000, diff: 260000 },
-        { id: 'B-1630', code: '1630', article: 'Зобов’язання з оплати праці', beg: 1850000, end: 1940000, diff: 90000 }
+        { id: 'B-1630', code: '1630', article: 'Оплата праці', beg: 1850000, end: 1940000, diff: 90000 }
       ],
       summary: () => `<div>Баланс Ф-1: <strong>${fmt(51052500)}</strong></div><div class="summary-checksum"><span class="checksum-badge">Актив = Пасив (0.00)</span></div>`
     },
@@ -496,10 +416,7 @@
         { id: 'P-2150', code: '2150', item: 'Витрати на збут', curr: -1680000, prev: -1410000, pct: 19.1 },
         { id: 'P-2350', code: '2350', item: 'Чистий прибуток', curr: 6355000, prev: 4559200, pct: 39.4 }
       ],
-      summary: (rows) => {
-        const np = rows.find(r => r.code === '2350')?.curr || 6355000;
-        return `<div>Чистий прибуток: <strong>${fmt(np)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">EBITDA: ${fmtPct(27.2)}</span></div>`;
-      }
+      summary: (rows) => `<div>Чистий прибуток: <strong>${fmt(rows.find(r => r.code === '2350')?.curr || 6355000)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">EBITDA: 27.2%</span></div>`
     },
 
     'vat-decl': {
@@ -536,20 +453,14 @@
         { key: 'unit', label: 'Собівартість од.', num: true, computed: true },
         { key: 'tot', label: 'Всього', num: true, computed: true }
       ],
-      recalcRow: (r) => {
-        r.tot = Number(r.mat) + Number(r.lab) + Number(r.ovh);
-        r.unit = Number(r.qty) > 0 ? r.tot / Number(r.qty) : 0;
-      },
+      recalcRow: (r) => { r.tot = Number(r.mat) + Number(r.lab) + Number(r.ovh); r.unit = Number(r.qty) > 0 ? r.tot / Number(r.qty) : 0; },
       rows: [
-        { id: 'COST-1', sku: 'ALK-C2-M-BLK', name: 'Панчохи компресійні КЛ-2 (Чорні, M)', qty: 4200, mat: 672000, lab: 294000, ovh: 168000, unit: 270, tot: 1134000 },
-        { id: 'COST-2', sku: 'ALK-BP4-L', name: 'Бандаж попереково-крижовий БП-4 (L)', qty: 2800, mat: 784000, lab: 336000, ovh: 196000, unit: 470, tot: 1316000 },
-        { id: 'COST-3', sku: 'ALK-OR2-S', name: 'Ортез колінний шарнірний OR-2 (S)', qty: 1450, mat: 609000, lab: 261000, ovh: 145000, unit: 700, tot: 1015000 },
-        { id: 'COST-4', sku: 'ALK-GL1-L', name: 'Гольфи антиемболічні КЛ-1 (Білі, L)', qty: 6500, mat: 650000, lab: 325000, ovh: 195000, unit: 180, tot: 1170000 }
+        { id: 'COST-1', sku: 'ALK-C2-M-BLK', name: 'Панчохи КЛ-2 (Чорні, M)', qty: 4200, mat: 672000, lab: 294000, ovh: 168000, unit: 270, tot: 1134000 },
+        { id: 'COST-2', sku: 'ALK-BP4-L', name: 'Бандаж БП-4 (L)', qty: 2800, mat: 784000, lab: 336000, ovh: 196000, unit: 470, tot: 1316000 },
+        { id: 'COST-3', sku: 'ALK-OR2-S', name: 'Ортез OR-2 (S)', qty: 1450, mat: 609000, lab: 261000, ovh: 145000, unit: 700, tot: 1015000 },
+        { id: 'COST-4', sku: 'ALK-GL1-L', name: 'Гольфи КЛ-1 (L)', qty: 6500, mat: 650000, lab: 325000, ovh: 195000, unit: 180, tot: 1170000 }
       ],
-      summary: (rows) => {
-        const tot = rows.reduce((s, r) => s + Number(r.tot), 0);
-        return `<div>Фактична собівартість: <strong>${fmt(tot)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Авто-калькуляція</span></div>`;
-      }
+      summary: (rows) => `<div>Собівартість випуску: <strong>${fmt(rows.reduce((s, r) => s + Number(r.tot), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Авто-калькуляція</span></div>`
     },
 
     'mes-m29': {
@@ -562,20 +473,18 @@
         { key: 'diff', label: 'Відхилення', num: true, computed: true },
         { key: 'status', label: 'Висновок', editable: true }
       ],
-      recalcRow: (r) => {
-        r.diff = Number(r.fact) - Number(r.norm);
-        r.status = r.diff > 0 ? 'Перевитрата' : (r.diff < 0 ? 'Економія' : 'В межах норми');
-      },
+      recalcRow: (r) => { r.diff = Number(r.fact) - Number(r.norm); r.status = r.diff > 0 ? 'Перевитрата' : (r.diff < 0 ? 'Економія' : 'В межах норми'); },
       rows: [
         { id: 'M29-LYCRA', order: 'WO-2026-4402', mat: 'Пряжа Lycra 70 DEN (Італія)', unit: 'кг', norm: 412.0, fact: 413.8, diff: 1.8, status: 'Перевитрата (Переналагодження)' },
         { id: 'M29-POLY', order: 'WO-2026-4402', mat: 'Нитка поліамідна PA 6.6', unit: 'кг', norm: 850.0, fact: 848.5, diff: -1.5, status: 'Економія' },
         { id: 'M29-NEOP', order: 'WO-2026-4409', mat: 'Неопрен медичний 3мм', unit: 'м2', norm: 620.0, fact: 620.0, diff: 0, status: 'В межах норми' },
         { id: 'M29-SIL', order: 'WO-2026-4411', mat: 'Стрічка силіконова 50мм', unit: 'м.п.', norm: 2100.0, fact: 2100.0, diff: 0, status: 'В межах норми' }
       ],
-      summary: () => `<div>Форма М-29: контроль нормативів</div><div class="summary-checksum"><span class="checksum-badge">Допуск: 0.5%</span></div>`
+      summary: () => `<div>Форма М-29</div><div class="summary-checksum"><span class="checksum-badge">Допуск: 0.5%</span></div>`
     },
 
     'mes-orders': {
+      kanbanStages: ['В роботі', 'Пошиття фінальне', 'Формовка та ВТК', 'Передано на склад ГП'],
       columns: [
         { key: 'id', label: '№ Наряду', editable: true },
         { key: 'product', label: 'Виріб (Партія)', editable: true },
@@ -592,7 +501,7 @@
         { id: 'WO-2026-4411', product: 'Гольфи КЛ-1 (LOT-2026-GL901)', workshop: 'Merz CC4 #5-8', plan: 6500, done: 6500, pct: 100.0, status: 'Передано на склад ГП' },
         { id: 'WO-2026-4418', product: 'Ортез OR-2 (LOT-2026-OR07)', workshop: 'Складальна №2', plan: 2000, done: 940, pct: 47.0, status: 'В роботі' }
       ],
-      summary: (rows) => `<div>Нарядів у роботі: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Виконання: ${fmtPct(87.5)}</span></div>`
+      summary: (rows) => `<div>Нарядів: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Виконання: 87.5%</span></div>`
     },
 
     'mes-boms': {
@@ -600,13 +509,13 @@
         { key: 'code', label: 'Код BOM', editable: true },
         { key: 'product', label: 'Виріб', editable: true },
         { key: 'components', label: 'Склад специфікації', editable: true },
-        { key: 'steps', label: 'Технологічний маршрут', editable: true },
+        { key: 'steps', label: 'Маршрут', editable: true },
         { key: 'normTime', label: 'Нормо-час (хв)', num: true, editable: true }
       ],
       rows: [
-        { id: 'BOM-C2', code: 'SPEC-0012', product: 'Панчохи КЛ-2', components: 'Lycra 70D (0.045кг), PA 6.6 (0.085кг), Силікон (0.5м)', steps: 'В’язання → Зшивання → Фарбування → Формовка → ВТК', normTime: 18.5 },
-        { id: 'BOM-BP4', code: 'SPEC-0048', product: 'Бандаж БП-4', components: 'Полотно еластичне (0.35м), Ребра сталеві (4шт), Велкро', steps: 'CAD-розкрій → Окантовка → Ребра → ВТК', normTime: 24.0 },
-        { id: 'BOM-OR2', code: 'SPEC-0089', product: 'Ортез OR-2', components: 'Неопрен 3мм (0.42м2), Шарніри алюм. (2шт), Ремені (2шт)', steps: 'Вирубка → Оверлок → Склеювання → Шарніри → ВТК', normTime: 32.0 }
+        { id: 'BOM-C2', code: 'SPEC-0012', product: 'Панчохи КЛ-2', components: 'Lycra 70D, PA 6.6, Силікон', steps: 'В’язання → Зшивання → Фарбування → ВТК', normTime: 18.5 },
+        { id: 'BOM-BP4', code: 'SPEC-0048', product: 'Бандаж БП-4', components: 'Полотно, Ребра сталеві, Велкро', steps: 'CAD-розкрій → Окантовка → ВТК', normTime: 24.0 },
+        { id: 'BOM-OR2', code: 'SPEC-0089', product: 'Ортез OR-2', components: 'Неопрен 3мм, Шарніри, Ремені', steps: 'Вирубка → Склеювання → ВТК', normTime: 32.0 }
       ],
       summary: (rows) => `<div>Техкарт: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">ISO 13485</span></div>`
     },
@@ -618,27 +527,24 @@
         { key: 'lot', label: 'Партія', editable: true },
         { key: 'item', label: 'Продукція', editable: true },
         { key: 'qty', label: 'Брак (шт)', num: true, editable: true },
-        { key: 'loss', label: 'Сума втрат', num: true, editable: true },
+        { key: 'loss', label: 'Втрати (грн)', num: true, editable: true },
         { key: 'reason', label: 'Причина ВТК', editable: true }
       ],
       rows: [
-        { id: 'SCR-01', act: 'АБ-0084', date: '12.11.2026', lot: 'LOT-2026-TC112', item: 'Панчохи КЛ-2', qty: 28, loss: 7560, reason: 'Невідповідність тиску на щиколотці (<23 мм рт. ст.)' },
-        { id: 'SCR-02', act: 'АБ-0089', date: '14.11.2026', lot: 'LOT-2026-AK048', item: 'Бандаж БП-4', qty: 12, loss: 5640, reason: 'Дефект закріпки велкро-стрічки' }
+        { id: 'SCR-01', act: 'АБ-0084', date: '12.11.2026', lot: 'LOT-2026-TC112', item: 'Панчохи КЛ-2', qty: 28, loss: 7560, reason: 'Тиск <23 мм рт. ст.' },
+        { id: 'SCR-02', act: 'АБ-0089', date: '14.11.2026', lot: 'LOT-2026-AK048', item: 'Бандаж БП-4', qty: 12, loss: 5640, reason: 'Дефект рядка велкро' }
       ],
-      summary: (rows) => {
-        const loss = rows.reduce((s, r) => s + Number(r.loss), 0);
-        return `<div>Рівень браку: <strong>${fmtPct(0.32)}</strong></div><div class="summary-checksum"><span class="checksum-badge">Списано: ${fmt(loss)}</span></div>`;
-      }
+      summary: (rows) => `<div>Брак: <strong>0.32%</strong></div><div class="summary-checksum"><span class="checksum-badge">Втрати: ${fmt(rows.reduce((s, r) => s + Number(r.loss), 0))}</span></div>`
     },
 
     'wms-m19': {
       columns: [
         { key: 'wh', label: 'Склад', editable: true },
         { key: 'item', label: 'Номенклатура', editable: true },
-        { key: 'beg', label: 'Залишок поч.', num: true, editable: true },
+        { key: 'beg', label: 'Поч.', num: true, editable: true },
         { key: 'inc', label: 'Прихід', num: true, editable: true },
         { key: 'exp', label: 'Розхід', num: true, editable: true },
-        { key: 'end', label: 'Залишок кін.', num: true, computed: true },
+        { key: 'end', label: 'Кін.', num: true, computed: true },
         { key: 'sum', label: 'Сума (грн)', num: true, editable: true }
       ],
       recalcRow: (r) => { r.end = Number(r.beg) + Number(r.inc) - Number(r.exp); },
@@ -648,29 +554,26 @@
         { id: 'M19-3', wh: 'Склад ГП №2', item: 'Панчохи КЛ-2 (пари)', beg: 8400, inc: 4200, exp: 5100, end: 7500, sum: 2025000 },
         { id: 'M19-4', wh: 'Склад ГП №2', item: 'Бандажі АЛКОМ (шт)', beg: 5120, inc: 2800, exp: 3400, end: 4520, sum: 2124400 }
       ],
-      summary: (rows) => {
-        const tot = rows.reduce((s, r) => s + Number(r.sum), 0);
-        return `<div>Залишок по М-19: <strong>${fmt(tot)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Рахунки 201 / 26: OK</span></div>`;
-      }
+      summary: (rows) => `<div>Залишок М-19: <strong>${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Рахунки 201 / 26: OK</span></div>`
     },
 
     'wms-batch': {
       columns: [
         { key: 'id', label: 'Партія (LOT)', editable: true },
         { key: 'item', label: 'Виріб', editable: true },
-        { key: 'mfgDate', label: 'Виготовлено', editable: true },
-        { key: 'expDate', label: 'Термін до', editable: true },
+        { key: 'mfgDate', label: 'Виробн.', editable: true },
+        { key: 'expDate', label: 'Придатний до', editable: true },
         { key: 'qty', label: 'Залишок', num: true, editable: true },
         { key: 'pressure', label: 'Протокол ВТК', editable: true },
         { key: 'status', label: 'Статус', editable: true }
       ],
       rows: [
-        { id: 'LOT-2026-TC112', item: 'Панчохи КЛ-2 (Чорні, M)', mfgDate: '12.11.2026', expDate: '12.11.2031', qty: 4200, pressure: '26.4 мм рт.ст. (Норма)', status: 'Дозволено до відвантаження' },
-        { id: 'LOT-2026-AK048', item: 'Бандаж БП-4 (L)', mfgDate: '10.11.2026', expDate: '10.11.2031', qty: 2800, pressure: 'Тест жорсткості: OK', status: 'Дозволено до відвантаження' },
-        { id: 'LOT-2026-GL901', item: 'Гольфи КЛ-1 (L)', mfgDate: '08.11.2026', expDate: '08.11.2031', qty: 6500, pressure: '19.8 мм рт.ст. (Норма)', status: 'Відвантажується (FEFO)' },
+        { id: 'LOT-2026-TC112', item: 'Панчохи КЛ-2 (M)', mfgDate: '12.11.2026', expDate: '12.11.2031', qty: 4200, pressure: '26.4 мм рт.ст.', status: 'Дозволено до відвантаження' },
+        { id: 'LOT-2026-AK048', item: 'Бандаж БП-4 (L)', mfgDate: '10.11.2026', expDate: '10.11.2031', qty: 2800, pressure: 'Тест жорсткості OK', status: 'Дозволено до відвантаження' },
+        { id: 'LOT-2026-GL901', item: 'Гольфи КЛ-1 (L)', mfgDate: '08.11.2026', expDate: '08.11.2031', qty: 6500, pressure: '19.8 мм рт.ст.', status: 'Відвантажується (FEFO)' },
         { id: 'LOT-2026-OR07', item: 'Ортез OR-2', mfgDate: '14.11.2026', expDate: '14.11.2031', qty: 940, pressure: 'На тестуванні ВТК', status: 'Карантин до перевірки' }
       ],
-      summary: (rows) => `<div>Активних партій: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Простежуваність 100%</span></div>`
+      summary: (rows) => `<div>Партій: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Простежуваність 100%</span></div>`
     },
 
     'wms-reserves': {
@@ -680,46 +583,40 @@
         { key: 'phys', label: 'Фізично', num: true, editable: true },
         { key: 'res', label: 'Резерв', num: true, editable: true },
         { key: 'free', label: 'Вільно', num: true, computed: true },
-        { key: 'client', label: 'Під кого резерв', editable: true }
+        { key: 'client', label: 'Резерв під мережу', editable: true }
       ],
       recalcRow: (r) => { r.free = Number(r.phys) - Number(r.res); },
       rows: [
-        { id: 'RES-1', sku: 'ALK-C2-M-BLK', name: 'Панчохи КЛ-2 (Чорні, M)', phys: 7500, res: 3200, free: 4300, client: 'АНЦ (2000), Подорожник (1200)' },
+        { id: 'RES-1', sku: 'ALK-C2-M-BLK', name: 'Панчохи КЛ-2 (M)', phys: 7500, res: 3200, free: 4300, client: 'АНЦ (2000), Подорожник (1200)' },
         { id: 'RES-2', sku: 'ALK-BP4-L', name: 'Бандаж БП-4 (L)', phys: 4520, res: 1850, free: 2670, client: 'ОРТОС (1200), Добробут (650)' },
         { id: 'RES-3', sku: 'ALK-GL1-L', name: 'Гольфи КЛ-1', phys: 6500, res: 4100, free: 2400, client: 'Аптека 9-1-1 (4100)' }
       ],
-      summary: (rows) => {
-        const res = rows.reduce((s, r) => s + Number(r.res), 0);
-        return `<div>Зарезервовано: <strong>${fmtInt(res, 'од.')}</strong></div><div class="summary-checksum"><span class="checksum-badge">Оверселінг заблоковано</span></div>`;
-      }
+      summary: (rows) => `<div>В резерві: <strong>${fmtInt(rows.reduce((s, r) => s + Number(r.res), 0), 'од.')}</strong></div><div class="summary-checksum"><span class="checksum-badge">Оверселінг заблоковано</span></div>`
     },
 
     'wms-inv19': {
       columns: [
-        { key: 'code', label: 'Інв. код', editable: true },
+        { key: 'code', label: 'Код', editable: true },
         { key: 'name', label: 'Номенклатура', editable: true },
-        { key: 'book', label: 'За обліком', num: true, editable: true },
-        { key: 'fact', label: 'Фактично (ТСД)', num: true, editable: true },
+        { key: 'book', label: 'Облік', num: true, editable: true },
+        { key: 'fact', label: 'Факт (ТСД)', num: true, editable: true },
         { key: 'diff', label: 'Відхилення', num: true, computed: true },
         { key: 'res', label: 'Висновок', editable: true }
       ],
-      recalcRow: (r) => {
-        r.diff = Number(r.fact) - Number(r.book);
-        r.res = r.diff === 0 ? 'Збіг 100%' : (r.diff > 0 ? 'Лишок' : 'Нестача');
-      },
+      recalcRow: (r) => { r.diff = Number(r.fact) - Number(r.book); r.res = r.diff === 0 ? 'Збіг 100%' : 'Розбіжність'; },
       rows: [
         { id: 'INV-1', code: '201-014', name: 'Пряжа Lycra 70 DEN', book: 2090, fact: 2090, diff: 0, res: 'Збіг 100%' },
         { id: 'INV-2', code: '26-102', name: 'Панчохи КЛ-2 (Коробки)', book: 375, fact: 375, diff: 0, res: 'Збіг 100%' },
         { id: 'INV-3', code: '26-205', name: 'Бандажі БП-4', book: 4520, fact: 4520, diff: 0, res: 'Збіг 100%' }
       ],
-      summary: () => `<div>Інвентаризація (Форма Інв-19)</div><div class="summary-checksum"><span class="checksum-badge">Розбіжностей: 0</span></div>`
+      summary: () => `<div>Інв-19</div><div class="summary-checksum"><span class="checksum-badge">Розбіжностей: 0</span></div>`
     },
 
     'sales-recon': {
       columns: [
         { key: 'id', label: 'Код', editable: true },
         { key: 'contract', label: 'Контрагент / Договір', editable: true },
-        { key: 'beg', label: 'Сальдо поч.', num: true, editable: true },
+        { key: 'beg', label: 'Поч. сальдо', num: true, editable: true },
         { key: 'shipped', label: 'Відвантажено', num: true, editable: true },
         { key: 'paid', label: 'Оплачено', num: true, editable: true },
         { key: 'end', label: 'Борг контрагента', num: true, computed: true },
@@ -730,12 +627,9 @@
         { id: 'REC-ANC', contract: 'ТОВ «Аптека АНЦ» (№402/26)', beg: 1840000, shipped: 9450000, paid: 8920000, end: 2370000, status: 'Потребує звірки (ТТН ВН-004182)' },
         { id: 'REC-POD', contract: 'ТОВ «Подорожник» (№118/26)', beg: 1420000, shipped: 7800000, paid: 7410000, end: 1810000, status: 'Підписано в Вчасно.ЕДО' },
         { id: 'REC-ORT', contract: 'ТОВ «ОРТОС» (№085/26)', beg: 960000, shipped: 4620000, paid: 4380000, end: 1200000, status: 'Підписано в Вчасно.ЕДО' },
-        { id: 'REC-DOB', contract: 'ММ «Добробут» (№310/26)', beg: 540000, shipped: 2980000, paid: 2890000, end: 630000, status: 'Очікує підпису контрагента' }
+        { id: 'REC-DOB', contract: 'ММ «Добробут» (№310/26)', beg: 540000, shipped: 2980000, paid: 2890000, end: 630000, status: 'Очікує підпису' }
       ],
-      summary: (rows) => {
-        const tot = rows.reduce((s, r) => s + Number(r.end), 0);
-        return `<div>Дебіторка по мережах: <strong>${fmt(tot)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Вчасно.ЕДО / M.E.Doc</span></div>`;
-      }
+      summary: (rows) => `<div>Дебіторка: <strong>${fmt(rows.reduce((s, r) => s + Number(r.end), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Вчасно.ЕДО / M.E.Doc</span></div>`
     },
 
     'sales-aging': {
@@ -754,19 +648,17 @@
         { id: 'AGE-3', client: 'ТОВ «ОРТОС»', d15: 850000, d30: 230000, d60: 120000, d60p: 0, total: 1200000 },
         { id: 'AGE-4', client: 'Аптека 9-1-1', d15: 900000, d30: 90000, d60: 0, d60p: 0, total: 990000 }
       ],
-      summary: (rows) => {
-        const p60 = rows.reduce((s, r) => s + Number(r.d60p), 0);
-        return `<div>Прострочка 60+ днів: <strong>${fmt(p60)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Ризик портфеля: Низький</span></div>`;
-      }
+      summary: () => `<div>Прострочка 60+: <strong>0.00 грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Ризик: Низький</span></div>`
     },
 
     'sales-orders': {
+      kanbanStages: ['Очікує погодження CEO', 'Зарезервовано', 'На збірці', 'Відвантажено'],
       columns: [
         { key: 'id', label: '№ Замовлення', editable: true },
         { key: 'date', label: 'Дата EDI', editable: true },
         { key: 'client', label: 'Мережа', editable: true },
         { key: 'items', label: 'Позицій', num: true, editable: true },
-        { key: 'sum', label: 'Сума', num: true, editable: true },
+        { key: 'sum', label: 'Сума (грн)', num: true, editable: true },
         { key: 'status', label: 'Статус', editable: true }
       ],
       rows: [
@@ -775,10 +667,7 @@
         { id: 'ORD-8819', date: '15.11.2026', client: 'ТОВ «Подорожник»', items: 94, sum: 1180000, status: 'Відвантажено' },
         { id: 'ORD-8824', date: '15.11.2026', client: 'ММ «Добробут»', items: 28, sum: 490000, status: 'Зарезервовано' }
       ],
-      summary: (rows) => {
-        const tot = rows.reduce((s, r) => s + Number(r.sum), 0);
-        return `<div>Замовлень: <strong>${rows.length}</strong> на суму <strong>${fmt(tot)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">EDI-шлюз активний</span></div>`;
-      }
+      summary: (rows) => `<div>Замовлень: <strong>${rows.length}</strong> | Сума: <strong>${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">EDI активний</span></div>`
     },
 
     'sales-margin': {
@@ -789,28 +678,20 @@
         { key: 'gp', label: 'Валовий прибуток', num: true, computed: true },
         { key: 'margin', label: 'Маржа %', num: true, computed: true }
       ],
-      recalcRow: (r) => {
-        r.gp = Number(r.rev) - Number(r.cogs);
-        r.margin = Number(r.rev) > 0 ? (r.gp / Number(r.rev) * 100) : 0;
-      },
+      recalcRow: (r) => { r.gp = Number(r.rev) - Number(r.cogs); r.margin = Number(r.rev) > 0 ? (r.gp / Number(r.rev) * 100) : 0; },
       rows: [
-        { id: 'MRG-1', cat: 'Компресійний трикотаж (КЛ-1..3)', rev: 12400000, cogs: 7100000, gp: 5300000, margin: 42.7 },
+        { id: 'MRG-1', cat: 'Компресійний трикотаж', rev: 12400000, cogs: 7100000, gp: 5300000, margin: 42.7 },
         { id: 'MRG-2', cat: 'Бандажі та коректори', rev: 8200000, cogs: 4920000, gp: 3280000, margin: 40.0 },
         { id: 'MRG-3', cat: 'Ортези суглобові', rev: 4900000, cogs: 3180000, gp: 1720000, margin: 35.1 },
         { id: 'MRG-4', cat: 'Устілки та взуття', rev: 3000000, cogs: 1920000, gp: 1080000, margin: 36.0 }
       ],
-      summary: (rows) => {
-        const gp = rows.reduce((s, r) => s + Number(r.gp), 0);
-        const rev = rows.reduce((s, r) => s + Number(r.rev), 0);
-        const m = rev > 0 ? (gp / rev * 100) : 0;
-        return `<div>Середня маржа: <strong>${fmtPct(m)}</strong></div><div class="summary-checksum"><span class="checksum-badge">Валовий прибуток: ${fmt(gp)}</span></div>`;
-      }
+      summary: (rows) => `<div>Валовий прибуток: <strong>${fmt(rows.reduce((s, r) => s + Number(r.gp), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Маржа: 39.9%</span></div>`
     },
 
     'treasury-stmt': {
       columns: [
         { key: 'bank', label: 'Банк / IBAN', editable: true },
-        { key: 'beg', label: 'Залишок поч.', num: true, editable: true },
+        { key: 'beg', label: 'Поч. залишок', num: true, editable: true },
         { key: 'inc', label: 'Надходження', num: true, editable: true },
         { key: 'out', label: 'Списання', num: true, editable: true },
         { key: 'end', label: 'Поточний залишок', num: true, computed: true }
@@ -821,10 +702,7 @@
         { id: 'BNK-RF', bank: 'Райффайзен (UA12380805...022)', beg: 3100000, inc: 8200000, out: 7430000, end: 3870000 },
         { id: 'BNK-UKR', bank: 'Укрсиббанк (UA88351005...519)', beg: 900000, inc: 2800000, out: 2700000, end: 1000000 }
       ],
-      summary: (rows) => {
-        const tot = rows.reduce((s, r) => s + Number(r.end), 0);
-        return `<div>Залишок на рахунках (311): <strong>${fmt(tot)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Звірено з ОСВ 311: OK</span></div>`;
-      }
+      summary: (rows) => `<div>Рахунки (311): <strong>${fmt(rows.reduce((s, r) => s + Number(r.end), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Звірено з ОСВ: OK</span></div>`
     },
 
     'treasury-cash': {
@@ -837,61 +715,49 @@
         { key: 'out', label: 'Видаток', num: true, editable: true }
       ],
       rows: [
-        { id: 'CSH-1', doc: 'ПКО-00112', date: '14.11.2026', person: 'Салон «Алком»', purpose: 'Здача роздрібної виручки', inc: 48500, out: 0 },
-        { id: 'CSH-2', doc: 'ВКО-00084', date: '15.11.2026', person: 'Інкасація ПриватБанк', purpose: 'Здача готівки в банк', inc: 0, out: 33500 }
+        { id: 'CSH-1', doc: 'ПКО-00112', date: '14.11.2026', person: 'Салон «Алком»', purpose: 'Здача виручки', inc: 48500, out: 0 },
+        { id: 'CSH-2', doc: 'ВКО-00084', date: '15.11.2026', person: 'ПриватБанк', purpose: 'Інкасація', inc: 0, out: 33500 }
       ],
-      summary: () => `<div>Залишок каси (301): <strong>${fmt(57500)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Ліміт каси: OK</span></div>`
+      summary: () => `<div>Каса (301): <strong>${fmt(57500)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">Ліміт каси: OK</span></div>`
     },
 
     'hr-payroll': {
       columns: [
         { key: 'dept', label: 'Підрозділ', editable: true },
-        { key: 'emp', label: 'Штат (осіб)', num: true, editable: true },
-        { key: 'gross', label: 'Нараховано (ФОП)', num: true, editable: true },
+        { key: 'emp', label: 'Штат', num: true, editable: true },
+        { key: 'gross', label: 'Нараховано', num: true, editable: true },
         { key: 'pdfo', label: 'ПДФО (18%)', num: true, computed: true },
-        { key: 'vz', label: 'Військ. збір (5%)', num: true, computed: true },
+        { key: 'vz', label: 'ВЗ (5%)', num: true, computed: true },
         { key: 'net', label: 'До виплати', num: true, computed: true }
       ],
-      recalcRow: (r) => {
-        r.pdfo = Number(r.gross) * 0.18;
-        r.vz = Number(r.gross) * 0.05;
-        r.net = Number(r.gross) - r.pdfo - r.vz;
-      },
+      recalcRow: (r) => { r.pdfo = Number(r.gross) * 0.18; r.vz = Number(r.gross) * 0.05; r.net = Number(r.gross) - r.pdfo - r.vz; },
       rows: [
         { id: 'HR-1', dept: 'Швейно-в’язальний цех', emp: 84, gross: 2100000, pdfo: 378000, vz: 105000, net: 1617000 },
         { id: 'HR-2', dept: 'Склад, Логістика та ВТК', emp: 24, gross: 540000, pdfo: 97200, vz: 27000, net: 415800 },
         { id: 'HR-3', dept: 'Відділ продажів та ЕДО', emp: 18, gross: 680000, pdfo: 122400, vz: 34000, net: 523600 },
         { id: 'HR-4', dept: 'Адміністрація та Бухгалтерія', emp: 14, gross: 520000, pdfo: 93600, vz: 26000, net: 400400 }
       ],
-      summary: (rows) => {
-        const net = rows.reduce((s, r) => s + Number(r.net), 0);
-        return `<div>Загалом до виплати: <strong>${fmt(net)} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">ПДФО 18% + ВЗ 5% авто</span></div>`;
-      }
+      summary: (rows) => `<div>До виплати: <strong>${fmt(rows.reduce((s, r) => s + Number(r.net), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">ПДФО+ВЗ авто</span></div>`
     }
   };
 
   function pushUndo(viewId, rowsSnapshot) {
     state.undoStack.push({ viewId, rows: JSON.parse(JSON.stringify(rowsSnapshot)) });
     if (state.undoStack.length > 25) state.undoStack.shift();
-    updateUndoBtn();
+    const btn = document.getElementById('btn-undo');
+    if (btn) btn.disabled = state.undoStack.length === 0;
   }
 
   function performUndo() {
     if (state.undoStack.length === 0) return;
     const snap = state.undoStack.pop();
     DATASETS[snap.viewId].rows = snap.rows;
-    updateUndoBtn();
-    updateAuditRadar();
-    if (state.activeMode === 'TABLE') {
-      if (state.activeView !== snap.viewId) window.__switchToTable(snap.viewId);
-      else renderActiveView();
-    } else renderCEOCockpit();
-    showToast('Останню зміну скасовано (Ctrl+Z)');
-  }
-
-  function updateUndoBtn() {
     const btn = document.getElementById('btn-undo');
     if (btn) btn.disabled = state.undoStack.length === 0;
+    updateAuditRadar();
+    if (state.activeMode === 'TABLE') renderActiveView();
+    else renderCEOCockpit();
+    showToast('Останню дію скасовано');
   }
 
   function computeAuditRisks() {
@@ -916,21 +782,21 @@
     const risks = computeAuditRisks();
     const btn = document.getElementById('btn-audit-radar');
     const countEl = document.getElementById('radar-count');
-    if (!btn || !countEl) return;
-    if (risks.length === 0) { btn.classList.add('clean'); countEl.textContent = '0 ризиків'; }
-    else { btn.classList.remove('clean'); countEl.textContent = `${risks.length} ризик(и)`; }
-
+    if (btn && countEl) {
+      if (risks.length === 0) { btn.classList.add('clean'); countEl.textContent = '0 ризиків'; }
+      else { btn.classList.remove('clean'); countEl.textContent = `${risks.length} ризик(и)`; }
+    }
     const body = document.getElementById('radar-list-body');
     if (body) {
       body.innerHTML = risks.length === 0
-        ? '<div style="padding:20px; text-align:center; color:#059669; font-weight:700;">Аудит-Радар: 0 розбіжностей. Баланс, податки та склад синхронізовані.</div>'
+        ? '<div style="padding:20px; text-align:center; color:#059669; font-weight:700;">Аудит-Радар: 0 розбіжностей.</div>'
         : risks.map(r => `
           <div class="ceo-approval-item" style="border-left: 4px solid ${r.level === 'danger' ? '#DC2626' : '#D97706'};">
             <div>
               <div style="font-weight:700; font-size:12px;">${esc(r.title)}</div>
               <div style="font-size:11px; color:#64748B; margin-top:2px;">${esc(r.desc)}</div>
             </div>
-            <button class="btn-action-primary" onclick="document.getElementById('modal-radar').classList.remove('open'); window.__switchToTable('${r.view}', '${r.rowId}')">Перейти &rarr;</button>
+            <button class="btn-action-primary" onclick="document.getElementById('modal-radar').classList.remove('open'); window.__switchToTable('${r.view}', '${r.rowId}')">Відкрити &rarr;</button>
           </div>
         `).join('');
     }
@@ -952,7 +818,6 @@
       userCount.classList.toggle('valid', uLen === 20);
       passCount.classList.toggle('valid', pLen === 20);
     }
-
     userInput.addEventListener('input', updateCounters);
     passInput.addEventListener('input', updateCounters);
 
@@ -972,7 +837,7 @@
       updateAuditRadar();
       if (roleKey === 'CEO') switchToCEO();
       else window.__switchToTable('osv');
-      showToast(`Вхід виконано: ${profile.title} — ${profile.name}`);
+      showToast(`Вхід виконано: ${profile.title}`);
     }
 
     form.addEventListener('submit', (e) => {
@@ -980,7 +845,7 @@
       errBox.classList.remove('show');
       const u = userInput.value, p = passInput.value;
       if (u.length !== 20 || p.length !== 20) {
-        errBox.textContent = 'Помилка: Логін та пароль мають містити рівно 20 символів.';
+        errBox.textContent = 'Логін та пароль мають містити рівно 20 символів.';
         errBox.classList.add('show');
         return;
       }
@@ -990,34 +855,22 @@
     });
 
     document.getElementById('btn-quick-ceo').addEventListener('click', () => {
-      userInput.value = CREDENTIALS.CEO.login;
-      passInput.value = CREDENTIALS.CEO.pass;
-      updateCounters();
-      loginAs('CEO');
+      userInput.value = CREDENTIALS.CEO.login; passInput.value = CREDENTIALS.CEO.pass; updateCounters(); loginAs('CEO');
     });
-
     document.getElementById('btn-quick-cpa').addEventListener('click', () => {
-      userInput.value = CREDENTIALS.CPA.login;
-      passInput.value = CREDENTIALS.CPA.pass;
-      updateCounters();
-      loginAs('CPA');
+      userInput.value = CREDENTIALS.CPA.login; passInput.value = CREDENTIALS.CPA.pass; updateCounters(); loginAs('CPA');
     });
-
     document.getElementById('btn-logout').addEventListener('click', () => {
-      sessionStorage.removeItem('opex_role');
-      state.role = null;
-      userInput.value = '';
-      passInput.value = '';
-      updateCounters();
-      errBox.classList.remove('show');
-      screen.classList.remove('hidden');
+      sessionStorage.removeItem('opex_role'); state.role = null;
+      userInput.value = ''; passInput.value = ''; updateCounters();
+      errBox.classList.remove('show'); screen.classList.remove('hidden');
     });
 
     const saved = sessionStorage.getItem('opex_role');
     if (saved && CREDENTIALS[saved]) loginAs(saved);
   }
 
-  // ================= CEO ANALYTICS & PREDICTION COCKPIT =================
+  // ================= CEO ANALYTICS & PREDICTION =================
   function switchToCEO() {
     state.activeMode = 'CEO';
     document.getElementById('ceo-cockpit-view').classList.add('active');
@@ -1031,7 +884,7 @@
     state.activeMode = 'TABLE';
     state.activeView = viewId;
     state.highlightedRowId = highlightId;
-    state.activeCell = null;
+    state.viewDisplayMode = 'LIST';
     state.sortCol = null;
     document.getElementById('ceo-cockpit-view').classList.remove('active');
     document.getElementById('table-workspace-view').classList.remove('hidden');
@@ -1044,17 +897,12 @@
   function renderAnalyticsChart() {
     const container = document.getElementById('analytics-main-chart');
     if (!container) return;
-
     const series = TIME_SERIES[state.chartMetric] || TIME_SERIES.rev;
     const labels = TIME_SERIES.labels;
     const allVals = [...series.y2025, ...series.y2026, ...series.pred].filter(v => v !== null);
-    const minV = Math.min(...allVals) * 0.85;
-    const maxV = Math.max(...allVals) * 1.08;
-
+    const minV = Math.min(...allVals) * 0.85, maxV = Math.max(...allVals) * 1.08;
     const W = 920, H = 210, padL = 46, padR = 20, padT = 18, padB = 28;
-    const plotW = W - padL - padR;
-    const plotH = H - padT - padB;
-
+    const plotW = W - padL - padR, plotH = H - padT - padB;
     const getX = (i) => padL + (i / (labels.length - 1)) * plotW;
     const getY = (v) => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
 
@@ -1062,26 +910,20 @@
       let d = '';
       arr.forEach((v, i) => {
         if (v === null) return;
-        const x = getX(i).toFixed(1), y = getY(v).toFixed(1);
-        d += (d === '' ? `M ${x} ${y}` : ` L ${x} ${y}`);
+        d += (d === '' ? `M ${getX(i).toFixed(1)} ${getY(v).toFixed(1)}` : ` L ${getX(i).toFixed(1)} ${getY(v).toFixed(1)}`);
       });
       return d;
     }
 
-    // Confidence band around Prediction (last 4 points: index 10..13)
     const predPts = [];
     series.pred.forEach((v, i) => { if (v !== null) predPts.push({ i, v }); });
     let bandPath = '';
     if (predPts.length > 1) {
       const upper = predPts.map((p, idx) => `${getX(p.i).toFixed(1)},${getY(p.v * (1 + idx * 0.025)).toFixed(1)}`);
-      const lower = [...predPts].reverse().map((p, idx) => {
-        const revIdx = predPts.length - 1 - idx;
-        return `${getX(p.i).toFixed(1)},${getY(p.v * (1 - revIdx * 0.025)).toFixed(1)}`;
-      });
+      const lower = [...predPts].reverse().map((p, idx) => `${getX(p.i).toFixed(1)},${getY(p.v * (1 - (predPts.length - 1 - idx) * 0.025)).toFixed(1)}`);
       bandPath = `<polygon points="${upper.concat(lower).join(' ')}" fill="rgba(16, 185, 129, 0.14)" />`;
     }
 
-    // Horizontal grid lines
     let gridHtml = '';
     for (let g = 0; g <= 4; g++) {
       const val = minV + ((maxV - minV) * g) / 4;
@@ -1090,38 +932,22 @@
       gridHtml += `<text x="${padL - 6}" y="${Number(y) + 3}" font-size="10" text-anchor="end" fill="#64748B" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : val.toFixed(1)}</text>`;
     }
 
-    // X labels + Prediction divider
     const divX = getX(10).toFixed(1);
     let xLabelsHtml = `<line x1="${divX}" y1="${padT}" x2="${divX}" y2="${H - padB}" stroke="#CBD5E1" stroke-dasharray="3,3" />`;
     labels.forEach((lbl, i) => {
-      const x = getX(i).toFixed(1);
       const isPred = lbl.includes('*');
-      xLabelsHtml += `<text x="${x}" y="${H - 8}" font-size="10" text-anchor="middle" fill="${isPred ? '#059669' : '#64748B'}" font-weight="${isPred ? '700' : '500'}">${lbl}</text>`;
+      xLabelsHtml += `<text x="${getX(i).toFixed(1)}" y="${H - 8}" font-size="10" text-anchor="middle" fill="${isPred ? '#059669' : '#64748B'}" font-weight="${isPred ? '700' : '500'}">${lbl}</text>`;
     });
 
-    // Data dots for 2026 & Prediction
     let dotsHtml = '';
-    series.y2026.forEach((v, i) => {
-      if (v === null) return;
-      dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.2" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" />`;
-    });
+    series.y2026.forEach((v, i) => { if (v !== null) dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.2" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" />`; });
     series.pred.forEach((v, i) => {
       if (v === null || i === 10) return;
       dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.8" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5" />`;
       dotsHtml += `<text x="${getX(i).toFixed(1)}" y="${(getY(v) - 8).toFixed(1)}" font-size="10" font-weight="700" text-anchor="middle" fill="#059669" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : v}</text>`;
     });
 
-    container.innerHTML = `
-      <svg viewBox="0 0 ${W} ${H}" width="100%" height="210" style="overflow:visible;">
-        ${gridHtml}
-        ${xLabelsHtml}
-        ${bandPath}
-        <path d="${buildPath(series.y2025)}" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5,4" />
-        <path d="${buildPath(series.y2026)}" fill="none" stroke="#2563EB" stroke-width="2.5" />
-        <path d="${buildPath(series.pred)}" fill="none" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6,4" />
-        ${dotsHtml}
-      </svg>
-    `;
+    container.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="210" style="overflow:visible;">${gridHtml}${xLabelsHtml}${bandPath}<path d="${buildPath(series.y2025)}" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5,4" /><path d="${buildPath(series.y2026)}" fill="none" stroke="#2563EB" stroke-width="2.5" /><path d="${buildPath(series.pred)}" fill="none" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6,4" />${dotsHtml}</svg>`;
   }
 
   function renderCEOCockpit() {
@@ -1131,87 +957,29 @@
     const marginPct = revTot > 0 ? (gpTot / revTot * 100) : 0;
 
     document.getElementById('ceo-kpi-grid').innerHTML = `
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')">
-        <div class="ceo-kpi-label">Виручка (Лис 2026)</div>
-        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(revTot)}</div>
-        <div class="ceo-kpi-sub"><span>+21.8% vs 2025</span><span>YoY &rarr;</span></div>
-      </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('pnl-stat')">
-        <div class="ceo-kpi-label">Чистий прибуток</div>
-        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(6355000)}</div>
-        <div class="ceo-kpi-sub"><span>+39.4% vs 2025</span><span>P&amp;L &rarr;</span></div>
-      </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('sales-margin')">
-        <div class="ceo-kpi-label">Валова маржа</div>
-        <div class="ceo-kpi-val">${fmtPct(marginPct)}</div>
-        <div class="ceo-kpi-sub"><span>+2.5 п.п. vs 2025</span><span>SKU &rarr;</span></div>
-      </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('treasury-stmt')">
-        <div class="ceo-kpi-label">Вільні кошти (311+301)</div>
-        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(cashTot)}</div>
-        <div class="ceo-kpi-sub"><span>+30.1% ліквідність</span><span>Банк &rarr;</span></div>
-      </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-chains')">
-        <div class="ceo-kpi-label">Оборотність (DSO / DIO)</div>
-        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '17.4 / 42 дн.'}</div>
-        <div class="ceo-kpi-sub"><span>Швидше на 8 дн.</span><span>Мережі &rarr;</span></div>
-      </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')" style="border-color:#10B981; background:#ECFDF5;">
-        <div class="ceo-kpi-label" style="color:#047857;">Prediction (Грудень 2026)</div>
-        <div class="ceo-kpi-val" style="color:#065F46;">${state.noNumbersMode ? '—' : '₴ ' + fmt(31800000)}</div>
-        <div class="ceo-kpi-sub" style="color:#047857;"><span>Точність 94.2%</span><span>Прогноз &rarr;</span></div>
-      </div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')"><div class="ceo-kpi-label">Виручка (Лис 2026)</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(revTot)}</div><div class="ceo-kpi-sub"><span>+21.8% vs 2025</span><span>YoY &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('pnl-stat')"><div class="ceo-kpi-label">Чистий прибуток</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(6355000)}</div><div class="ceo-kpi-sub"><span>+39.4% vs 2025</span><span>P&amp;L &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('sales-margin')"><div class="ceo-kpi-label">Валова маржа</div><div class="ceo-kpi-val">${fmtPct(marginPct)}</div><div class="ceo-kpi-sub"><span>+2.5 п.п. vs 2025</span><span>SKU &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('treasury-stmt')"><div class="ceo-kpi-label">Вільні кошти</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(cashTot)}</div><div class="ceo-kpi-sub"><span>+30.1% ліквідність</span><span>Банк &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-chains')"><div class="ceo-kpi-label">Оборотність DSO/DIO</div><div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '17.4 / 42 дн.'}</div><div class="ceo-kpi-sub"><span>Швидше на 8 дн.</span><span>Мережі &rarr;</span></div></div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')" style="border-color:#10B981; background:#ECFDF5;"><div class="ceo-kpi-label" style="color:#047857;">Prediction (Гру 2026)</div><div class="ceo-kpi-val" style="color:#065F46;">${state.noNumbersMode ? '—' : '₴ ' + fmt(31800000)}</div><div class="ceo-kpi-sub" style="color:#047857;"><span>Точність 94.2%</span><span>Прогноз &rarr;</span></div></div>
     `;
 
     renderAnalyticsChart();
 
     document.getElementById('ceo-predictions-list').innerHTML = `
-      <div class="pred-card good" onclick="window.__switchToTable('an-sku')" style="cursor:pointer;">
-        <div>
-          <div style="font-weight:700; font-size:12px;">Сезонний прогноз попиту: Компресійний трикотаж КЛ-2 (+18%)</div>
-          <div style="font-size:11px; color:#334155;">На базі продажів Грудень 2024–2025 очікується 5 400 пар/міс. Рекомендація: збільшити завантаження Merz CC4.</div>
-        </div>
-        <span class="status-badge status-ok">94.2%</span>
-      </div>
-      <div class="pred-card warn" onclick="window.__switchToTable('an-prod')" style="cursor:pointer;">
-        <div>
-          <div style="font-weight:700; font-size:12px;">Ризик зупинки: Залишок пряжі Lycra 70 DEN вистачить на 11 днів</div>
-          <div style="font-size:11px; color:#334155;">При плані 61.5 тис. шт у грудні потрібно замовити 1 500 кг пряжі не пізніше 22.11.2026.</div>
-        </div>
-        <span class="status-badge status-warning">Критично</span>
-      </div>
-      <div class="pred-card" onclick="window.__switchToTable('an-chains')" style="cursor:pointer;">
-        <div>
-          <div style="font-weight:700; font-size:12px;">Прогноз надходження коштів від мереж до 25.11: +5 930 000 грн</div>
-          <div style="font-size:11px; color:#334155;">АНЦ (1.95M), Подорожник (1.60M), ОРТОС (0.85M), Аптека 9-1-1 (0.90M), Добробут (0.63M).</div>
-        </div>
-        <span class="status-badge status-info">Cash-In</span>
-      </div>
+      <div class="pred-card good" onclick="window.__switchToTable('an-sku')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Сезонний пік попиту: Компресійний трикотаж КЛ-2 (+18%)</div><div style="font-size:11px; color:#334155;">Прогноз на грудень: 5 400 пар/міс. Рекомендація: збільшити завантаження Merz CC4.</div></div><span class="status-badge status-ok">94.2%</span></div>
+      <div class="pred-card warn" onclick="window.__switchToTable('an-prod')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Ризик дефіциту: Пряжа Lycra 70 DEN вистачить на 11 днів</div><div style="font-size:11px; color:#334155;">Рекомендовано замовити 1 500 кг пряжі не пізніше 22.11.2026.</div></div><span class="status-badge status-warning">Критично</span></div>
+      <div class="pred-card" onclick="window.__switchToTable('an-chains')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Прогноз надходжень до 25.11: +5 930 000 грн</div><div style="font-size:11px; color:#334155;">АНЦ (1.95M), Подорожник (1.60M), ОРТОС (0.85M), Аптека 9-1-1 (0.90M).</div></div><span class="status-badge status-info">Cash-In</span></div>
     `;
 
     const pending = state.tasks.filter(t => t.status === 'ACTIVE');
     document.getElementById('ceo-chains-and-approvals').innerHTML = `
       <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;">
-        ${DATASETS['an-chains'].rows.slice(0, 3).map(c => `
-          <div style="display:flex; justify-content:space-between; font-size:12px; padding:5px 8px; background:#F8FAFC; border-radius:4px; border:1px solid #E2E8F0;">
-            <span><strong>${esc(c.chain)}</strong> (Маржа ${fmtPct(c.margin)}, DSO ${c.dso} дн.)</span>
-            <span style="font-family:var(--font-mono); font-weight:700;">${fmt(c.rev)} грн</span>
-          </div>
-        `).join('')}
+        ${DATASETS['an-chains'].rows.slice(0, 3).map(c => `<div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 10px; background:#F8FAFC; border-radius:6px; border:1px solid #E2E8F0;"><span><strong>${esc(c.chain)}</strong> (Маржа ${fmtPct(c.margin)}, DSO ${c.dso} дн.)</span><span style="font-family:var(--font-mono); font-weight:700;">${fmt(c.rev)} грн</span></div>`).join('')}
       </div>
-      <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; margin-top:4px;">На погодженні у CEO (${pending.length}):</div>
-      ${pending.length === 0 ? '<div style="color:#059669; font-weight:600; font-size:12px;">Всі документи погоджено</div>' : pending.slice(0, 2).map(t => `
-        <div class="ceo-approval-item">
-          <div>
-            <div style="font-weight:700; font-size:12px;">${esc(t.title)}</div>
-            <div style="font-size:11px; color:#64748B;">${esc(t.comment)}</div>
-          </div>
-          <div style="display:flex; gap:5px; flex-shrink:0;">
-            <button class="btn-row-action" onclick="window.__switchToTable('${esc(t.view)}', '${esc(t.rowId || '')}')">Таблиця</button>
-            <button class="btn-approve-sm" onclick="window.__completeTask('${esc(t.id)}')">Погодити</button>
-          </div>
-        </div>
-      `).join('')}
+      <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; margin-top:4px;">Черга на погодження (${pending.length}):</div>
+      ${pending.length === 0 ? '<div style="color:#059669; font-weight:600; font-size:12px;">Всі документи погоджено</div>' : pending.slice(0, 2).map(t => `<div class="ceo-approval-item"><div><div style="font-weight:700; font-size:12px;">${esc(t.title)}</div><div style="font-size:11px; color:#64748B;">${esc(t.comment)}</div></div><div style="display:flex; gap:5px; flex-shrink:0;"><button class="btn-row-action" onclick="window.__switchToTable('${esc(t.view)}', '${esc(t.rowId || '')}')">Відкрити</button><button class="btn-approve-sm" onclick="window.__completeTask('${esc(t.id)}')">Погодити</button></div></div>`).join('')}
     `;
   }
 
@@ -1220,30 +988,18 @@
     const container = document.getElementById('sidebar-tree-container');
     if (!container) return;
     const filterText = (document.getElementById('tree-search')?.value || '').toLowerCase().trim();
-
     container.innerHTML = DOMAINS.map(domain => {
-      const filteredSubtypes = domain.subtypes.filter(st => {
-        if (!filterText) return true;
-        return st.title.toLowerCase().includes(filterText) || st.code.toLowerCase().includes(filterText);
-      });
+      const filteredSubtypes = domain.subtypes.filter(st => !filterText || st.title.toLowerCase().includes(filterText) || st.code.toLowerCase().includes(filterText));
       if (filterText && filteredSubtypes.length === 0) return '';
       const isOpen = filterText ? true : domain.open;
       return `
         <div class="acc-domain-group ${isOpen ? 'open' : ''}">
           <div class="domain-header" onclick="window.__toggleDomain('${domain.id}')">
-            <div class="domain-header-title">
-              <span class="domain-arrow">&#9654;</span>
-              <span>${esc(domain.title)}</span>
-            </div>
+            <div class="domain-header-title"><span class="domain-arrow">&#9654;</span><span>${esc(domain.title)}</span></div>
             <span class="domain-count">${filteredSubtypes.length}</span>
           </div>
           <div class="subtype-list">
-            ${filteredSubtypes.map(st => `
-              <div class="subtype-item ${state.activeMode === 'TABLE' && state.activeView === st.id ? 'active' : ''}" onclick="window.__switchToTable('${st.id}')">
-                <span>${esc(st.title)}</span>
-                <span class="subtype-code">${esc(st.code)}</span>
-              </div>
-            `).join('')}
+            ${filteredSubtypes.map(st => `<div class="subtype-item ${state.activeMode === 'TABLE' && state.activeView === st.id ? 'active' : ''}" onclick="window.__switchToTable('${st.id}')"><span>${esc(st.title)}</span><span class="subtype-code">${esc(st.code)}</span></div>`).join('')}
           </div>
         </div>
       `;
@@ -1263,22 +1019,40 @@
     return { domain: DOMAINS[0], subtype: DOMAINS[0].subtypes[0] };
   }
 
-  // ================= EXCEL-GRID TABLE =================
-  function renderActiveView(recalcRowIdx = null) {
+  // ================= ODOO-STYLE LIST / KANBAN + INSPECTOR =================
+  function renderModuleKPIs(dataset, rows) {
+    const strip = document.getElementById('module-kpi-strip');
+    if (!strip) return;
+    let cards = [];
+    if (dataset.kpis) cards = dataset.kpis(rows);
+    else {
+      const numCol = dataset.columns.find(c => c.num);
+      const totalVal = numCol ? rows.reduce((s, r) => s + Number(r[numCol.key] || 0), 0) : 0;
+      cards = [
+        { title: 'Записів у модулі', val: rows.length },
+        { title: numCol ? `Разом (${numCol.label})` : 'Статус', val: numCol ? fmt(totalVal) : 'Активний' },
+        { title: 'Організація', val: 'ТОВ «ТД «Алком»' },
+        { title: 'Синхронізація обліку', val: 'Live (0 розбіжностей)' }
+      ];
+    }
+    strip.innerHTML = cards.map(c => `<div class="mod-kpi-card"><div class="mod-kpi-title">${esc(c.title)}</div><div class="mod-kpi-val">${esc(c.val)}</div></div>`).join('');
+  }
+
+  function renderActiveView() {
     const meta = getActiveSubtypeMeta();
     const dataset = DATASETS[state.activeView] || DATASETS['osv'];
 
     document.getElementById('ctrl-breadcrumb').textContent = `${meta.domain.title} > ${meta.subtype.title}`;
-    document.getElementById('ctrl-title').innerHTML = `
-      <span>${esc(meta.subtype.title)}</span>
-      <span class="ctrl-tag">${esc(meta.subtype.tag)}</span>
-    `;
+    document.getElementById('ctrl-title').innerHTML = `<span>${esc(meta.subtype.title)}</span><span class="ctrl-tag">${esc(meta.subtype.tag)}</span>`;
+
+    const modeSwitch = document.getElementById('view-mode-switch');
+    if (modeSwitch) {
+      modeSwitch.style.display = meta.subtype.hasKanban ? 'inline-flex' : 'none';
+      modeSwitch.querySelectorAll('.view-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.vmode === state.viewDisplayMode));
+    }
 
     const q = (state.searchQuery || '').toLowerCase().trim();
-    let filteredRows = dataset.rows.filter(row => {
-      if (!q) return true;
-      return Object.values(row).some(val => String(val).toLowerCase().includes(q));
-    });
+    let filteredRows = dataset.rows.filter(row => !q || Object.values(row).some(val => String(val).toLowerCase().includes(q)));
 
     if (state.sortCol) {
       const col = dataset.columns.find(c => c.key === state.sortCol);
@@ -1289,75 +1063,73 @@
       });
     }
 
+    renderModuleKPIs(dataset, filteredRows);
     const viewport = document.getElementById('table-viewport');
     if (!viewport) return;
 
-    let thead = '<thead><tr><th class="col-letter-row" style="width:36px;">#</th>';
-    dataset.columns.forEach((col, cIdx) => {
-      thead += `<th class="col-letter-row" onclick="window.__sortCol('${col.key}')" title="Сортувати">${colLetter(cIdx)}</th>`;
-    });
-    thead += '<th class="col-letter-row">Дії</th></tr>';
-
-    thead += '<tr><th class="col-title-row" style="text-align:center;">№</th>';
-    dataset.columns.forEach(col => {
-      const arrow = state.sortCol === col.key ? (state.sortDir === 1 ? ' ▲' : ' ▼') : '';
-      thead += `<th class="col-title-row ${col.num ? 'num' : ''}" onclick="window.__sortCol('${col.key}')">${esc(col.label)}${arrow}</th>`;
-    });
-    thead += '<th class="col-title-row" style="text-align:right; width:175px;">Маршрут / Док / Вид.</th></tr></thead>';
-
-    let tbody = '<tbody>';
-    filteredRows.forEach((row, rIdx) => {
-      const isHighlighted = state.highlightedRowId === row.id ? 'highlighted' : '';
-      tbody += `<tr class="${isHighlighted}" id="row-${esc(row.id)}">`;
-      tbody += `<td class="row-index-cell">${rIdx + 1}</td>`;
-
-      dataset.columns.forEach((col, cIdx) => {
-        const val = row[col.key];
-        const cellRef = `${colLetter(cIdx)}${rIdx + 1}`;
-        const isActiveCell = state.activeCell && state.activeCell.cellRef === cellRef ? 'active-cell' : '';
-        const isFlash = (recalcRowIdx === rIdx && col.computed) ? 'recalc-flash' : '';
-        const editableClass = col.editable ? 'editable-cell' : '';
-
-        let displayVal = '';
-        if (col.num) {
-          if (['pct', 'margin', 'growth', 'share', 'conf', 'oee', 'scrap'].includes(col.key)) displayVal = fmtPct(val);
-          else if (['qty', 'emp', 'items', 'book', 'fact', 'phys', 'res', 'free', 'plan', 'done', 'predQty', 'recStock', 'dso', 'output', 'matDays'].includes(col.key)) displayVal = fmtInt(val);
-          else displayVal = fmt(val);
-        } else if (col.key === 'status') {
-          let badgeClass = 'status-info';
-          const s = String(val).toLowerCase();
-          if (s.includes('ок') || s.includes('дозв') || s.includes('підпис') || s.includes('прийн') || s.includes('зареєст') || s.includes('передано') || s.includes('норм') || s.includes('звірен') || s.includes('авто') || s.includes('aaa') || s.includes('факт')) badgeClass = 'status-ok';
-          else if (s.includes('потр') || s.includes('очік') || s.includes('перевитр') || s.includes('карант') || s.includes('увага') || s.includes('ризик')) badgeClass = 'status-warning';
-          displayVal = `<span class="status-badge ${badgeClass}">${esc(val)}</span>`;
-        } else {
-          displayVal = esc(val);
-        }
-
-        tbody += `<td class="${col.num ? 'num' : ''} ${editableClass} ${isActiveCell} ${isFlash}"
-                      data-row-id="${esc(row.id)}" data-col-key="${esc(col.key)}" data-cell-ref="${cellRef}"
-                      onclick="window.__selectCell('${esc(row.id)}', '${esc(col.key)}', '${cellRef}', ${rIdx})"
-                      ondblclick="window.__editCell(this, '${esc(row.id)}', '${esc(col.key)}', ${rIdx})">${displayVal}</td>`;
-      });
-
-      const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
-      tbody += `
-        <td style="text-align:right;">
-          <div class="row-actions">
-            <button class="btn-row-action" onclick="window.__openHandoff('${esc(meta.subtype.title)}: ${esc(rowLabel)}', '${esc(row.id)}')">Передати</button>
-            <button class="btn-row-action" onclick="window.__openDocViewer('${esc(row.id)}', '${esc(rowLabel)}')">Док</button>
-            <button class="btn-row-action btn-row-del" onclick="window.__deleteRow('${esc(row.id)}')" title="Видалити">&times;</button>
+    if (meta.subtype.hasKanban && state.viewDisplayMode === 'KANBAN' && dataset.kanbanStages) {
+      viewport.innerHTML = `<div class="kanban-board">${dataset.kanbanStages.map(stage => {
+        const cards = filteredRows.filter(r => r.status === stage);
+        return `
+          <div class="kanban-col">
+            <div class="kanban-col-head"><span>${esc(stage)}</span><span class="domain-count">${cards.length}</span></div>
+            ${cards.map(r => `
+              <div class="kanban-card" onclick="window.__openInspector('${esc(r.id)}')">
+                <div style="font-family:var(--font-mono); font-size:11px; color:#2563EB; font-weight:700;">${esc(r.id)}</div>
+                <div style="font-weight:700; font-size:12.5px;">${esc(r.product || r.client)}</div>
+                <div style="font-size:11px; color:#64748B;">${esc(r.workshop || r.date)} • ${r.sum ? fmt(r.sum) + ' грн' : fmtPct(r.pct)}</div>
+              </div>
+            `).join('')}
           </div>
-        </td>
-      </tr>`;
-    });
-    tbody += '</tbody>';
+        `;
+      }).join('')}</div>`;
+    } else {
+      let thead = '<thead><tr>';
+      dataset.columns.forEach(col => {
+        const arrow = state.sortCol === col.key ? (state.sortDir === 1 ? ' ▲' : ' ▼') : '';
+        thead += `<th class="${col.num ? 'num' : ''}" onclick="window.__sortCol('${col.key}')">${esc(col.label)}${arrow}</th>`;
+      });
+      thead += '<th style="text-align:right; width:140px;">Дії</th></tr></thead>';
 
-    viewport.innerHTML = `<table class="op-table">${thead}${tbody}</table>`;
+      let tbody = '<tbody>';
+      filteredRows.forEach(row => {
+        const isHighlighted = state.highlightedRowId === row.id ? 'highlighted' : '';
+        const isSelected = state.inspectedRowId === row.id ? 'selected-row' : '';
+        tbody += `<tr class="${isHighlighted} ${isSelected}" id="row-${esc(row.id)}" onclick="window.__openInspector('${esc(row.id)}')">`;
+
+        dataset.columns.forEach((col, cIdx) => {
+          const val = row[col.key];
+          let displayVal = '';
+          if (col.num) {
+            if (['pct', 'margin', 'growth', 'share', 'conf', 'oee', 'scrap'].includes(col.key)) displayVal = fmtPct(val);
+            else if (['qty', 'emp', 'items', 'book', 'fact', 'phys', 'res', 'free', 'plan', 'done', 'predQty', 'recStock', 'dso', 'output', 'matDays'].includes(col.key)) displayVal = fmtInt(val);
+            else displayVal = fmt(val);
+          } else if (col.key === 'status') {
+            let badgeClass = 'status-info';
+            const s = String(val).toLowerCase();
+            if (s.includes('ок') || s.includes('дозв') || s.includes('підпис') || s.includes('прийн') || s.includes('зареєст') || s.includes('передано') || s.includes('норм') || s.includes('звірен') || s.includes('авто') || s.includes('aaa') || s.includes('факт') || s.includes('відвантаж')) badgeClass = 'status-ok';
+            else if (s.includes('потр') || s.includes('очік') || s.includes('перевитр') || s.includes('карант') || s.includes('увага') || s.includes('ризик')) badgeClass = 'status-warning';
+            displayVal = `<span class="status-badge ${badgeClass}">${esc(val)}</span>`;
+          } else {
+            displayVal = esc(val);
+          }
+          tbody += `<td class="${col.num ? 'num' : ''} ${cIdx === 0 || cIdx === 1 ? 'primary-col' : ''}">${displayVal}</td>`;
+        });
+
+        const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
+        tbody += `
+          <td style="text-align:right;" onclick="event.stopPropagation();">
+            <button class="btn-row-action" onclick="window.__openInspector('${esc(row.id)}')">Картка</button>
+            <button class="btn-row-action" onclick="window.__openHandoff('${esc(meta.subtype.title)}: ${esc(rowLabel)}', '${esc(row.id)}')">Передати</button>
+          </td>
+        </tr>`;
+      });
+      tbody += '</tbody>';
+      viewport.innerHTML = `<table class="op-table">${thead}${tbody}</table>`;
+    }
 
     const summaryEl = document.getElementById('table-summary-bar');
-    if (summaryEl) {
-      summaryEl.innerHTML = dataset.summary ? dataset.summary(filteredRows) : `<div>Рядків: ${filteredRows.length}</div>`;
-    }
+    if (summaryEl) summaryEl.innerHTML = dataset.summary ? dataset.summary(filteredRows) : `<div>Рядків: ${filteredRows.length}</div>`;
   }
 
   window.__sortCol = function(colKey) {
@@ -1366,128 +1138,128 @@
     renderActiveView();
   };
 
-  window.__selectCell = function(rowId, colKey, cellRef, rIdx) {
+  // ================= RECORD INSPECTOR DRAWER =================
+  window.__openInspector = function(rowId) {
     const dataset = DATASETS[state.activeView];
-    const row = dataset.rows.find(r => r.id === rowId);
-    const col = dataset.columns.find(c => c.key === colKey);
+    const row = dataset?.rows.find(r => r.id === rowId);
     if (!row) return;
-    state.activeCell = { rowId, colKey, cellRef, rIdx };
-    document.getElementById('fx-cell-ref').textContent = cellRef;
-    document.getElementById('fx-input').value = row[colKey];
+    state.inspectedRowId = rowId;
+    const meta = getActiveSubtypeMeta();
+    const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
 
-    const hintEl = document.getElementById('fx-col-stats');
-    if (hintEl && col && col.num && !state.noNumbersMode) {
-      const vals = dataset.rows.map(r => Number(r[colKey] || 0));
-      const sum = vals.reduce((a, b) => a + b, 0);
-      const avg = vals.length ? sum / vals.length : 0;
-      hintEl.textContent = `Колонка [${col.label}]: Сума = ${fmt(sum)} | Середнє = ${fmt(avg)} | Рядків = ${vals.length}`;
-    } else if (hintEl) {
-      hintEl.textContent = 'Двічі клікніть або введіть =формулу у рядок fx';
-    }
+    document.getElementById('inspector-title').textContent = `${meta.subtype.code}: ${rowLabel}`;
+    const body = document.getElementById('inspector-body');
 
-    document.querySelectorAll('.op-table td.active-cell').forEach(td => td.classList.remove('active-cell'));
-    const target = document.querySelector(`td[data-cell-ref="${cellRef}"]`);
-    if (target) target.classList.add('active-cell');
-  };
+    body.innerHTML = `
+      <div class="inspector-section">
+        <div class="inspector-sec-title">Параметри запису (Редагування)</div>
+        <div class="inspector-field-grid">
+          ${dataset.columns.map(col => `
+            <div class="form-group">
+              <label class="form-label">${esc(col.label)}</label>
+              <input type="${col.num ? 'number' : 'text'}" class="insp-input ${col.num ? 'mono' : ''}" data-insp-key="${esc(col.key)}" value="${esc(row[col.key])}" ${col.computed ? 'readonly style="background:#EEF2F6;"' : ''}>
+            </div>
+          `).join('')}
+        </div>
+      </div>
 
-  window.__editCell = function(tdEl, rowId, colKey, rIdx) {
-    const dataset = DATASETS[state.activeView];
-    const col = dataset.columns.find(c => c.key === colKey);
-    const row = dataset.rows.find(r => r.id === rowId);
-    if (!row || !col || !col.editable) return;
+      <div class="inspector-section">
+        <div class="inspector-sec-title">Журнал стану та Авто-проводки</div>
+        <div class="timeline-box">
+          <div class="timeline-step"><strong>Документ сформовано в OpexMetrix</strong><div style="font-size:11px; color:#64748B;">16.11.2026 • Організація: ТОВ «ТД «Алком»</div></div>
+          <div class="timeline-step"><strong>Перевірено Аудит-Радаром 24/7</strong><div style="font-size:11px; color:#64748B;">Кореспонденція рахунків та балансові інваріанти валідні</div></div>
+        </div>
+      </div>
+    `;
 
-    const currentVal = row[colKey];
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'cell-inline-input';
-    input.value = currentVal;
-    tdEl.innerHTML = '';
-    tdEl.appendChild(input);
-    input.focus();
-    input.select();
-
-    let committed = false;
-    function commit() {
-      if (committed) return;
-      committed = true;
-      let rawVal = input.value.trim();
-      let newVal = rawVal;
-      if (col.num) {
-        const evalRes = evalMathExpr(rawVal);
-        if (evalRes !== null) newVal = evalRes;
-        else {
-          newVal = parseFloat(rawVal.replace(/\s+/g, '').replace(',', '.'));
-          if (isNaN(newVal)) newVal = currentVal;
-        }
-      }
-      if (newVal !== currentVal) {
-        pushUndo(state.activeView, dataset.rows);
-        row[colKey] = newVal;
-        if (dataset.recalcRow) dataset.recalcRow(row);
-        updateAuditRadar();
-        showToast(`Оновлено (${col.label}) — підсумки перераховано`);
-      }
-      renderActiveView(rIdx);
-    }
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); commit(); }
-      else if (e.key === 'Escape') { committed = true; renderActiveView(); }
-    });
-    input.addEventListener('blur', commit);
-  };
-
-  window.__deleteRow = function(rowId) {
-    const dataset = DATASETS[state.activeView];
-    if (!dataset) return;
-    pushUndo(state.activeView, dataset.rows);
-    dataset.rows = dataset.rows.filter(r => r.id !== rowId);
-    updateAuditRadar();
+    document.getElementById('inspector-overlay').classList.add('open');
+    document.getElementById('inspector-drawer').classList.add('open');
     renderActiveView();
-    showToast('Рядок видалено (Ctrl+Z для скасування)');
   };
 
-  document.getElementById('fx-input')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && state.activeCell) {
-      const { rowId, colKey, rIdx } = state.activeCell;
-      const dataset = DATASETS[state.activeView];
-      const col = dataset.columns.find(c => c.key === colKey);
-      const row = dataset.rows.find(r => r.id === rowId);
-      if (!row || !col || !col.editable) {
-        showToast('Розрахункова клітинка');
-        return;
-      }
-      let raw = e.target.value.trim();
-      let val = raw;
-      if (col.num) {
-        const evalRes = evalMathExpr(raw);
-        if (evalRes !== null) val = evalRes;
-        else {
-          val = parseFloat(raw.replace(/\s+/g, '').replace(',', '.'));
-          if (isNaN(val)) return;
-        }
-      }
-      pushUndo(state.activeView, dataset.rows);
-      row[colKey] = val;
-      if (dataset.recalcRow) dataset.recalcRow(row);
-      updateAuditRadar();
-      renderActiveView(rIdx);
-      showToast('Значення через fx застосовано');
-    }
-  });
+  function closeInspector() {
+    state.inspectedRowId = null;
+    document.getElementById('inspector-overlay').classList.remove('open');
+    document.getElementById('inspector-drawer').classList.remove('open');
+  }
 
-  document.getElementById('btn-add-row')?.addEventListener('click', () => {
+  document.getElementById('btn-close-inspector')?.addEventListener('click', closeInspector);
+  document.getElementById('inspector-overlay')?.addEventListener('click', closeInspector);
+
+  document.getElementById('btn-insp-save')?.addEventListener('click', () => {
     const dataset = DATASETS[state.activeView];
-    if (!dataset) return;
+    const row = dataset?.rows.find(r => r.id === state.inspectedRowId);
+    if (!row) return;
     pushUndo(state.activeView, dataset.rows);
-    const newRow = { id: 'ROW-' + Math.floor(1000 + Math.random() * 9000) };
-    dataset.columns.forEach(c => { newRow[c.key] = c.num ? 0 : 'Новий запис'; });
-    dataset.rows.push(newRow);
-    renderActiveView(dataset.rows.length - 1);
-    showToast('Додано новий рядок');
+
+    document.querySelectorAll('#inspector-body [data-insp-key]').forEach(inp => {
+      const k = inp.dataset.inspKey;
+      const col = dataset.columns.find(c => c.key === k);
+      if (col && col.editable) {
+        row[k] = col.num ? (parseFloat(inp.value) || 0) : inp.value;
+      }
+    });
+    if (dataset.recalcRow) dataset.recalcRow(row);
+    updateAuditRadar();
+    closeInspector();
+    renderActiveView();
+    showToast('Зміни збережено та автоматично перераховано');
   });
 
-  // ================= LIVE BANK / 1C IMPORT =================
+  document.getElementById('btn-insp-doc')?.addEventListener('click', () => {
+    const dataset = DATASETS[state.activeView];
+    const row = dataset?.rows.find(r => r.id === state.inspectedRowId);
+    if (!row) return;
+    window.__openDocViewer(row.id, row.name || row.contract || row.product || row.id);
+  });
+
+  document.getElementById('btn-insp-handoff')?.addEventListener('click', () => {
+    const dataset = DATASETS[state.activeView];
+    const row = dataset?.rows.find(r => r.id === state.inspectedRowId);
+    if (!row) return;
+    const meta = getActiveSubtypeMeta();
+    window.__openHandoff(`${meta.subtype.title}: ${row.name || row.contract || row.id}`, row.id);
+  });
+
+  // ================= CREATE & POST DOCUMENT FLOW =================
+  window.__openCreateDocModal = function() {
+    document.getElementById('modal-create-doc').classList.add('open');
+  };
+
+  document.getElementById('btn-create-doc')?.addEventListener('click', window.__openCreateDocModal);
+  document.getElementById('btn-close-create-doc')?.addEventListener('click', () => document.getElementById('modal-create-doc').classList.remove('open'));
+  document.getElementById('btn-cancel-create-doc')?.addEventListener('click', () => document.getElementById('modal-create-doc').classList.remove('open'));
+
+  document.getElementById('btn-submit-create-doc')?.addEventListener('click', () => {
+    const type = document.getElementById('new-doc-type').value;
+    const partner = document.getElementById('new-doc-partner').value;
+    const desc = document.getElementById('new-doc-desc').value.trim() || 'Операція ТОВ «ТД «Алком»';
+    const amt = parseFloat(document.getElementById('new-doc-amount').value) || 0;
+    const docId = (type === 'SALE' ? 'ВН-' : type === 'PAYMENT' ? 'БВ-' : 'WO-2026-') + Math.floor(4200 + Math.random() * 5000);
+
+    if (type === 'SALE') {
+      DATASETS['sales-orders'].rows.unshift({ id: docId, date: '16.11.2026', client: partner, items: 24, sum: amt, status: 'Відвантажено' });
+      DATASETS['ledger'].rows.unshift({ id: 'JRN-' + Date.now(), time: '16.11 Щойно', doc: docId, dt: '361', ct: '701', sum: amt, desc: `${partner}: ${desc}`, status: 'Авто-проводка' });
+      const osv361 = DATASETS['osv'].rows.find(r => r.acc === '361');
+      if (osv361) { osv361.turnDt += amt; DATASETS['osv'].recalcRow(osv361); }
+      const osv701 = DATASETS['osv'].rows.find(r => r.acc === '701');
+      if (osv701) { osv701.turnCt += amt; osv701.turnDt += amt; }
+    } else if (type === 'PAYMENT') {
+      DATASETS['ledger'].rows.unshift({ id: 'JRN-' + Date.now(), time: '16.11 Щойно', doc: docId, dt: '311', ct: '361', sum: amt, desc: `Оплата від ${partner}`, status: 'Банк-Клієнт' });
+      const pb = DATASETS['treasury-stmt'].rows[0];
+      if (pb) { pb.inc += amt; DATASETS['treasury-stmt'].recalcRow(pb); }
+    } else {
+      DATASETS['mes-orders'].rows.unshift({ id: docId, product: desc, workshop: partner, plan: amt, done: 0, pct: 0, status: 'В роботі' });
+    }
+
+    updateAuditRadar();
+    document.getElementById('modal-create-doc').classList.remove('open');
+    if (state.activeMode === 'CEO') renderCEOCockpit();
+    else renderActiveView();
+    showToast(`Документ ${docId} проведено в облік та Журнал проводок!`);
+  });
+
+  // ================= IMPORT, AUTOMATION, HANDOFF, DRAWER, DOC VIEWER =================
   document.getElementById('btn-open-import')?.addEventListener('click', () => {
     document.getElementById('import-log-box').style.display = 'none';
     document.getElementById('modal-import').classList.add('open');
@@ -1507,24 +1279,14 @@
         const parts = line.split(';');
         const partner = parts[2] || 'Контрагент';
         const amt = Math.abs(parseFloat((parts[3] || '0').replace(/[^\d.-]/g, ''))) || 0;
-        const purpose = parts[4] || 'Оплата по банку';
-
         const pb = DATASETS['treasury-stmt'].rows[0];
         if (pb && amt > 0) { pb.inc += amt; DATASETS['treasury-stmt'].recalcRow(pb); }
         if (partner.includes('АНЦ')) {
           const anc = DATASETS['sales-recon'].rows.find(r => r.id === 'REC-ANC');
           if (anc) { anc.paid += amt; anc.status = 'Звірено автоматично (Банк OK)'; DATASETS['sales-recon'].recalcRow(anc); }
-        } else if (partner.includes('Подорожник')) {
-          const pod = DATASETS['sales-recon'].rows.find(r => r.id === 'REC-POD');
-          if (pod) { pod.paid += amt; DATASETS['sales-recon'].recalcRow(pod); }
         }
-        DATASETS['ledger'].rows.unshift({
-          id: 'JRN-' + Math.floor(100 + Math.random() * 899),
-          time: '16.11 Щойно', doc: 'БВ-AUTO', dt: '311', ct: '361', sum: amt,
-          desc: `${partner}: ${purpose}`, status: 'Імпорт Банк-Клієнт'
-        });
-
-        logBox.innerHTML += `<div class="auto-log-line"><span class="auto-log-ok">[Дт311 Кт361]</span><span>${esc(partner)}: +${fmt(amt)} грн проведено</span></div>`;
+        DATASETS['ledger'].rows.unshift({ id: 'JRN-' + Math.floor(100 + Math.random() * 899), time: '16.11 Щойно', doc: 'БВ-AUTO', dt: '311', ct: '361', sum: amt, desc: `${partner}: Оплата`, status: 'Імпорт Банк-Клієнт' });
+        logBox.innerHTML += `<div class="auto-log-line"><span class="auto-log-ok">[Дт311 Кт361]</span><span>${esc(partner)}: +${fmt(amt)} грн</span></div>`;
         if (idx === lines.length - 1) {
           updateAuditRadar();
           if (state.activeMode === 'TABLE') renderActiveView();
@@ -1535,25 +1297,14 @@
     });
   });
 
-  // ================= AUTOMATION ENGINE =================
   window.__openAutomationModal = function() { document.getElementById('modal-automation').classList.add('open'); };
-
-  function appendAutoLog(tag, msg) {
-    const box = document.getElementById('auto-log-box');
-    const line = document.createElement('div');
-    line.className = 'auto-log-line';
-    line.innerHTML = `<span class="auto-log-ok">[${tag}]</span><span>${esc(msg)}</span>`;
-    box.appendChild(line);
-    box.scrollTop = box.scrollHeight;
-  }
-
   function runAutomationSequence(title, steps, onFinish) {
     const box = document.getElementById('auto-log-box');
-    box.innerHTML = '';
-    appendAutoLog('START', title);
+    box.innerHTML = `<div class="auto-log-line"><span class="auto-log-ok">[START]</span><span>${esc(title)}</span></div>`;
     steps.forEach((step, idx) => {
       setTimeout(() => {
-        appendAutoLog('OK', step);
+        box.innerHTML += `<div class="auto-log-line"><span class="auto-log-ok">[OK]</span><span>${esc(step)}</span></div>`;
+        box.scrollTop = box.scrollHeight;
         if (idx === steps.length - 1 && onFinish) onFinish();
       }, (idx + 1) * 320);
     });
@@ -1564,11 +1315,7 @@
   document.getElementById('btn-close-auto-footer')?.addEventListener('click', () => document.getElementById('modal-automation').classList.remove('open'));
 
   document.getElementById('btn-run-auto-bank')?.addEventListener('click', () => {
-    runAutomationSequence('Авто-звірка Банк ↔ 361...', [
-      'Завантажено виписку ПриватБанк (128 транзакцій)...',
-      'Оплату ТОВ «Аптека АНЦ» 1 004 000.00 грн прив’язано до ВН-004182',
-      'Оновлено Акт звірки та Журнал проводок.'
-    ], () => {
+    runAutomationSequence('Авто-звірка Банк ↔ 361...', ['Завантажено виписку ПриватБанк...', 'Оплату АНЦ 1 004 000 грн проведено (Дт 311 Кт 361).'], () => {
       const anc = DATASETS['sales-recon'].rows.find(r => r.id === 'REC-ANC');
       if (anc) anc.status = 'Звірено автоматично (Банк OK)';
       updateAuditRadar();
@@ -1577,67 +1324,37 @@
       showToast('Авто-звірку завершено');
     });
   });
-
   document.getElementById('btn-run-auto-cost')?.addEventListener('click', () => {
-    runAutomationSequence('Авто-розрахунок собівартості (Матеріали + ЗП + ЗВВ)...', [
-      'Зчитано списання М-29 (Lycra 70D, PA 6.6)...',
-      'Розподілено ЗВВ цеху пропорційно нормо-годинам Merz CC4...',
-      'Оновлено собівартість одиниці по 4 партіях.'
-    ], () => {
+    runAutomationSequence('Авто-розрахунок собівартості...', ['Зчитано списання М-29...', 'Оновлено собівартість одиниці по 4 партіях.'], () => {
       DATASETS['mes-cost'].rows.forEach(r => DATASETS['mes-cost'].recalcRow(r));
       if (state.activeMode === 'TABLE') renderActiveView();
       showToast('Калькуляцію перераховано');
     });
   });
+  document.getElementById('btn-run-auto-vat')?.addEventListener('click', () => runAutomationSequence('Перевірка ПДВ...', ['Звірено ПН з ЄРПН (7% / 20%)...', 'До сплати: 150 500 грн.'], () => showToast('ПДВ перевірено')));
+  document.getElementById('btn-run-auto-close')?.addEventListener('click', () => runAutomationSequence('Закриття місяця...', ['Дт 901 Кт 26 = 17 120 000 грн', 'Баланс Дт = Кт (0.00).'], () => showToast('Місяць закрито')));
 
-  document.getElementById('btn-run-auto-vat')?.addEventListener('click', () => {
-    runAutomationSequence('Авто-перевірка ПДВ...', [
-      'Звірено ПН з ЄРПН (7% медвироби / 20% імпорт)...',
-      'Сформовано Декларацію ПДВ: до сплати 150 500 грн.'
-    ], () => showToast('ПДВ перевірено без помилок'));
-  });
-
-  document.getElementById('btn-run-auto-close')?.addEventListener('click', () => {
-    runAutomationSequence('Закриття місяця...', [
-      'Дт 901 Кт 26 = 17 120 000.00 грн',
-      'Дт 701 Кт 791 = 28 500 000.00 грн',
-      'Баланс Дт = Кт (Розбіжність 0.00).'
-    ], () => {
-      updateAuditRadar();
-      if (state.activeMode === 'TABLE') renderActiveView();
-      showToast('Місяць закрито успішно');
-    });
-  });
-
-  // ================= HANDOFF & TASKS DRAWER =================
   window.__openHandoff = function(docName, rowId = null) {
     state.handoffContext = { docName, rowId, view: state.activeView };
     document.getElementById('handoff-doc-name').value = docName;
     document.getElementById('handoff-comment').value = '';
     document.getElementById('modal-handoff').classList.add('open');
   };
-
   function closeHandoffModal() { document.getElementById('modal-handoff').classList.remove('open'); }
-
   function confirmHandoff() {
     const docName = document.getElementById('handoff-doc-name').value;
     const recipient = document.getElementById('handoff-recipient').value;
     const priority = document.getElementById('handoff-priority').value;
-    const comment = document.getElementById('handoff-comment').value.trim() || 'Прошу перевірити та опрацювати документ.';
+    const comment = document.getElementById('handoff-comment').value.trim() || 'Прошу перевірити документ.';
     const senderProfile = CREDENTIALS[state.role || 'CPA'];
-
-    const now = new Date();
-    const timeStr = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.2026 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-
     state.tasks.unshift({
       id: 'TSK-' + Math.floor(105 + Math.random() * 890),
       title: docName, sender: `${senderProfile.name} (${senderProfile.title})`,
-      recipient, priority, date: timeStr,
+      recipient, priority, date: '16.11.2026 Щойно',
       view: state.handoffContext ? state.handoffContext.view : state.activeView,
       rowId: state.handoffContext ? state.handoffContext.rowId : null,
       status: 'ACTIVE', comment
     });
-
     renderTasksDrawer();
     if (state.activeMode === 'CEO') renderCEOCockpit();
     closeHandoffModal();
@@ -1650,7 +1367,6 @@
     document.getElementById('drawer-badge-count').textContent = activeCount;
     const listEl = document.getElementById('drawer-tasks-list');
     if (!listEl) return;
-
     listEl.innerHTML = state.tasks.map(t => {
       let pClass = 'priority-normal', pText = 'Звичайне';
       if (t.priority === 'URGENT') { pClass = 'priority-urgent'; pText = 'ТЕРМІНОВО'; }
@@ -1658,18 +1374,12 @@
       const isDone = t.status === 'DONE';
       return `
         <div class="task-card" style="opacity: ${isDone ? '0.6' : '1'};">
-          <div class="task-card-header">
-            <span class="task-priority-tag ${pClass}">${pText}</span>
-            <span style="font-size:11px; color:#64748B; font-family:var(--font-mono);">${esc(t.date)}</span>
-          </div>
+          <div class="task-card-header"><span class="task-priority-tag ${pClass}">${pText}</span><span style="font-size:11px; color:#64748B; font-family:var(--font-mono);">${esc(t.date)}</span></div>
           <div class="task-title">${esc(t.title)}</div>
-          <div class="task-meta">
-            <span>Від: <strong>${esc(t.sender.split('(')[0])}</strong></span>
-            <span>Кому: <strong>${esc(t.recipient.split('(')[0])}</strong></span>
-          </div>
+          <div class="task-meta"><span>Від: <strong>${esc(t.sender.split('(')[0])}</strong></span><span>Кому: <strong>${esc(t.recipient.split('(')[0])}</strong></span></div>
           <div class="task-comment-box">${esc(t.comment)}</div>
           <div class="task-actions">
-            <button class="btn-task-action" onclick="window.__goToTaskView('${esc(t.view)}', '${esc(t.rowId || '')}')">Перейти до таблиці</button>
+            <button class="btn-task-action" onclick="window.__goToTaskView('${esc(t.view)}', '${esc(t.rowId || '')}')">Відкрити</button>
             ${!isDone ? `<button class="btn-task-action" onclick="window.__completeTask('${esc(t.id)}')">Погодити</button>` : '<span style="font-size:11px; color:#059669; font-weight:600;">Виконано</span>'}
           </div>
         </div>
@@ -1680,90 +1390,42 @@
   window.__goToTaskView = function(viewId, rowId) {
     closeTasksDrawer();
     window.__switchToTable(viewId, rowId || null);
-    if (rowId) {
-      setTimeout(() => {
-        const el = document.getElementById('row-' + rowId);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    }
   };
 
   window.__completeTask = function(taskId) {
     const t = state.tasks.find(x => x.id === taskId);
-    if (t) {
-      t.status = 'DONE';
-      renderTasksDrawer();
-      if (state.activeMode === 'CEO') renderCEOCockpit();
-      showToast('Погоджено та виконано');
-    }
+    if (t) { t.status = 'DONE'; renderTasksDrawer(); if (state.activeMode === 'CEO') renderCEOCockpit(); showToast('Погоджено'); }
   };
 
-  function openTasksDrawer() {
-    document.getElementById('drawer-overlay').classList.add('open');
-    document.getElementById('tasks-drawer').classList.add('open');
-  }
-
-  function closeTasksDrawer() {
-    document.getElementById('drawer-overlay').classList.remove('open');
-    document.getElementById('tasks-drawer').classList.remove('open');
-  }
+  function openTasksDrawer() { document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('tasks-drawer').classList.add('open'); }
+  function closeTasksDrawer() { document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('tasks-drawer').classList.remove('open'); }
 
   window.__openDocViewer = function(docId, docLabel) {
     state.docContext = { docId, docLabel };
     const paper = document.getElementById('doc-paper-content');
     if (!paper) return;
-    const sumVal = state.noNumbersMode ? '—' : '1 004 000.00 грн (в т.ч. ПДВ 7%: 65 682.24 грн)';
+    const sumVal = state.noNumbersMode ? '—' : '1 004 000.00 грн (ПДВ 7%: 65 682.24 грн)';
     paper.innerHTML = `
-      <div class="doc-barcode-row">
-        <div><strong>Електронний первинний документ</strong></div>
-        <div style="font-family:var(--font-mono); font-size:12px;">ID: ${esc(docId)} | QR-VERIFIED</div>
-      </div>
+      <div class="doc-barcode-row"><div><strong>Електронний первинний документ</strong></div><div style="font-family:var(--font-mono); font-size:12px;">ID: ${esc(docId)} | QR-VERIFIED</div></div>
       <div class="doc-title-h1">ПЕРВИННИЙ ОБЛІКОВИЙ ДОКУМЕНТ № ${esc(docId)} від 16.11.2026</div>
-      <div class="doc-grid">
-        <div class="doc-grid-label">Підприємство:</div>
-        <div>ТОВ «ТД «Алком» (ЄДРПОУ 32894510, м. Київ, вул. Промислова, 14)</div>
-        <div class="doc-grid-label">Підстава / Об'єкт:</div>
-        <div><strong>${esc(docLabel)}</strong></div>
-        <div class="doc-grid-label">Відповідальний:</div>
-        <div>Шевченко О. В. (Головний бухгалтер)</div>
-      </div>
-      <table class="doc-table">
-        <thead><tr><th>№</th><th>Найменування позиції / Партія (LOT)</th><th>Од.</th><th>Кількість</th><th>Сума (грн)</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>1</td><td>${esc(docLabel)} (Партія LOT-2026-TC112, ISO 13485)</td><td>шт/пар</td>
-            <td style="text-align:right;">${state.noNumbersMode ? '—' : '1 200'}</td>
-            <td style="text-align:right;">${sumVal}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="doc-signatures">
-        <div class="doc-sig-block">Сформував<br><strong>Шевченко О. В.</strong></div>
-        <div class="doc-sig-block">ЕЦП / КЕП Підпис<br><strong>Дійсний (ЦСК «Україна»)</strong></div>
-        <div class="doc-sig-block">Погодив (CEO)<br><strong>Коваленко І. П.</strong></div>
-      </div>
+      <div class="doc-grid"><div class="doc-grid-label">Підприємство:</div><div>ТОВ «ТД «Алком» (ЄДРПОУ 32894510)</div><div class="doc-grid-label">Об'єкт:</div><div><strong>${esc(docLabel)}</strong></div></div>
+      <table class="doc-table"><thead><tr><th>№</th><th>Найменування / Партія</th><th>Од.</th><th>Кількість</th><th>Сума (грн)</th></tr></thead><tbody><tr><td>1</td><td>${esc(docLabel)} (LOT-2026-TC112)</td><td>шт/пар</td><td style="text-align:right;">${state.noNumbersMode ? '—' : '1 200'}</td><td style="text-align:right;">${sumVal}</td></tr></tbody></table>
+      <div class="doc-signatures"><div class="doc-sig-block">Сформував<br><strong>Шевченко О. В.</strong></div><div class="doc-sig-block">ЕЦП / КЕП<br><strong>Дійсний</strong></div><div class="doc-sig-block">Погодив (CEO)<br><strong>Коваленко І. П.</strong></div></div>
     `;
     document.getElementById('modal-doc-viewer').classList.add('open');
   };
-
-  function closeDocViewer() { document.getElementById('modal-doc-viewer').classList.remove('open'); }
 
   function exportCSV() {
     const dataset = DATASETS[state.activeView] || DATASETS['osv'];
     const meta = getActiveSubtypeMeta();
     const headers = dataset.columns.map(c => `"${c.label}"`).join(';');
-    const lines = dataset.rows.map(r => dataset.columns.map(c => {
-      let val = r[c.key];
-      if (state.noNumbersMode && c.num) val = '';
-      return `"${String(val).replace(/"/g, '""')}"`;
-    }).join(';'));
-    const csvContent = '\uFEFF' + headers + '\n' + lines.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const lines = dataset.rows.map(r => dataset.columns.map(c => `"${String(state.noNumbersMode && c.num ? '' : r[c.key]).replace(/"/g, '""')}"`).join(';'));
+    const blob = new Blob(['\uFEFF' + headers + '\n' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `OpexMetrix_${state.activeView}_2026.csv`;
     link.click();
-    showToast(`Експортовано в Excel: ${meta.subtype.title}`);
+    showToast(`Експортовано: ${meta.subtype.title}`);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -1776,6 +1438,13 @@
     document.getElementById('tree-search')?.addEventListener('input', renderSidebar);
     document.getElementById('btn-undo')?.addEventListener('click', performUndo);
 
+    document.querySelectorAll('.view-mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.viewDisplayMode = btn.dataset.vmode;
+        renderActiveView();
+      });
+    });
+
     document.querySelectorAll('#chart-metric-tabs .chart-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('#chart-metric-tabs .chart-tab').forEach(t => t.classList.remove('active'));
@@ -1785,17 +1454,11 @@
       });
     });
 
-    document.getElementById('btn-audit-radar')?.addEventListener('click', () => {
-      updateAuditRadar();
-      document.getElementById('modal-radar').classList.add('open');
-    });
+    document.getElementById('btn-audit-radar')?.addEventListener('click', () => { updateAuditRadar(); document.getElementById('modal-radar').classList.add('open'); });
     document.getElementById('btn-close-radar')?.addEventListener('click', () => document.getElementById('modal-radar').classList.remove('open'));
     document.getElementById('btn-close-radar-footer')?.addEventListener('click', () => document.getElementById('modal-radar').classList.remove('open'));
 
-    const onSearch = (e) => {
-      state.searchQuery = e.target.value;
-      if (state.activeMode === 'TABLE') renderActiveView();
-    };
+    const onSearch = (e) => { state.searchQuery = e.target.value; if (state.activeMode === 'TABLE') renderActiveView(); };
     document.getElementById('global-search')?.addEventListener('input', onSearch);
     document.getElementById('table-search')?.addEventListener('input', onSearch);
 
@@ -1805,14 +1468,12 @@
       document.getElementById('label-num-mode').textContent = state.noNumbersMode ? 'Без цифр' : 'З цифрами';
       if (state.activeMode === 'CEO') renderCEOCockpit();
       else renderActiveView();
-      showToast(state.noNumbersMode ? 'Увімкнено режим без цифр' : 'Увімкнено числовий режим');
     });
 
     document.querySelectorAll('.period-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        state.period = btn.dataset.period;
         renderActiveView();
       });
     });
@@ -1820,40 +1481,24 @@
     document.getElementById('btn-tasks-drawer')?.addEventListener('click', openTasksDrawer);
     document.getElementById('btn-close-drawer')?.addEventListener('click', closeTasksDrawer);
     document.getElementById('drawer-overlay')?.addEventListener('click', closeTasksDrawer);
-    document.getElementById('btn-create-task-drawer')?.addEventListener('click', () => {
-      closeTasksDrawer();
-      const meta = getActiveSubtypeMeta();
-      window.__openHandoff(meta.subtype.title);
-    });
-
-    document.getElementById('btn-handoff-report')?.addEventListener('click', () => {
-      const meta = getActiveSubtypeMeta();
-      window.__openHandoff(meta.subtype.title);
-    });
+    document.getElementById('btn-create-task-drawer')?.addEventListener('click', () => { closeTasksDrawer(); window.__openHandoff(getActiveSubtypeMeta().subtype.title); });
+    document.getElementById('btn-handoff-report')?.addEventListener('click', () => window.__openHandoff(getActiveSubtypeMeta().subtype.title));
     document.getElementById('btn-close-handoff')?.addEventListener('click', closeHandoffModal);
     document.getElementById('btn-cancel-handoff')?.addEventListener('click', closeHandoffModal);
     document.getElementById('btn-confirm-handoff')?.addEventListener('click', confirmHandoff);
 
-    document.getElementById('btn-close-doc-viewer')?.addEventListener('click', closeDocViewer);
+    document.getElementById('btn-close-doc-viewer')?.addEventListener('click', () => document.getElementById('modal-doc-viewer').classList.remove('open'));
     document.getElementById('btn-print-doc')?.addEventListener('click', () => window.print());
     document.getElementById('btn-doc-handoff')?.addEventListener('click', () => {
-      closeDocViewer();
-      if (state.docContext) {
-        window.__openHandoff(`Первинний документ ${state.docContext.docId}: ${state.docContext.docLabel}`, state.docContext.docId);
-      }
+      document.getElementById('modal-doc-viewer').classList.remove('open');
+      if (state.docContext) window.__openHandoff(`Первинний документ ${state.docContext.docId}: ${state.docContext.docLabel}`, state.docContext.docId);
     });
 
     document.getElementById('btn-export-csv')?.addEventListener('click', exportCSV);
-
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
         e.preventDefault();
-        document.getElementById('global-search')?.focus();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          performUndo();
-        }
+        performUndo();
       }
     });
   });
