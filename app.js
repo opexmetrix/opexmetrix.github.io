@@ -197,7 +197,7 @@
         paid: true
       }
     ],
-    holdingEntity: 'ALL',
+    holdingEntity: 'ALKOM_TD',
     ledgerSeq: 9428,
     ledgerEntries: [
       {
@@ -817,6 +817,24 @@
   ];
 
   const HOLDING_ENTITIES = {
+    ALKOM_TD: {
+      badge: 'ТОВ "ТД Алком" (Виробництво ортопедії • Салони ORTOS • Аптечна мережа)',
+      cashBalance: 14850000,
+      revenue: 28500000,
+      cogs: 16200000,
+      opex: 4100000,
+      taxes: 1850000,
+      receivables: 4920000
+    },
+    ALKOM: {
+      badge: 'ТОВ "ТД Алком" (Виробництво ортопедії • Салони ORTOS • Аптечна мережа)',
+      cashBalance: 14850000,
+      revenue: 28500000,
+      cogs: 16200000,
+      opex: 4100000,
+      taxes: 1850000,
+      receivables: 4920000
+    },
     ALL: {
       badge: 'Група Компаній (Цех + Склад + Торговий Дім)',
       cashBalance: 4850000,
@@ -910,6 +928,14 @@
   };
 
   const NICHE_PROFILES = {
+    ALKOM: {
+      badge: 'Медичні вироби • Ортопедія • Компресійний трикотаж',
+      shortName: 'ТД Алком (Виробництво + ORTOS + Аптеки)',
+      salesHint: 'Накладна з серіями Lot/Batch + Сертифікати ДПС/Держлікслужби',
+      defaultDocType: 'WAYBILL',
+      summary:
+        'Адаптовано під ТОВ «ТД «Алком»: наскрізний партійний облік (Lot/Batch), матриця SKU (Модель × Розмір × Клас × Колір), клімат-контроль WMS, стенд градуйованого тиску та аптечна дистрибуція (АНЦ, Подорожник, ORTOS).'
+    },
     TRADE: {
       badge: 'Оптова та роздрібна торгівля',
       shortName: 'Холдинг + Виробництво MES',
@@ -1348,6 +1374,385 @@
   }
 
   // ─── 1. ГОЛОВНА (ПУЛЬС ХОЛДИНГУ ТА КОНСОЛІДАЦІЯ) ──────────────────────────
+  
+  // ─── Turnkey Profile: ТОВ «ТД «Алком» (Медичні вироби, MES, ORTOS) ───────────
+  function applyAlkomProfile() {
+    state.holdingEntity = 'ALKOM_TD';
+    state.activeNiche = 'PRODUCTION';
+
+    // Matrix SKU Inventory with real Alkom models & Batch/Lot
+    state.stockItems = [
+      { sku: 'RAW-SILICONE-MED', barcode: '4820010400101', itemName: 'Силікон медичний біосумісний рідкий A+B (ISO 10993)', category: 'Товари та сировина', unit: 'кг', qty: 480, unitPrice: 1850, sellPrice: 2600, minThreshold: 150, lastDocId: 'DOC-ALK-SILICONE' },
+      { sku: 'RAW-ELAST-ROICA', barcode: '4820010400118', itemName: 'Нитки компресійні еластомерні Roica/Lycra (бобіни кл. 2)', category: 'Товари та сировина', unit: 'кг', qty: 820, unitPrice: 1420, sellPrice: 1980, minThreshold: 200, lastDocId: 'DOC-ALK-SILICONE' },
+      { sku: 'RAW-ALUM-STAY', barcode: '4820010400125', itemName: 'Ребра жорсткості алюмінієві профільовані (4 шт/к-т)', category: 'POS та комплектуючі', unit: 'к-т', qty: 1250, unitPrice: 145, sellPrice: 220, minThreshold: 300, lastDocId: 'DOC-ALK-SILICONE' },
+      { sku: 'FIN-BAN-2045-M', barcode: '4820010400132', itemName: 'Бандаж поперековий напівжорсткий Алком 2045 (р. M, беж) • LOT-2026-AK048', category: 'Обладнання та техніка', unit: 'шт', qty: 340, unitPrice: 720, sellPrice: 1350, minThreshold: 100, lastDocId: 'DOC-ALK-104' },
+      { sku: 'FIN-STOCK-6052-L', barcode: '4820010400149', itemName: 'Панчохи компресійні 2 клас (23-32 мм) Алком 6052 (р. L) • LOT-2026-TC112', category: 'Обладнання та техніка', unit: 'пар', qty: 415, unitPrice: 890, sellPrice: 1680, minThreshold: 120, lastDocId: 'DOC-ALK-104' },
+      { sku: 'FIN-KNEE-3023-XL', barcode: '4820010400156', itemName: 'Ортез колінний з силіконовим кільцем Алком 3023 (р. XL) • LOT-2026-KN033', category: 'Обладнання та техніка', unit: 'шт', qty: 195, unitPrice: 980, sellPrice: 1890, minThreshold: 50, lastDocId: 'DOC-ALK-104' },
+      { sku: 'FIN-INSOLE-COMF', barcode: '4820010400163', itemName: 'Устілка ортопедична індивідуальна каркасна Comfort (р. 41-42)', category: 'Обладнання та техніка', unit: 'пар', qty: 280, unitPrice: 420, sellPrice: 850, minThreshold: 80, lastDocId: 'DOC-ALK-104' }
+    ];
+
+    // Omnichannel CRM Deals: Pharmacy Chains + ORTOS Salons + MedCenters
+    state.crmDeals = [
+      {
+        id: 'CRM-ALK-101',
+        origin: 'INBOUND_CALL',
+        client: 'Аптечна мережа «АНЦ» (ТОВ "Аптека-Магнолія")',
+        edrpou: '36453412',
+        contact: 'Григоренко В.С. (Керівник закупівель)',
+        phone: '+380 44 593-11-20',
+        subject: 'Поставка компресійного трикотажу 2 класу Алком 6052 (1200 пар) + бандажі 2045',
+        amount: 1850000,
+        stage: 'PROPOSAL',
+        note: 'Звірено ліміт залишків. Підтверджено наявність сертифікатів відповідності Держлікслужби',
+        docId: 'DOC-ALK-104',
+        callHistory: [
+          { time: '11:15 Сьогодні', dir: 'Вхідний (SIP)', duration: '4 хв 12 сек', summary: 'Погодили специфікацію відвантаження збірної палети на центральний аптечний хаб АНЦ у Броварах.' }
+        ]
+      },
+      {
+        id: 'CRM-ALK-102',
+        origin: 'MANUAL',
+        client: 'Мережа ортопедичних салонів «ORTOS» (14 салонів)',
+        edrpou: '39201488',
+        contact: 'Ковальчук О.М. (Директор роздробу)',
+        phone: '+380 67 441-20-05',
+        subject: 'Планове поповнення роздрібних салонів (Устілки Comfort, Бандажі M/L, Ортези колінні)',
+        amount: 940000,
+        stage: 'WON',
+        note: 'Комплектація Pick & Pack за індивідуальними рецептурними заявками лікарів',
+        docId: 'DOC-ALK-104',
+        callHistory: [
+          { time: '10:30 Сьогодні', dir: 'Вхідний (SIP)', duration: '2 хв 45 сек', summary: 'Заявки на підбір ортезів за рецептами ортопедів оброблені в системі.' }
+        ]
+      },
+      {
+        id: 'CRM-ALK-103',
+        origin: 'OUTBOUND_CALL',
+        client: 'Аптечна мережа «Подорожник» (ТОВ "Соломія-Сервіс")',
+        edrpou: '37291044',
+        contact: 'Демченко М.П. (Категорійний менеджер)',
+        phone: '+380 32 297-55-10',
+        subject: 'Квартальний тендер на бандажну та післяопераційну групу Алком (850 аптек)',
+        amount: 1420000,
+        stage: 'NEGOTIATION',
+        note: 'Погоджено графік поставок раз на 14 днів із відстрочкою 21 день',
+        docId: 'DOC-ALK-104',
+        callHistory: [
+          { time: '09:40 Сьогодні', dir: 'Вихідний (SIP)', duration: '5 хв 20 сек', summary: 'Обговорили умови ексклюзивної викладки в категорії реабілітації.' }
+        ]
+      },
+      {
+        id: 'CRM-ALK-104',
+        origin: 'INBOUND_CALL',
+        client: 'Медичний центр «Добробут» (Ортопедія та Травматологія)',
+        edrpou: '31821094',
+        contact: 'Д-р Мельник В.В.',
+        phone: '+380 44 495-28-88',
+        subject: 'Ортези колінні Алком 3023 та післяопераційні бандажі (VIP стаціонар)',
+        amount: 385000,
+        stage: 'NEW',
+        note: 'Візит медичного представника (MedRep) завершився запитом на договір',
+        docId: 'DOC-ALK-104',
+        callHistory: [
+          { time: 'Вчора 17:00', dir: 'Вхідний (SIP)', duration: '3 хв 10 сек', summary: 'Лікарі затвердили клінічні випробування моделі 3023 з силіконовим кільцем.' }
+        ]
+      }
+    ];
+
+    // Alkom Orders
+    state.orders = [
+      {
+        id: 'ord-alk-104',
+        orderNumber: 'INV-2026-ALK104',
+        date: '16.11.2026',
+        clientName: 'Аптечна мережа «АНЦ» (ТОВ "Аптека-Магнолія")',
+        clientEdrpou: '36453412',
+        itemsSummary: 'Панчохи компресійні 2 кл. Алком 6052 (500 пар), Бандажі 2045 (300 шт)',
+        items: [
+          { name: 'Панчохи компресійні 2 клас Алком 6052 (р. L, карамель, серія LOT-2026-TC112)', unit: 'пар', qty: 500, price: 1680, cost: 890 },
+          { name: 'Бандаж попереково-крижовий напівжорсткий Алком 2045 (р. M, серія LOT-2026-AK048)', unit: 'шт.', qty: 300, price: 1350, cost: 720 },
+          { name: 'Ортез колінний з шарнірами Алком 3023 (р. XL)', unit: 'шт.', qty: 100, price: 1890, cost: 980 }
+        ],
+        totalAmount: 1434000,
+        costAmount: 759000,
+        marginPct: 47.1,
+        status: 'PAID',
+        withVat: true
+      },
+      {
+        id: 'ord-alk-105',
+        orderNumber: 'INV-2026-ALK105',
+        date: '16.11.2026',
+        clientName: 'Мережа ортопедичних салонів «ORTOS» (Поповнення)',
+        clientEdrpou: '39201488',
+        itemsSummary: 'Устілки Comfort (280 пар), Бандажі Алком 2045 (120 шт)',
+        items: [
+          { name: 'Устілка ортопедична індивідуальна каркасна Comfort (р. 41-42)', unit: 'пар', qty: 280, price: 850, cost: 420 },
+          { name: 'Бандаж поперековий напівжорсткий Алком 2045 (р. M, беж)', unit: 'шт.', qty: 120, price: 1350, cost: 720 }
+        ],
+        totalAmount: 400000,
+        costAmount: 204000,
+        marginPct: 49.0,
+        status: 'SHIPPED',
+        withVat: true
+      }
+    ];
+
+    // Alkom MES Production Lines
+    state.mesLines = [
+      {
+        id: 'line-alk-1',
+        name: 'Лінія САПР №1 • Автоматизований розкрійний комплекс Lectra / Gerber',
+        orderTitle: 'Наряд #MES-ALK01 • Лекала розмірних сіток S-XXL (Бандажі Алком 2045)',
+        operator: 'Розкрійний майстер Коваль О. (Зміна А • QR #OP-03)',
+        oee: 95.4,
+        cycleSec: 28,
+        kwh: 18.5,
+        batchCost: 72000,
+        doneQty: 95,
+        totalQty: 100,
+        status: 'ACTIVE'
+      },
+      {
+        id: 'line-alk-2',
+        name: 'Лінія №2 • Круглопанчішні автомати компресійного в\'язання Merz CC4-II',
+        orderTitle: 'Наряд #MES-ALK02 • В\'язання змінного градієнта (Панчохи 2 кл. 6052)',
+        operator: 'Оператор в\'язального цеху Сидоренко Т. (Зміна А • QR #OP-11)',
+        oee: 92.8,
+        cycleSec: 140,
+        kwh: 26.0,
+        batchCost: 222500,
+        doneQty: 240,
+        totalQty: 250,
+        status: 'ACTIVE'
+      },
+      {
+        id: 'line-alk-3',
+        name: 'Швейно-складальна дільниця №3 • Вшивання Velcro, ребер жорсткості та пелотів',
+        orderTitle: 'Наряд #MES-ALK03 • Складання поперекових корсетів (Партія для ORTOS)',
+        operator: 'Бригада швачок №1 (QR #OP-18)',
+        oee: 89.6,
+        cycleSec: 65,
+        kwh: 12.4,
+        batchCost: 145000,
+        doneQty: 110,
+        totalQty: 120,
+        status: 'ACTIVE'
+      },
+      {
+        id: 'line-alk-4',
+        name: 'Стенд калібрування №4 • Вимірювальний стенд HOSY / MST контролю компресії',
+        orderTitle: 'Наряд #MES-ALK04 • Тест розподілу тиску 100%-70%-40% (Серія LOT-2026-TC112)',
+        operator: 'Інженер-метролог Грищенко І. (QR #OP-05)',
+        oee: 98.2,
+        cycleSec: 45,
+        kwh: 8.2,
+        batchCost: 185000,
+        doneQty: 50,
+        totalQty: 50,
+        status: 'READY_RELEASE'
+      },
+      {
+        id: 'line-alk-5',
+        name: 'Дільниця 100% ВТК №5 • Лазерне маркування серій (Batch/Lot) та термоупаковка',
+        orderTitle: 'Наряд #MES-ALK05 • Маркування QR партій та контроль швів (Аптечна мережа АНЦ)',
+        operator: 'Контролер ВТК Шевчук Н. (QR #OP-09)',
+        oee: 96.1,
+        cycleSec: 22,
+        kwh: 11.0,
+        batchCost: 98000,
+        doneQty: 500,
+        totalQty: 500,
+        status: 'READY_RELEASE'
+      },
+      {
+        id: 'line-alk-6',
+        name: 'Дільниця R&D та Прототипування • Індивідуальні устілки та складне ортезування',
+        orderTitle: 'Наряд #MES-ALK06 • Індивідуальні каркасні устілки Comfort за 3D-сканами стоп',
+        operator: 'Ортопед-технік Марченко Д. (QR #OP-02)',
+        oee: 91.4,
+        cycleSec: 180,
+        kwh: 6.8,
+        batchCost: 64000,
+        doneQty: 28,
+        totalQty: 30,
+        status: 'ACTIVE'
+      }
+    ];
+
+    // Alkom BOMs
+    state.boms = [
+      {
+        name: 'Бандаж поперековий жорсткий Алком 2045 (Партія 100 од. • САПР + Швейна збірка)',
+        qty: 100,
+        totalBatchCost: 72000,
+        operations: [
+          { name: 'Автоматизований САПР-розкрій гіпоалергенного полотна', duration: '45 хв' },
+          { name: 'Вшивання 4 профільованих алюмінієвих ребер жорсткості та липучок Velcro', duration: '90 хв' },
+          { name: '100% ВТК контроль швів та нанесення QR-коду партії LOT-2026-AK048', duration: '30 хв' }
+        ]
+      },
+      {
+        name: 'Панчохи компресійні 2 клас Алком 6052 (Партія 250 пар • Merz автоматика)',
+        qty: 250,
+        totalBatchCost: 222500,
+        operations: [
+          { name: 'В\'язання трикотажу на круглопанчішних автоматах Merz CC4-II', duration: '180 хв' },
+          { name: 'Стенд калібрування тиску HOSY (контроль градієнта 100%-70%-40%)', duration: '60 хв' },
+          { name: 'Медичне термофіксування, фасування та присвоєння серії LOT-2026-TC112', duration: '45 хв' }
+        ]
+      }
+    ];
+
+    // Alkom Primary Document
+    state.activeOcrDoc = {
+      id: 'DOC-ALK-104',
+      docType: 'WAYBILL',
+      typeBadge: 'Видаткова накладна (Медичні вироби з номерами серій Lot/Batch)',
+      source: 'Сформовано автоматично з WMS сканування збірної палети',
+      docNumber: 'ВН-2026/ALK104 від 16.11.2026',
+      counterparty: 'Аптечна мережа «АНЦ» (ТОВ "Аптека-Магнолія")',
+      edrpou: '36453412',
+      amount: 1434000,
+      vatAmount: 100380,
+      itemsSummary: 'Панчохи компресійні 2 кл. Алком 6052 (500 пар, серія LOT-2026-TC112) + Бандажі 2045 (300 шт, серія LOT-2026-AK048) + Сертифікати відповідності Держлікслужби',
+      ecosystemLink: 'Склад WMS (Рах. 26) -> Клімат-контроль -> Відвантаження B2B на палетах (Рах. 361)',
+      aiRiskCheck: 'ОК: Сертифікати відповідності дійсні, градуйований тиск 23.8 мм рт.ст. підтверджено протоколом ВТК.',
+      approvalRoute: 'Нач. ВТК (OK) -> Завскладом WMS (OK) -> Фіндиректор / Власник',
+      ledgerDt: '361 Розрахунки з покупцями (АНЦ)',
+      ledgerDtCode: '361',
+      ledgerKt: '701 Дохід від реалізації готової продукції',
+      ledgerKtCode: '701'
+    };
+
+    // Alkom Approval Stream Docs
+    state.approvalDocs = [
+      {
+        id: 'DOC-ALK-104',
+        docNumber: 'ВН-2026/ALK104 від 16.11.2026',
+        source: 'WMS Склад (Збірна палета)',
+        typeBadge: 'Видаткова накладна B2B (Медичні вироби)',
+        counterparty: 'Аптечна мережа «АНЦ» (ТОВ "Аптека-Магнолія")',
+        edrpou: '36453412',
+        ecosystemLink: 'Компресійні панчохи 2 кл. (500 пар) + Бандажі 2045 (300 шт) • Партії LOT-2026-TC112 / AK048',
+        amount: 1434000,
+        approvalRoute: 'Нач. ВТК (OK) -> Завскладом WMS (OK) -> Очікує Власника',
+        status: 'PENDING',
+        ledgerDt: '361 Розрахунки з покупцями (АНЦ)',
+        ledgerDtCode: '361',
+        ledgerKt: '701 Дохід від реалізації готової продукції',
+        ledgerKtCode: '701'
+      },
+      {
+        id: 'DOC-ALK-QA-01',
+        docNumber: 'АКТ-ВТК-048 від 16.11.2026',
+        source: 'Стенд HOSY / Метрологія',
+        typeBadge: 'Протокол калібрування тиску',
+        counterparty: 'Цех компресійного трикотажу ТД Алком',
+        edrpou: '32490244',
+        ecosystemLink: 'Тест градієнта тиску 100% (23.8 мм рт.ст.) -> 70% -> 40% пройшов успішно. Відхилення 0.4%.',
+        amount: 222500,
+        approvalRoute: 'Інженер-метролог (OK) -> Нач. Цеху (OK) -> Очікує Власника',
+        status: 'PENDING',
+        ledgerDt: '26 Готова продукція',
+        ledgerDtCode: '26',
+        ledgerKt: '231 Основне виробництво (Цех компресії)',
+        ledgerKtCode: '231'
+      },
+      {
+        id: 'DOC-ALK-SILICONE',
+        docNumber: 'ВХ-СИЛ-109 від 15.11.2026',
+        source: 'Лабораторія Вхідного Контролю',
+        typeBadge: 'Вхідний контроль сировини',
+        counterparty: 'Wacker Chemie AG (Німеччина)',
+        edrpou: 'DE12948102',
+        ecosystemLink: 'Силікон медичний рідкий біосумісний A+B (480 кг) • Сертифікат біобезпеки ISO 10993',
+        amount: 888000,
+        approvalRoute: 'Хімік-технолог (OK) -> Відділ постачання (OK) -> Очікує Власника',
+        status: 'PENDING',
+        ledgerDt: '201 Сировина та матеріали (Склад WMS)',
+        ledgerDtCode: '201',
+        ledgerKt: '632 Розрахунки з іноземними постачальниками',
+        ledgerKtCode: '632'
+      }
+    ];
+
+    // Alkom Cost Centers
+    state.costCenters = [
+      { code: 'ЦФВ-01 • Виробничий комплекс ортопедії та компресії (MES)', head: 'Головний технолог Бондар В.М. • Рах. 231 / 91', limitUah: 18500000, spentUah: 14200000, remainingUah: 4300000, status: 'NORMAL' },
+      { code: 'ЦФВ-02 • Мережа роздрібних салонів ортопедії ORTOS', head: 'Керівник роздробу Ковальчук О.М. • Рах. 93', limitUah: 4200000, spentUah: 3450000, remainingUah: 750000, status: 'NORMAL' },
+      { code: 'ЦФВ-03 • Департамент B2B дистрибуції та роботи з аптеками', head: 'Директор з продажів Савченко Д.Р. • Рах. 93', limitUah: 3600000, spentUah: 2890000, remainingUah: 710000, status: 'NORMAL' },
+      { code: 'ЦФВ-04 • R&D, Клінічні дослідження та Академія Алком', head: 'Медичний директор д-р Грищенко І.В. • Рах. 94', limitUah: 1500000, spentUah: 1180000, remainingUah: 320000, status: 'NORMAL' }
+    ];
+
+    // Alkom Payables
+    state.payables = [
+      { id: 'AP-1', party: 'Wacker Chemie AG (Медичний силікон ISO 10993)', edrpou: 'DE12948102', doc: 'INV-DE-8812 (Силікон A+B, 480 кг)', docId: 'DOC-ALK-SILICONE', amount: 888000, overdueDays: 0, dueDate: '28.11.2026', status: 'OPEN' },
+      { id: 'AP-2', party: 'Asahi Kasei / Roica Europe (Еластомерні нитки)', edrpou: 'DE81142099', doc: 'INV-AK-4410 (Бобіни Roica кл. 2)', docId: 'DOC-ALK-SILICONE', amount: 540000, overdueDays: 0, dueDate: '02.12.2026', status: 'OPEN' },
+      { id: 'AP-3', party: 'ТОВ "АлюмПрофіль Україна" (Ребра жорсткості)', edrpou: '37102944', doc: 'РН-1190 (Алюмінієві шини 4 ребра)', docId: 'DOC-ALK-SILICONE', amount: 181250, overdueDays: 0, dueDate: '25.11.2026', status: 'OPEN' },
+      { id: 'AP-4', party: 'АТ "Київобленерго" (Електроенергія виробництва)', edrpou: '22767506', doc: 'Рах. 11/2026 (Круглопанчішні автомати)', docId: 'DOC-ALK-104', amount: 94500, overdueDays: 0, dueDate: '20.11.2026', status: 'OPEN' }
+    ];
+
+    // Alkom Ledger Entries
+    state.ledgerEntries = [
+      {
+        id: 'JL-9428',
+        time: '14:52:18.042',
+        doc: 'ВН-2026/ALK104 / ПН ЄРПН',
+        desc: 'Реалізація партії компресійного трикотажу Алком 6052 та бандажів 2045 (Аптечна мережа АНЦ)',
+        entity: 'ТОВ "ТД Алком"',
+        dt: '361 Розрахунки з покупцями (АНЦ)',
+        dtCode: '361',
+        kt: '701 Дохід від реалізації ГП',
+        ktCode: '701',
+        amount: 1434000
+      },
+      {
+        id: 'JL-9427',
+        time: '14:52:18.044',
+        doc: 'ПН J1201016 (Ставка 7%)',
+        desc: 'Нараховано податкове зобов\'язання з ПДВ (7% на мед. вироби) при відвантаженні партії на АНЦ',
+        entity: 'ТОВ "ТД Алком"',
+        dt: '701 Дохід від реалізації ГП',
+        dtCode: '701',
+        kt: '6412 Розрахунки за ПДВ',
+        ktCode: '6412',
+        amount: 100380
+      },
+      {
+        id: 'JL-9426',
+        time: '14:52:18.046',
+        doc: 'FIFO-Списання партії LOT-2026-TC112',
+        desc: 'Списано собівартість реалізованої партії компресійного трикотажу та ортезів за техкартами BOM',
+        entity: 'ТОВ "ТД Алком"',
+        dt: '901 Собівартість реалізованої ГП',
+        dtCode: '901',
+        kt: '26 Готова продукція (Склад WMS)',
+        ktCode: '26',
+        amount: 759000
+      },
+      {
+        id: 'JL-9425',
+        time: '14:38:05.119',
+        doc: 'MES-ALK02 / Merz CC4',
+        desc: 'Випуск готової продукції з цеху компресійного в\'язання після стенда HOSY (Партія 250 пар)',
+        entity: 'ТОВ "ТД Алком"',
+        dt: '26 Готова продукція',
+        dtCode: '26',
+        kt: '231 Основне виробництво (MES)',
+        ktCode: '231',
+        amount: 222500
+      }
+    ];
+
+    // Alkom Company Logs
+    state.companyLogs = [
+      { time: '11:15:22', role: 'STAFF (ВТК / Метролог)', module: 'Цех MES', sheet: 'Контроль_Градієнта_HOSY', action: 'Стенд HOSY підтвердив градієнт 100%-70%-40% на партії LOT-2026-TC112', amount: 222500 },
+      { time: '11:42:05', role: 'STAFF (Менеджер B2B)', module: 'CRM / Аптеки', sheet: 'CRM_Аптечні_Мережі', action: 'Сформовано накладну на 1 434 000 грн для Аптечної мережі «АНЦ» (Партії LOT-2026-TC112 та AK048)', amount: 1434000 },
+      { time: '14:52:18', role: 'CHIEF_ACCOUNTANT', module: 'Облік / ОСВ', sheet: 'Проводки_ОСВ_ДЗКЗ', action: 'Проводка JL-9428: Дт 361 Кт 701 (ТОВ "Аптека-Магнолія" / АНЦ) + ПДВ 7%', amount: 1434000 }
+    ];
+  }
+
   function renderPulseSection() {
     const ent = HOLDING_ENTITIES[state.holdingEntity] || HOLDING_ENTITIES.ALL;
     const cashBalance = ent.cashBalance;
@@ -4528,11 +4933,21 @@
     if (holdingSelect) {
       holdingSelect.addEventListener('change', () => {
         state.holdingEntity = holdingSelect.value || 'ALL';
+        if (state.holdingEntity === 'ALKOM_TD' || state.holdingEntity === 'ALKOM') {
+          applyAlkomProfile();
+        }
         const ent = HOLDING_ENTITIES[state.holdingEntity] || HOLDING_ENTITIES.ALL;
         const sidebarName = document.getElementById('sidebar-niche-name');
         if (sidebarName) sidebarName.textContent = ent.badge;
         renderPulseSection();
         renderCashflowChart();
+        renderStockSection();
+        renderMesSection();
+        renderCrmDealsTable();
+        renderSalesOrdersTable();
+        renderLedgerSection();
+        renderCostCentersTable();
+        renderDebtSection();
         showInlineStatus(`Контур консолідації перемкнено: ${ent.badge}`);
       });
     }
@@ -6909,6 +7324,15 @@
   // ─── Boot ──────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     bindEvents();
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const qProfile = params.get('profile') || params.get('niche') || params.get('entity');
+      const holdingSel = document.getElementById('holding-entity-select');
+      if ((qProfile && (qProfile.toLowerCase() === 'alkom' || qProfile.toUpperCase() === 'ALKOM_TD')) || (holdingSel && holdingSel.value === 'ALKOM_TD')) {
+        if (holdingSel) holdingSel.value = 'ALKOM_TD';
+        applyAlkomProfile();
+      }
+    } catch (_e) {}
     await loadAllData();
     try {
       const params = new URLSearchParams(window.location.search);
