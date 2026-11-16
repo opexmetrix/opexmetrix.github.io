@@ -215,6 +215,22 @@
       display: flex; justify-content: space-between; align-items: center; gap: 10px; box-shadow: var(--shadow-sm);
     }
     .recon-item.matched { border-left: 4px solid var(--success); background: #F0FDF4; }
+    /* Document Scan & OCR Split View */
+    .scan-split { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; padding: 16px; height: 100%; overflow: auto; }
+    .scan-dropzone {
+      border: 2px dashed var(--border-strong); border-radius: 10px; padding: 20px; text-align: center;
+      background: #F8FAFC; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .scan-dropzone:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .scan-preview-box {
+      border: 1px solid var(--border); border-radius: 8px; background: #0F172A; min-height: 240px; max-height: 360px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; color: #94A3B8;
+    }
+    .scan-preview-box img { max-width: 100%; max-height: 360px; object-fit: contain; }
+    .scan-form-card {
+      background: #FFFFFF; border: 1px solid var(--border); border-radius: 10px; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-sm);
+    }
     .sidebar-search { padding: 4px 12px 10px; border-bottom: 1px solid #1E293B; }
     .sidebar-search input {
       width: 100%; background: #1E293B; border: 1px solid #334155; color: #FFFFFF;

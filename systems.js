@@ -25,6 +25,20 @@
     undoStack: [],
     handoffContext: null,
     docContext: null,
+    scanDraft: {
+      fileName: 'Фото_накладної_телефон.jpg',
+      previewUrl: null,
+      sampleMode: 'INVOICE',
+      docType: 'Прибуткова накладна (Вхідна від постачальника)',
+      docNum: 'ПН-009482',
+      docDate: '16.11.2026',
+      partner: 'ТОВ «Текстиль-Імпорт» (ЄДРПОУ 38491022)',
+      itemDesc: 'Пряжа еластанова Lycra 70 DEN (800 кг) — Склад №1',
+      amount: 720000,
+      vat: 144000,
+      postingDt: '201',
+      postingCt: '631'
+    },
     tasks: [
       { id: 'TSK-101', title: 'Акт звірки: Аптечна мережа АНЦ (Договір №402/26)', sender: 'Савченко Д. І. (Комерційний директор)', recipient: 'Шевченко О. В. (Головний бухгалтер)', priority: 'URGENT', date: '16.11.2026 11:45', view: 'sales-recon', rowId: 'REC-ANC', status: 'ACTIVE', comment: 'Перевірити зарахування оплати на 1 004 000 грн по накладній ВН-004182.' },
       { id: 'TSK-102', title: 'Списання сировини М-29: Наряд WO-2026-4402', sender: 'Мельник С. М. (Нач. швейного цеху)', recipient: 'Коваленко І. П. (CEO)', priority: 'APPROVAL', date: '16.11.2026 10:15', view: 'mes-m29', rowId: 'M29-LYCRA', status: 'ACTIVE', comment: 'Перевитрата пряжі Lycra 70 DEN (+1.8 кг) через переналагодження Merz CC4.' },
@@ -65,6 +79,16 @@
         { id: 'balance', code: 'Ф-1', title: 'Баланс підприємства (Форма №1)', tag: 'НП(С)БО 1' },
         { id: 'pnl-stat', code: 'Ф-2', title: 'Фінансові результати (Форма №2)', tag: 'P&L' },
         { id: 'vat-decl', code: 'ПДВ', title: 'Реєстр ПН та Декларація ПДВ', tag: 'Податки' }
+      ]
+    },
+    {
+      id: 'DOCS',
+      title: 'Обіг документів (Скан / ЕДО)',
+      open: true,
+      subtypes: [
+        { id: 'doc-scan', code: 'SCAN', title: 'Скан з телефону / ПК (OCR)', tag: 'Фото / PDF → Облік' },
+        { id: 'doc-flow', code: 'ЕДО', title: 'Реєстр обігу документів', tag: 'Вчасно / M.E.Doc' },
+        { id: 'doc-archive', code: 'КЕП', title: 'Архів підписаних документів', tag: 'ЕЦП / Хеш' }
       ]
     },
     {
@@ -382,6 +406,68 @@
         { title: 'Лідер росту чеку', val: 'ОРТОС (+22.4%)' }
       ],
       summary: () => `<div>Покриття України: <strong>3 554 торгових точок</strong></div><div class="summary-checksum"><span class="checksum-badge">Retention 6 міс: 95.6%</span></div>`
+    },
+
+    'doc-scan': {
+      columns: [
+        { key: 'docNum', label: '№ Документа', editable: true },
+        { key: 'docType', label: 'Тип', editable: true },
+        { key: 'partner', label: 'Контрагент', editable: true },
+        { key: 'amount', label: 'Сума (грн)', num: true, editable: true },
+        { key: 'status', label: 'Статус', editable: true }
+      ],
+      rows: [
+        { id: 'SCN-1', docNum: 'ПН-009482', docType: 'Скан з телефону (OCR)', partner: 'ТОВ «Текстиль-Імпорт»', amount: 720000, status: 'Очікує проведення' }
+      ],
+      kpis: () => [
+        { title: 'Розпізнавання (OCR)', val: 'Фото / PDF / Камера' },
+        { title: 'Авто-визначення Дт/Кт', val: 'Posting Groups' },
+        { title: 'Середній час обробки', val: '3 секунди' },
+        { title: 'Інтеграція ЕДО', val: 'Вчасно / M.E.Doc' }
+      ],
+      summary: () => `<div>Завантажте фото з телефону або PDF-скан з комп’ютера для миттєвого проведення в облік</div><div class="summary-checksum"><span class="checksum-badge">OCR + ЕЦП активні</span></div>`
+    },
+
+    'doc-flow': {
+      columns: [
+        { key: 'id', label: '№ Документа', editable: true },
+        { key: 'date', label: 'Дата', editable: true },
+        { key: 'type', label: 'Вид документа', editable: true },
+        { key: 'partner', label: 'Контрагент / Відправник', editable: true },
+        { key: 'channel', label: 'Джерело (Скан / ЕДО)', editable: true },
+        { key: 'sum', label: 'Сума (грн)', num: true, editable: true },
+        { key: 'status', label: 'Статус обігу', editable: true }
+      ],
+      rows: [
+        { id: 'ВН-004182', date: '16.11.2026', type: 'Видаткова накладна + ТТН', partner: 'ТОВ «Аптека АНЦ»', channel: 'Вчасно.ЕДО (КЕП)', sum: 1004000, status: 'Очікує підпису контрагента' },
+        { id: 'ПН-009480', date: '16.11.2026', type: 'Прибуткова накладна (Сировина)', partner: 'ТОВ «Текстиль-Імпорт»', channel: 'Скан з телефону (OCR)', sum: 864000, status: 'Проведено (Дт 201 Кт 631)' },
+        { id: 'АЗВ-402', date: '15.11.2026', type: 'Акт звірки взаєморозрахунків', partner: 'ТОВ «Подорожник»', channel: 'M.E.Doc (КЕП)', sum: 1810000, status: 'Підписано з двох сторін' },
+        { id: 'ТТН-8819', date: '15.11.2026', type: 'Товарно-транспортна накладна', partner: 'Нова Пошта / ТОВ «ОРТОС»', channel: 'Скан з ПК (PDF)', sum: 685000, status: 'Підписано та проведено' }
+      ],
+      kpis: (rows) => [
+        { title: 'Документів в обігу', val: rows.length },
+        { title: 'Підписано КЕП / Проведено', val: rows.filter(r => r.status.includes('Підпис') || r.status.includes('Провед')).length },
+        { title: 'Отримано через Скан/Фото', val: rows.filter(r => r.channel.includes('Скан')).length },
+        { title: 'Електронний обмін', val: 'Вчасно.ЕДО + M.E.Doc' }
+      ],
+      summary: (rows) => `<div>Загальна сума документів в обігу: <strong>${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">100% первинних документів зі сканом/КЕП</span></div>`
+    },
+
+    'doc-archive': {
+      columns: [
+        { key: 'id', label: 'ID Архіва', editable: true },
+        { key: 'date', label: 'Дата підпису', editable: true },
+        { key: 'doc', label: 'Документ', editable: true },
+        { key: 'signer', label: 'Підписант (КЕП)', editable: true },
+        { key: 'hash', label: 'Криптографічний хеш (SHA-256)', editable: true },
+        { key: 'status', label: 'Статус зберігання', editable: true }
+      ],
+      rows: [
+        { id: 'ARC-101', date: '15.11.2026 17:42', doc: 'АЗВ-402 (ТОВ «Подорожник»)', signer: 'Шевченко О. В. (ЦСК «Україна»)', hash: '8f4a2c91...d03e12', status: 'Незмінний архів (OK)' },
+        { id: 'ARC-102', date: '15.11.2026 15:10', doc: 'ТТН-8819 (ТОВ «ОРТОС»)', signer: 'Коваленко І. П. (Приват24 КЕП)', hash: '3b71e90a...4419bc', status: 'Незмінний архів (OK)' },
+        { id: 'ARC-103', date: '14.11.2026 11:20', doc: 'МД №100294 (Імпорт Lycra 70D)', signer: 'Шевченко О. В. (ЦСК «Україна»)', hash: '9c12a04f...8810ef', status: 'Незмінний архів (OK)' }
+      ],
+      summary: (rows) => `<div>Документів у крипто-архіві: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Перевірка цілісності: OK</span></div>`
     },
 
     'posting-setup': {
@@ -1193,13 +1279,13 @@
     `;
 
     const shortcuts = [
+      { id: 'doc-scan', title: 'Скан з телефону / ПК (OCR)', sub: 'Фото / PDF накладної → Облік' },
+      { id: 'doc-flow', title: 'Реєстр обігу документів', sub: 'Вчасно.ЕДО, M.E.Doc, ТТН' },
       { id: 'osv', title: 'Оборотно-сальдова (ОСВ)', sub: 'Синтетичний баланс' },
       { id: 'balance', title: 'Баланс (Форма №1)', sub: 'Актив = Пасив (51.05M)' },
       { id: 'pnl-stat', title: 'Фін. результати (Форма №2)', sub: 'P&L / Прибуток 6.36M' },
       { id: 'vat-decl', title: 'Декларація ПДВ та ЄРПН', sub: 'Зобов’язання та кредит' },
       { id: 'mes-cost', title: 'Калькуляція собівартості', sub: 'Матеріали + ЗП + ЗВВ' },
-      { id: 'wms-m19', title: 'Матеріальний звіт (М-19)', sub: 'Рух по складах №1/№2' },
-      { id: 'wms-inv19', title: 'Інвентаризація (Інв-19)', sub: 'Звірка ТМЦ по ТСД' },
       { id: 'coa', title: 'План рахунків (Live)', sub: 'Всі залишки в реальному часі' }
     ];
     document.getElementById('acc-reports-shortcut-grid').innerHTML = shortcuts.map(s => `
@@ -1450,7 +1536,78 @@
     const viewport = document.getElementById('table-viewport');
     if (!viewport) return;
 
-    if (state.activeView === 'bank-recon' && state.viewDisplayMode === 'LIST') {
+    if (state.activeView === 'doc-scan' && state.viewDisplayMode === 'LIST') {
+      const sd = state.scanDraft;
+      const previewHtml = sd.previewUrl
+        ? `<img src="${sd.previewUrl}" alt="Скан документа">`
+        : `<div style="padding:20px; text-align:left; width:92%; background:#FFFFFF; color:#0F172A; border-radius:6px; font-family:var(--font-mono); font-size:11px; box-shadow:0 4px 14px rgba(0,0,0,0.25);">
+             <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #CBD5E1; padding-bottom:6px; margin-bottom:8px;">
+               <strong>${esc(sd.fileName)}</strong>
+               <span style="color:#059669; font-weight:700;">OCR 99.4%</span>
+             </div>
+             <div><strong>Документ:</strong> ${esc(sd.docType)} № ${esc(sd.docNum)}</div>
+             <div><strong>Дата:</strong> ${esc(sd.docDate)}</div>
+             <div><strong>Контрагент:</strong> ${esc(sd.partner)}</div>
+             <div style="margin-top:8px; padding:6px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:4px;">
+               <div><strong>Позиція:</strong> ${esc(sd.itemDesc)}</div>
+               <div><strong>Сума без ПДВ:</strong> ${fmt(sd.amount)} грн | <strong>ПДВ:</strong> ${fmt(sd.vat)} грн</div>
+             </div>
+           </div>`;
+
+      viewport.innerHTML = `
+        <div class="scan-split">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <label class="scan-dropzone" for="scan-file-input">
+              <div style="font-weight:700; font-size:13px; color:#0F172A;">Завантажити фото з телефону або скан з ПК (JPG / PNG / PDF)</div>
+              <div style="font-size:11.5px; color:#64748B;">Натисніть тут або зробіть фото камерою телефону — система розпізнає реквізити автоматично</div>
+              <input type="file" id="scan-file-input" accept="image/*,.pdf" capture="environment" style="display:none;" onchange="window.__handleScanUpload(this)">
+            </label>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-row-action" onclick="window.__loadSampleScan('INVOICE')">Зразок 1: Фото накладної (Сировина)</button>
+              <button class="btn-row-action" onclick="window.__loadSampleScan('TTN')">Зразок 2: Скан ТТН (Аптека АНЦ)</button>
+            </div>
+
+            <div class="scan-preview-box">${previewHtml}</div>
+          </div>
+
+          <div class="scan-form-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="font-size:14px; font-weight:800;">Розпізнані дані (OCR) та Авто-проводка</h3>
+              <span class="status-badge status-ok">Готово до проведення</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Тип документа:</label>
+              <input type="text" id="scan-doc-type" class="form-control" value="${esc(sd.docType)}">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group"><label class="form-label">№ Документа:</label><input type="text" id="scan-doc-num" class="form-control" value="${esc(sd.docNum)}"></div>
+              <div class="form-group"><label class="form-label">Дата:</label><input type="text" id="scan-doc-date" class="form-control" value="${esc(sd.docDate)}"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Контрагент (ЄДРПОУ):</label>
+              <input type="text" id="scan-partner" class="form-control" value="${esc(sd.partner)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Номенклатура / Призначення:</label>
+              <input type="text" id="scan-item" class="form-control" value="${esc(sd.itemDesc)}">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group"><label class="form-label">Сума без ПДВ (грн):</label><input type="number" id="scan-amount" class="form-control" value="${sd.amount}"></div>
+              <div class="form-group"><label class="form-label">ПДВ (грн):</label><input type="number" id="scan-vat" class="form-control" value="${sd.vat}"></div>
+            </div>
+            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:10px; font-size:12px;">
+              <strong>Авто-визначена проводка (Posting Group):</strong> Дт <code>${esc(sd.postingDt)}</code> / Кт <code>${esc(sd.postingCt)}</code>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+              <button class="btn-action-outline" onclick="window.__openHandoff('Скан документа ' + document.getElementById('scan-doc-num').value)">Передати колезі</button>
+              <button class="btn-action-primary" onclick="window.__postScannedDoc()">Провести в облік і Реєстр ЕДО &rarr;</button>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (state.activeView === 'bank-recon' && state.viewDisplayMode === 'LIST') {
       viewport.innerHTML = `
         <div class="recon-split">
           <div class="recon-col">
@@ -1586,6 +1743,73 @@
     const summaryEl = document.getElementById('table-summary-bar');
     if (summaryEl) summaryEl.innerHTML = dataset.summary ? dataset.summary(filteredRows) : `<div>Рядків: ${filteredRows.length}</div>`;
   }
+
+  window.__handleScanUpload = function(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    state.scanDraft.fileName = file.name;
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        state.scanDraft.previewUrl = e.target.result;
+        renderActiveView();
+        showToast(`Файл «${file.name}» завантажено та розпізнано через OCR`);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      state.scanDraft.previewUrl = null;
+      renderActiveView();
+      showToast(`PDF-документ «${file.name}» завантажено в чергу OCR`);
+    }
+  };
+
+  window.__loadSampleScan = function(mode) {
+    state.scanDraft.previewUrl = null;
+    if (mode === 'TTN') {
+      state.scanDraft = {
+        fileName: 'Скан_ТТН_АНЦ_004195.pdf', previewUrl: null, sampleMode: 'TTN',
+        docType: 'Товарно-транспортна накладна (ТТН)', docNum: 'ТТН-004195', docDate: '16.11.2026',
+        partner: 'ТОВ «Аптека АНЦ» (ЄДРПОУ 38910421)',
+        itemDesc: 'Панчохи компресійні КЛ-2 (1 200 пар, Партія LOT-2026-TC112)',
+        amount: 648000, vat: 45360, postingDt: '361', postingCt: '701'
+      };
+    } else {
+      state.scanDraft = {
+        fileName: 'Фото_накладної_телефон.jpg', previewUrl: null, sampleMode: 'INVOICE',
+        docType: 'Прибуткова накладна (Вхідна від постачальника)', docNum: 'ПН-009482', docDate: '16.11.2026',
+        partner: 'ТОВ «Текстиль-Імпорт» (ЄДРПОУ 38491022)',
+        itemDesc: 'Пряжа еластанова Lycra 70 DEN (800 кг) — Склад №1',
+        amount: 720000, vat: 144000, postingDt: '201', postingCt: '631'
+      };
+    }
+    renderActiveView();
+  };
+
+  window.__postScannedDoc = function() {
+    const docNum = document.getElementById('scan-doc-num').value.trim() || 'Скан-001';
+    const docType = document.getElementById('scan-doc-type').value.trim();
+    const docDate = document.getElementById('scan-doc-date').value.trim();
+    const partner = document.getElementById('scan-partner').value.trim();
+    const itemDesc = document.getElementById('scan-item').value.trim();
+    const amt = parseFloat(document.getElementById('scan-amount').value) || 0;
+    const vat = parseFloat(document.getElementById('scan-vat').value) || 0;
+    const tot = amt + vat;
+
+    DATASETS['doc-flow'].rows.unshift({
+      id: docNum, date: docDate, type: docType, partner: partner,
+      channel: 'Скан (Телефон / ПК OCR)', sum: tot,
+      status: `Проведено (Дт ${state.scanDraft.postingDt} Кт ${state.scanDraft.postingCt})`
+    });
+    DATASETS['ledger'].rows.unshift({
+      id: 'JRN-' + Math.floor(100 + Math.random() * 899),
+      time: '16.11 Щойно', doc: docNum,
+      dt: state.scanDraft.postingDt, ct: state.scanDraft.postingCt,
+      sum: tot, desc: `${partner}: ${itemDesc}`, status: 'Скан OCR → Облік'
+    });
+    updateAuditRadar();
+    showToast(`Скан ${docNum} проведено! Додано в Реєстр обігу та Єдиний журнал.`);
+    window.__switchToTable('doc-flow', docNum);
+  };
 
   window.__reconcileBankRow = function(rowId) {
     const r = DATASETS['bank-recon'].rows.find(x => x.id === rowId);
