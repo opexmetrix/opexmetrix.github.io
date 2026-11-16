@@ -1,7 +1,5 @@
 /**
- * OpexMetrix Systems — Операційна ERP-платформа нового покоління
- * 20-символьний вхід, Excel-сітка з формулами (=), Undo Ctrl+Z, Аудит-Радар 24/7,
- * Імпорт Банк/1С, Живі проводки, Симулятор What-If для CEO, Маршрутизація
+ * OpexMetrix Systems — Аналітика, Прогнозування (Prediction) та Єдина ERP
  */
 
 (function () {
@@ -28,6 +26,7 @@
     role: null,
     activeMode: 'TABLE',
     activeView: 'osv',
+    chartMetric: 'rev',
     entity: 'ALKOM',
     period: 'CURRENT_MONTH',
     noNumbersMode: false,
@@ -92,6 +91,17 @@
   };
 
   const DOMAINS = [
+    {
+      id: 'ANALYTICS',
+      title: 'Аналітика та Прогнозування',
+      open: true,
+      subtypes: [
+        { id: 'an-yoy', code: 'YOY', title: 'Порівняння 2025 vs 2026 + Прогноз', tag: 'Prediction +3 міс.' },
+        { id: 'an-sku', code: 'ABC', title: 'ABC/XYZ Аналіз SKU та Попит', tag: 'Прогноз замовлень' },
+        { id: 'an-chains', code: 'LTV', title: 'Аналітика мереж, DSO та Скоринг', tag: 'Прогноз оплат' },
+        { id: 'an-prod', code: 'OEE', title: 'Аналітика цеху (OEE та Запаси)', tag: 'Прогноз дефіциту' }
+      ]
+    },
     {
       id: 'GL',
       title: 'Головна книга та Проводки',
@@ -159,6 +169,35 @@
     }
   ];
 
+  // Time-series data for 2025 vs 2026 + Prediction (+3 months)
+  const TIME_SERIES = {
+    labels: ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру*', 'Січ27*', 'Лют27*'],
+    rev: {
+      y2025: [16.2, 17.1, 18.4, 18.0, 17.5, 16.8, 17.2, 18.9, 20.4, 22.1, 23.4, 26.2, null, null],
+      y2026: [19.4, 20.8, 22.1, 21.6, 21.2, 20.5, 21.4, 23.1, 25.0, 27.1, 28.5, null, null, null],
+      pred:  [null, null, null, null, null, null, null, null, null, null, 28.5, 31.8, 29.4, 30.6],
+      unit: 'млн грн'
+    },
+    profit: {
+      y2025: [2.8, 3.0, 3.3, 3.2, 3.0, 2.9, 3.0, 3.4, 3.8, 4.2, 4.56, 5.2, null, null],
+      y2026: [3.9, 4.2, 4.6, 4.4, 4.3, 4.1, 4.4, 4.9, 5.4, 5.9, 6.36, null, null, null],
+      pred:  [null, null, null, null, null, null, null, null, null, null, 6.36, 7.25, 6.60, 6.95],
+      unit: 'млн грн'
+    },
+    cash: {
+      y2025: [7.2, 7.8, 8.1, 8.5, 8.3, 8.0, 8.4, 9.1, 9.8, 10.6, 11.4, 12.8, null, null],
+      y2026: [11.5, 11.9, 12.4, 12.1, 12.6, 12.9, 13.2, 13.6, 14.0, 14.4, 14.91, null, null, null],
+      pred:  [null, null, null, null, null, null, null, null, null, null, 14.91, 16.4, 17.1, 18.2],
+      unit: 'млн грн'
+    },
+    units: {
+      y2025: [32.0, 34.1, 36.5, 35.2, 34.0, 32.5, 33.8, 36.9, 40.1, 43.0, 45.2, 50.4, null, null],
+      y2026: [38.5, 41.2, 43.8, 42.4, 41.5, 40.2, 41.9, 45.6, 49.2, 52.8, 55.4, null, null, null],
+      pred:  [null, null, null, null, null, null, null, null, null, null, 55.4, 61.5, 56.8, 58.9],
+      unit: 'тис. шт'
+    }
+  };
+
   function fmt(val) {
     if (state.noNumbersMode) return '—';
     if (val === null || val === undefined || isNaN(val)) return '—';
@@ -188,9 +227,7 @@
       .replace(/"/g, '&quot;');
   }
 
-  function colLetter(idx) {
-    return String.fromCharCode(65 + idx);
-  }
+  function colLetter(idx) { return String.fromCharCode(65 + idx); }
 
   function evalMathExpr(raw) {
     const s = String(raw).trim();
@@ -200,9 +237,7 @@
     try {
       const res = Function('"use strict"; return (' + expr + ')')();
       return (typeof res === 'number' && isFinite(res)) ? res : null;
-    } catch (_) {
-      return null;
-    }
+    } catch (_) { return null; }
   }
 
   function showToast(msg) {
@@ -220,6 +255,96 @@
   }
 
   const DATASETS = {
+    'an-yoy': {
+      columns: [
+        { key: 'month', label: 'Період / Місяць', editable: true },
+        { key: 'rev25', label: 'Виручка 2025 (схожий період)', num: true, editable: true },
+        { key: 'rev26', label: 'Виручка 2026 (Факт / Прогноз)', num: true, editable: true },
+        { key: 'growth', label: 'Приріст YoY %', num: true, computed: true },
+        { key: 'prof25', label: 'Прибуток 2025', num: true, editable: true },
+        { key: 'prof26', label: 'Прибуток 2026', num: true, editable: true },
+        { key: 'conf', label: 'Точність моделі %', num: true, editable: true },
+        { key: 'status', label: 'Тип даних', editable: true }
+      ],
+      recalcRow: (r) => { r.growth = r.rev25 > 0 ? ((r.rev26 - r.rev25) / r.rev25 * 100) : 0; },
+      rows: [
+        { id: 'YOY-08', month: 'Серпень 2026', rev25: 18900000, rev26: 23100000, growth: 22.2, prof25: 3400000, prof26: 4900000, conf: 100.0, status: 'Факт (Закрито)' },
+        { id: 'YOY-09', month: 'Вересень 2026', rev25: 20400000, rev26: 25000000, growth: 22.5, prof25: 3800000, prof26: 5400000, conf: 100.0, status: 'Факт (Закрито)' },
+        { id: 'YOY-10', month: 'Жовтень 2026', rev25: 22100000, rev26: 27100000, growth: 22.6, prof25: 4200000, prof26: 5900000, conf: 100.0, status: 'Факт (Закрито)' },
+        { id: 'YOY-11', month: 'Листопад 2026', rev25: 23400000, rev26: 28500000, growth: 21.8, prof25: 4560000, prof26: 6355000, conf: 100.0, status: 'Поточний місяць' },
+        { id: 'YOY-12', month: 'Грудень 2026 (Prediction)', rev25: 26200000, rev26: 31800000, growth: 21.4, prof25: 5200000, prof26: 7250000, conf: 94.2, status: 'Прогноз (Зимовий пік)' },
+        { id: 'YOY-01', month: 'Січень 2027 (Prediction)', rev25: 19400000, rev26: 29400000, growth: 51.5, prof25: 3900000, prof26: 6600000, conf: 89.5, status: 'Прогноз (Тренд + Контракти)' },
+        { id: 'YOY-02', month: 'Лютий 2027 (Prediction)', rev25: 20800000, rev26: 30600000, growth: 47.1, prof25: 4200000, prof26: 6950000, conf: 87.0, status: 'Прогноз (Модель)' }
+      ],
+      summary: (rows) => {
+        const avgGrowth = rows.reduce((s, r) => s + Number(r.growth), 0) / rows.length;
+        return `<div>Середній приріст до аналогічного періоду 2025: <strong>+${fmtPct(avgGrowth)}</strong></div><div class="summary-checksum"><span class="checksum-badge">Прогноз Гру 2026: ${fmt(31800000)} грн</span></div>`;
+      }
+    },
+
+    'an-sku': {
+      columns: [
+        { key: 'sku', label: 'SKU / Група', editable: true },
+        { key: 'name', label: 'Номенклатура', editable: true },
+        { key: 'rev', label: 'Виручка (міс)', num: true, editable: true },
+        { key: 'share', label: 'Частка %', num: true, editable: true },
+        { key: 'abc', label: 'ABC / XYZ', editable: true },
+        { key: 'predQty', label: 'Прогноз попиту (Гру, шт)', num: true, editable: true },
+        { key: 'recStock', label: 'Рек. страховий запас', num: true, editable: true },
+        { key: 'status', label: 'Рекомендація', editable: true }
+      ],
+      rows: [
+        { id: 'SKU-1', sku: 'ALK-C2-M-BLK', name: 'Панчохи компресійні КЛ-2 (Чорні)', rev: 9400000, share: 33.0, abc: 'AX (Хіт)', predQty: 5400, recStock: 1800, status: 'Збільшити випуск +18%' },
+        { id: 'SKU-2', sku: 'ALK-BP4-L', name: 'Бандаж попереково-крижовий БП-4', rev: 6800000, share: 23.9, abc: 'AX (Стабільний)', predQty: 3400, recStock: 1100, status: 'Норма запасу ОК' },
+        { id: 'SKU-3', sku: 'ALK-GL1-L', name: 'Гольфи антиемболічні КЛ-1', rev: 5100000, share: 17.9, abc: 'AY (Клініки)', predQty: 7200, recStock: 2400, status: 'Тендерний пік у грудні' },
+        { id: 'SKU-4', sku: 'ALK-OR2-S', name: 'Ортез колінний шарнірний OR-2', rev: 4200000, share: 14.7, abc: 'BX (Сезонний)', predQty: 1950, recStock: 650, status: 'Ризик ожеледиці (+25% попит)' },
+        { id: 'SKU-5', sku: 'ALK-INS-41', name: 'Устілки ортопедичні (Зима)', rev: 3000000, share: 10.5, abc: 'CY (Імпульс)', predQty: 3100, recStock: 900, status: 'Підтримати залишок' }
+      ],
+      summary: (rows) => `<div>Товарів групи A (75% виручки): <strong>3 позиції</strong></div><div class="summary-checksum"><span class="checksum-badge">Прогноз випуску на Грудень: ${fmtInt(21050, 'шт')}</span></div>`
+    },
+
+    'an-chains': {
+      columns: [
+        { key: 'chain', label: 'Аптечна мережа', editable: true },
+        { key: 'rev', label: 'Оборот (міс)', num: true, editable: true },
+        { key: 'margin', label: 'Маржа %', num: true, editable: true },
+        { key: 'avgCheck', label: 'Середнє замовлення', num: true, editable: true },
+        { key: 'dso', label: 'Факт. DSO (днів)', num: true, editable: true },
+        { key: 'predPay', label: 'Прогноз оплати (сума)', num: true, editable: true },
+        { key: 'payDate', label: 'Очікувана дата', editable: true },
+        { key: 'status', label: 'Скоринг надійності', editable: true }
+      ],
+      rows: [
+        { id: 'CH-1', chain: 'ТОВ «Аптека АНЦ»', rev: 9450000, margin: 41.2, avgCheck: 1420000, dso: 16, predPay: 1950000, payDate: '20.11.2026', status: 'AAA (Надійний)' },
+        { id: 'CH-2', chain: 'ТОВ «Подорожник»', rev: 7800000, margin: 39.8, avgCheck: 1180000, dso: 18, predPay: 1600000, payDate: '22.11.2026', status: 'AAA (Надійний)' },
+        { id: 'CH-3', chain: 'ТОВ «ОРТОС»', rev: 4620000, margin: 43.5, avgCheck: 685000, dso: 24, predPay: 850000, payDate: '25.11.2026', status: 'AA (Контроль ліміту)' },
+        { id: 'CH-4', chain: 'Аптека 9-1-1', rev: 3650000, margin: 38.4, avgCheck: 740000, dso: 15, predPay: 900000, payDate: '19.11.2026', status: 'AAA (Надійний)' },
+        { id: 'CH-5', chain: 'ММ «Добробут»', rev: 2980000, margin: 44.0, avgCheck: 490000, dso: 14, predPay: 630000, payDate: '18.11.2026', status: 'AAA (Надійний)' }
+      ],
+      summary: (rows) => {
+        const totPay = rows.reduce((s, r) => s + Number(r.predPay), 0);
+        return `<div>Середній DSO по мережах: <strong>17.4 днів</strong></div><div class="summary-checksum"><span class="checksum-badge">Прогноз надходжень до 25.11: ${fmt(totPay)} грн</span></div>`;
+      }
+    },
+
+    'an-prod': {
+      columns: [
+        { key: 'line', label: 'Дільниця / Лінія', editable: true },
+        { key: 'oee', label: 'Ефективність OEE %', num: true, editable: true },
+        { key: 'output', label: 'Випуск (шт/міс)', num: true, editable: true },
+        { key: 'scrap', label: 'Брак %', num: true, editable: true },
+        { key: 'matDays', label: 'Запас сировини (днів)', num: true, editable: true },
+        { key: 'status', label: 'Прогноз та Ризики', editable: true }
+      ],
+      rows: [
+        { id: 'PR-1', line: 'В’язальний цех (Merz CC4 #1-4)', oee: 89.4, output: 18500, scrap: 0.31, matDays: 11, status: 'УВАГА: Замовити Lycra 70D до 22.11' },
+        { id: 'PR-2', line: 'В’язальний цех (Merz CC4 #5-8)', oee: 91.2, output: 21400, scrap: 0.24, matDays: 19, status: 'Завантажено оптимально' },
+        { id: 'PR-3', line: 'Розкрійний комплекс CAD/CAM', oee: 86.0, output: 11200, scrap: 0.40, matDays: 24, status: 'ОК (Резерв потужності +14%)' },
+        { id: 'PR-4', line: 'Складальна дільниця (Ортези)', oee: 78.5, output: 4300, scrap: 0.52, matDays: 16, status: 'Потрібна 2-га зміна у грудні' }
+      ],
+      summary: () => `<div>Середній OEE виробництва: <strong>86.3%</strong> (Світовий бенчмарк >85%)</div><div class="summary-checksum"><span class="checksum-badge">Критична сировина: Lycra 70D (11 дн.)</span></div>`
+    },
+
     'osv': {
       columns: [
         { key: 'acc', label: 'Рахунок', editable: true },
@@ -745,7 +870,6 @@
     }
   };
 
-  // ================= UNDO HISTORY =================
   function pushUndo(viewId, rowsSnapshot) {
     state.undoStack.push({ viewId, rows: JSON.parse(JSON.stringify(rowsSnapshot)) });
     if (state.undoStack.length > 25) state.undoStack.shift();
@@ -761,9 +885,7 @@
     if (state.activeMode === 'TABLE') {
       if (state.activeView !== snap.viewId) window.__switchToTable(snap.viewId);
       else renderActiveView();
-    } else {
-      renderCEOCockpit();
-    }
+    } else renderCEOCockpit();
     showToast('Останню зміну скасовано (Ctrl+Z)');
   }
 
@@ -772,39 +894,20 @@
     if (btn) btn.disabled = state.undoStack.length === 0;
   }
 
-  // ================= AUDIT RADAR 24/7 =================
   function computeAuditRisks() {
     const risks = [];
     const osvDt = DATASETS['osv'].rows.reduce((s, r) => s + Number(r.turnDt || 0), 0);
     const osvCt = DATASETS['osv'].rows.reduce((s, r) => s + Number(r.turnCt || 0), 0);
     if (Math.abs(osvDt - osvCt) > 0.01) {
-      risks.push({
-        level: 'danger',
-        title: 'Розбаланс ОСВ (Дт != Кт)',
-        desc: `Різниця оборотів становить ${fmt(Math.abs(osvDt - osvCt))} грн. Потребує перевірки проводок.`,
-        view: 'osv',
-        rowId: ''
-      });
+      risks.push({ level: 'danger', title: 'Розбаланс ОСВ (Дт != Кт)', desc: `Різниця оборотів: ${fmt(Math.abs(osvDt - osvCt))} грн.`, view: 'osv', rowId: '' });
     }
     const anc = DATASETS['sales-recon'].rows.find(r => r.id === 'REC-ANC');
     if (anc && anc.status.includes('Потребує')) {
-      risks.push({
-        level: 'warning',
-        title: 'Незвірена оплата ТОВ «Аптека АНЦ» (1 004 000 грн)',
-        desc: 'Банківський платіж ще не рознесений у Акті звірки.',
-        view: 'sales-recon',
-        rowId: 'REC-ANC'
-      });
+      risks.push({ level: 'warning', title: 'Незвірена оплата ТОВ «Аптека АНЦ» (1 004 000 грн)', desc: 'Банківський платіж ще не рознесений у Акті звірки.', view: 'sales-recon', rowId: 'REC-ANC' });
     }
     const m29 = DATASETS['mes-m29'].rows.find(r => Number(r.diff) > 0.5);
     if (m29) {
-      risks.push({
-        level: 'warning',
-        title: `Перевитрата сировини: ${m29.mat}`,
-        desc: `Наряд ${m29.order}: перевитрата +${m29.diff} ${m29.unit} понад технологічну норму.`,
-        view: 'mes-m29',
-        rowId: m29.id
-      });
+      risks.push({ level: 'warning', title: `Перевитрата сировини: ${m29.mat}`, desc: `Наряд ${m29.order}: перевитрата +${m29.diff} ${m29.unit}.`, view: 'mes-m29', rowId: m29.id });
     }
     return risks;
   }
@@ -814,14 +917,8 @@
     const btn = document.getElementById('btn-audit-radar');
     const countEl = document.getElementById('radar-count');
     if (!btn || !countEl) return;
-
-    if (risks.length === 0) {
-      btn.classList.add('clean');
-      countEl.textContent = '0 ризиків';
-    } else {
-      btn.classList.remove('clean');
-      countEl.textContent = `${risks.length} ризик(и)`;
-    }
+    if (risks.length === 0) { btn.classList.add('clean'); countEl.textContent = '0 ризиків'; }
+    else { btn.classList.remove('clean'); countEl.textContent = `${risks.length} ризик(и)`; }
 
     const body = document.getElementById('radar-list-body');
     if (body) {
@@ -839,7 +936,6 @@
     }
   }
 
-  // ================= LOGIN GATE =================
   function initLoginGate() {
     const screen = document.getElementById('login-screen');
     const form = document.getElementById('login-form');
@@ -850,8 +946,7 @@
     const errBox = document.getElementById('login-error');
 
     function updateCounters() {
-      const uLen = userInput.value.length;
-      const pLen = passInput.value.length;
+      const uLen = userInput.value.length, pLen = passInput.value.length;
       userCount.textContent = `${uLen} / 20`;
       passCount.textContent = `${pLen} / 20`;
       userCount.classList.toggle('valid', uLen === 20);
@@ -883,8 +978,7 @@
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       errBox.classList.remove('show');
-      const u = userInput.value;
-      const p = passInput.value;
+      const u = userInput.value, p = passInput.value;
       if (u.length !== 20 || p.length !== 20) {
         errBox.textContent = 'Помилка: Логін та пароль мають містити рівно 20 символів.';
         errBox.classList.add('show');
@@ -892,10 +986,7 @@
       }
       if (u === CREDENTIALS.CEO.login && p === CREDENTIALS.CEO.pass) loginAs('CEO');
       else if (u === CREDENTIALS.CPA.login && p === CREDENTIALS.CPA.pass) loginAs('CPA');
-      else {
-        errBox.textContent = 'Невірний логін або пароль.';
-        errBox.classList.add('show');
-      }
+      else { errBox.textContent = 'Невірний логін або пароль.'; errBox.classList.add('show'); }
     });
 
     document.getElementById('btn-quick-ceo').addEventListener('click', () => {
@@ -926,7 +1017,7 @@
     if (saved && CREDENTIALS[saved]) loginAs(saved);
   }
 
-  // ================= CEO COCKPIT + WHAT-IF SIMULATOR =================
+  // ================= CEO ANALYTICS & PREDICTION COCKPIT =================
   function switchToCEO() {
     state.activeMode = 'CEO';
     document.getElementById('ceo-cockpit-view').classList.add('active');
@@ -950,46 +1041,85 @@
     renderActiveView();
   };
 
-  function updateSimulator() {
-    const pDelta = Number(document.getElementById('sim-price')?.value || 0);
-    const cDelta = Number(document.getElementById('sim-cost')?.value || 0);
-    const days = Number(document.getElementById('sim-days')?.value || 14);
+  function renderAnalyticsChart() {
+    const container = document.getElementById('analytics-main-chart');
+    if (!container) return;
 
-    document.getElementById('sim-price-val').textContent = (pDelta >= 0 ? '+' : '') + pDelta + '%';
-    document.getElementById('sim-cost-val').textContent = (cDelta >= 0 ? '+' : '') + cDelta + '%';
-    document.getElementById('sim-days-val').textContent = days + ' дн.';
+    const series = TIME_SERIES[state.chartMetric] || TIME_SERIES.rev;
+    const labels = TIME_SERIES.labels;
+    const allVals = [...series.y2025, ...series.y2026, ...series.pred].filter(v => v !== null);
+    const minV = Math.min(...allVals) * 0.85;
+    const maxV = Math.max(...allVals) * 1.08;
 
-    const baseRev = DATASETS['sales-margin'].rows.reduce((s, r) => s + Number(r.rev), 0);
-    const baseCogs = DATASETS['sales-margin'].rows.reduce((s, r) => s + Number(r.cogs), 0);
-    const projRev = baseRev * (1 + pDelta / 100);
-    const projCogs = baseCogs * (1 + cDelta / 100);
-    const projProfit = (projRev - projCogs) - 5025000;
-    const ebitda = projRev > 0 ? ((projRev - projCogs - 3630000) / projRev * 100) : 0;
-    const cashGapRisk = days > 35 ? 'Ризик розриву!' : (days > 21 ? 'Помірний' : 'Безпечно');
+    const W = 920, H = 210, padL = 46, padR = 20, padT = 18, padB = 28;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
 
-    document.getElementById('sim-result-box').innerHTML = `
-      <div class="sim-res-item"><span>Прогноз виручки</span><strong>${state.noNumbersMode ? '—' : '₴ ' + fmt(projRev)}</strong></div>
-      <div class="sim-res-item"><span>Чистий прибуток</span><strong style="color:${projProfit >= 0 ? '#34D399' : '#F87171'};">${state.noNumbersMode ? '—' : '₴ ' + fmt(projProfit)}</strong></div>
-      <div class="sim-res-item"><span>EBITDA / Ліквідність</span><strong>${fmtPct(ebitda)} (${cashGapRisk})</strong></div>
-    `;
+    const getX = (i) => padL + (i / (labels.length - 1)) * plotW;
+    const getY = (v) => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
 
-    const cashBase = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end), 0);
-    const m1 = cashBase;
-    const m2 = cashBase + projProfit * 0.6 - (days * 140000);
-    const m3 = m2 + projProfit * 0.85;
-    const maxV = Math.max(m1, m2, m3, 1);
-    const h1 = Math.max(12, Math.round((m1 / maxV) * 56));
-    const h2 = Math.max(12, Math.round((Math.max(m2, 0) / maxV) * 56));
-    const h3 = Math.max(12, Math.round((Math.max(m3, 0) / maxV) * 56));
+    function buildPath(arr) {
+      let d = '';
+      arr.forEach((v, i) => {
+        if (v === null) return;
+        const x = getX(i).toFixed(1), y = getY(v).toFixed(1);
+        d += (d === '' ? `M ${x} ${y}` : ` L ${x} ${y}`);
+      });
+      return d;
+    }
 
-    document.getElementById('ceo-cashflow-chart').innerHTML = `
-      <svg viewBox="0 0 360 72" width="100%" height="72" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:6px; padding:4px;">
-        <rect x="28" y="${64 - h1}" width="64" height="${h1}" rx="4" fill="#2563EB"></rect>
-        <text x="60" y="69" font-size="9" text-anchor="middle" fill="#64748B">Поточний міс.</text>
-        <rect x="148" y="${64 - h2}" width="64" height="${h2}" rx="4" fill="${days > 35 ? '#F59E0B' : '#10B981'}"></rect>
-        <text x="180" y="69" font-size="9" text-anchor="middle" fill="#64748B">Прогноз +30 дн.</text>
-        <rect x="268" y="${64 - h3}" width="64" height="${h3}" rx="4" fill="#10B981"></rect>
-        <text x="300" y="69" font-size="9" text-anchor="middle" fill="#64748B">Прогноз +60 дн.</text>
+    // Confidence band around Prediction (last 4 points: index 10..13)
+    const predPts = [];
+    series.pred.forEach((v, i) => { if (v !== null) predPts.push({ i, v }); });
+    let bandPath = '';
+    if (predPts.length > 1) {
+      const upper = predPts.map((p, idx) => `${getX(p.i).toFixed(1)},${getY(p.v * (1 + idx * 0.025)).toFixed(1)}`);
+      const lower = [...predPts].reverse().map((p, idx) => {
+        const revIdx = predPts.length - 1 - idx;
+        return `${getX(p.i).toFixed(1)},${getY(p.v * (1 - revIdx * 0.025)).toFixed(1)}`;
+      });
+      bandPath = `<polygon points="${upper.concat(lower).join(' ')}" fill="rgba(16, 185, 129, 0.14)" />`;
+    }
+
+    // Horizontal grid lines
+    let gridHtml = '';
+    for (let g = 0; g <= 4; g++) {
+      const val = minV + ((maxV - minV) * g) / 4;
+      const y = getY(val).toFixed(1);
+      gridHtml += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#E2E8F0" stroke-width="1" />`;
+      gridHtml += `<text x="${padL - 6}" y="${Number(y) + 3}" font-size="10" text-anchor="end" fill="#64748B" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : val.toFixed(1)}</text>`;
+    }
+
+    // X labels + Prediction divider
+    const divX = getX(10).toFixed(1);
+    let xLabelsHtml = `<line x1="${divX}" y1="${padT}" x2="${divX}" y2="${H - padB}" stroke="#CBD5E1" stroke-dasharray="3,3" />`;
+    labels.forEach((lbl, i) => {
+      const x = getX(i).toFixed(1);
+      const isPred = lbl.includes('*');
+      xLabelsHtml += `<text x="${x}" y="${H - 8}" font-size="10" text-anchor="middle" fill="${isPred ? '#059669' : '#64748B'}" font-weight="${isPred ? '700' : '500'}">${lbl}</text>`;
+    });
+
+    // Data dots for 2026 & Prediction
+    let dotsHtml = '';
+    series.y2026.forEach((v, i) => {
+      if (v === null) return;
+      dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.2" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" />`;
+    });
+    series.pred.forEach((v, i) => {
+      if (v === null || i === 10) return;
+      dotsHtml += `<circle cx="${getX(i).toFixed(1)}" cy="${getY(v).toFixed(1)}" r="3.8" fill="#10B981" stroke="#FFFFFF" stroke-width="1.5" />`;
+      dotsHtml += `<text x="${getX(i).toFixed(1)}" y="${(getY(v) - 8).toFixed(1)}" font-size="10" font-weight="700" text-anchor="middle" fill="#059669" font-family="JetBrains Mono">${state.noNumbersMode ? '—' : v}</text>`;
+    });
+
+    container.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="210" style="overflow:visible;">
+        ${gridHtml}
+        ${xLabelsHtml}
+        ${bandPath}
+        <path d="${buildPath(series.y2025)}" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5,4" />
+        <path d="${buildPath(series.y2026)}" fill="none" stroke="#2563EB" stroke-width="2.5" />
+        <path d="${buildPath(series.pred)}" fill="none" stroke="#10B981" stroke-width="2.5" stroke-dasharray="6,4" />
+        ${dotsHtml}
       </svg>
     `;
   }
@@ -998,49 +1128,91 @@
     const cashTot = DATASETS['treasury-stmt'].rows.reduce((s, r) => s + Number(r.end), 0) + 57500;
     const revTot = DATASETS['sales-margin'].rows.reduce((s, r) => s + Number(r.rev), 0);
     const gpTot = DATASETS['sales-margin'].rows.reduce((s, r) => s + Number(r.gp), 0);
-    const debtTot = DATASETS['sales-recon'].rows.reduce((s, r) => s + Number(r.end), 0);
+    const marginPct = revTot > 0 ? (gpTot / revTot * 100) : 0;
 
     document.getElementById('ceo-kpi-grid').innerHTML = `
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('treasury-stmt')">
-        <div class="ceo-kpi-label">Гроші на рахунках і в касі</div>
-        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(cashTot)}</div>
-        <div class="ceo-kpi-sub">Банківські виписки IBAN &rarr;</div>
-      </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('sales-margin')">
-        <div class="ceo-kpi-label">Виручка від реалізації</div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')">
+        <div class="ceo-kpi-label">Виручка (Лис 2026)</div>
         <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(revTot)}</div>
-        <div class="ceo-kpi-sub">Валовий прибуток: ${fmt(gpTot)} &rarr;</div>
+        <div class="ceo-kpi-sub"><span>+21.8% vs 2025</span><span>YoY &rarr;</span></div>
       </div>
       <div class="ceo-kpi-card" onclick="window.__switchToTable('pnl-stat')">
-        <div class="ceo-kpi-label">Чистий прибуток (P&amp;L)</div>
+        <div class="ceo-kpi-label">Чистий прибуток</div>
         <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(6355000)}</div>
-        <div class="ceo-kpi-sub">Рентабельність 22.3% &rarr;</div>
+        <div class="ceo-kpi-sub"><span>+39.4% vs 2025</span><span>P&amp;L &rarr;</span></div>
       </div>
-      <div class="ceo-kpi-card" onclick="window.__switchToTable('sales-recon')">
-        <div class="ceo-kpi-label">Дебіторка аптечних мереж</div>
-        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(debtTot)}</div>
-        <div class="ceo-kpi-sub">Прострочка 60+ дн: 0.00 &rarr;</div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('sales-margin')">
+        <div class="ceo-kpi-label">Валова маржа</div>
+        <div class="ceo-kpi-val">${fmtPct(marginPct)}</div>
+        <div class="ceo-kpi-sub"><span>+2.5 п.п. vs 2025</span><span>SKU &rarr;</span></div>
+      </div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('treasury-stmt')">
+        <div class="ceo-kpi-label">Вільні кошти (311+301)</div>
+        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '₴ ' + fmt(cashTot)}</div>
+        <div class="ceo-kpi-sub"><span>+30.1% ліквідність</span><span>Банк &rarr;</span></div>
+      </div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-chains')">
+        <div class="ceo-kpi-label">Оборотність (DSO / DIO)</div>
+        <div class="ceo-kpi-val">${state.noNumbersMode ? '—' : '17.4 / 42 дн.'}</div>
+        <div class="ceo-kpi-sub"><span>Швидше на 8 дн.</span><span>Мережі &rarr;</span></div>
+      </div>
+      <div class="ceo-kpi-card" onclick="window.__switchToTable('an-yoy')" style="border-color:#10B981; background:#ECFDF5;">
+        <div class="ceo-kpi-label" style="color:#047857;">Prediction (Грудень 2026)</div>
+        <div class="ceo-kpi-val" style="color:#065F46;">${state.noNumbersMode ? '—' : '₴ ' + fmt(31800000)}</div>
+        <div class="ceo-kpi-sub" style="color:#047857;"><span>Точність 94.2%</span><span>Прогноз &rarr;</span></div>
+      </div>
+    `;
+
+    renderAnalyticsChart();
+
+    document.getElementById('ceo-predictions-list').innerHTML = `
+      <div class="pred-card good" onclick="window.__switchToTable('an-sku')" style="cursor:pointer;">
+        <div>
+          <div style="font-weight:700; font-size:12px;">Сезонний прогноз попиту: Компресійний трикотаж КЛ-2 (+18%)</div>
+          <div style="font-size:11px; color:#334155;">На базі продажів Грудень 2024–2025 очікується 5 400 пар/міс. Рекомендація: збільшити завантаження Merz CC4.</div>
+        </div>
+        <span class="status-badge status-ok">94.2%</span>
+      </div>
+      <div class="pred-card warn" onclick="window.__switchToTable('an-prod')" style="cursor:pointer;">
+        <div>
+          <div style="font-weight:700; font-size:12px;">Ризик зупинки: Залишок пряжі Lycra 70 DEN вистачить на 11 днів</div>
+          <div style="font-size:11px; color:#334155;">При плані 61.5 тис. шт у грудні потрібно замовити 1 500 кг пряжі не пізніше 22.11.2026.</div>
+        </div>
+        <span class="status-badge status-warning">Критично</span>
+      </div>
+      <div class="pred-card" onclick="window.__switchToTable('an-chains')" style="cursor:pointer;">
+        <div>
+          <div style="font-weight:700; font-size:12px;">Прогноз надходження коштів від мереж до 25.11: +5 930 000 грн</div>
+          <div style="font-size:11px; color:#334155;">АНЦ (1.95M), Подорожник (1.60M), ОРТОС (0.85M), Аптека 9-1-1 (0.90M), Добробут (0.63M).</div>
+        </div>
+        <span class="status-badge status-info">Cash-In</span>
       </div>
     `;
 
     const pending = state.tasks.filter(t => t.status === 'ACTIVE');
-    document.getElementById('ceo-pending-count').textContent = `${pending.length} активних`;
-    document.getElementById('ceo-approvals-list').innerHTML = pending.length === 0
-      ? '<div style="color:#059669; font-weight:600; text-align:center; padding:16px;">Всі документи погоджено</div>'
-      : pending.map(t => `
+    document.getElementById('ceo-chains-and-approvals').innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;">
+        ${DATASETS['an-chains'].rows.slice(0, 3).map(c => `
+          <div style="display:flex; justify-content:space-between; font-size:12px; padding:5px 8px; background:#F8FAFC; border-radius:4px; border:1px solid #E2E8F0;">
+            <span><strong>${esc(c.chain)}</strong> (Маржа ${fmtPct(c.margin)}, DSO ${c.dso} дн.)</span>
+            <span style="font-family:var(--font-mono); font-weight:700;">${fmt(c.rev)} грн</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase; margin-top:4px;">На погодженні у CEO (${pending.length}):</div>
+      ${pending.length === 0 ? '<div style="color:#059669; font-weight:600; font-size:12px;">Всі документи погоджено</div>' : pending.slice(0, 2).map(t => `
         <div class="ceo-approval-item">
           <div>
             <div style="font-weight:700; font-size:12px;">${esc(t.title)}</div>
-            <div style="font-size:11px; color:#64748B;">Від: ${esc(t.sender)} • ${esc(t.comment)}</div>
+            <div style="font-size:11px; color:#64748B;">${esc(t.comment)}</div>
           </div>
           <div style="display:flex; gap:5px; flex-shrink:0;">
             <button class="btn-row-action" onclick="window.__switchToTable('${esc(t.view)}', '${esc(t.rowId || '')}')">Таблиця</button>
             <button class="btn-approve-sm" onclick="window.__completeTask('${esc(t.id)}')">Погодити</button>
           </div>
         </div>
-      `).join('');
-
-    updateSimulator();
+      `).join('')}
+    `;
   }
 
   // ================= SIDEBAR =================
@@ -1122,7 +1294,7 @@
 
     let thead = '<thead><tr><th class="col-letter-row" style="width:36px;">#</th>';
     dataset.columns.forEach((col, cIdx) => {
-      thead += `<th class="col-letter-row" onclick="window.__sortCol('${col.key}')" title="Клікніть для сортування">${colLetter(cIdx)}</th>`;
+      thead += `<th class="col-letter-row" onclick="window.__sortCol('${col.key}')" title="Сортувати">${colLetter(cIdx)}</th>`;
     });
     thead += '<th class="col-letter-row">Дії</th></tr>';
 
@@ -1148,14 +1320,14 @@
 
         let displayVal = '';
         if (col.num) {
-          if (col.key === 'pct' || col.key === 'margin') displayVal = fmtPct(val);
-          else if (['qty', 'emp', 'items', 'book', 'fact', 'phys', 'res', 'free', 'plan', 'done'].includes(col.key)) displayVal = fmtInt(val);
+          if (['pct', 'margin', 'growth', 'share', 'conf', 'oee', 'scrap'].includes(col.key)) displayVal = fmtPct(val);
+          else if (['qty', 'emp', 'items', 'book', 'fact', 'phys', 'res', 'free', 'plan', 'done', 'predQty', 'recStock', 'dso', 'output', 'matDays'].includes(col.key)) displayVal = fmtInt(val);
           else displayVal = fmt(val);
         } else if (col.key === 'status') {
           let badgeClass = 'status-info';
           const s = String(val).toLowerCase();
-          if (s.includes('ок') || s.includes('дозв') || s.includes('підпис') || s.includes('прийн') || s.includes('зареєст') || s.includes('передано') || s.includes('норм') || s.includes('звірен') || s.includes('авто')) badgeClass = 'status-ok';
-          else if (s.includes('потр') || s.includes('очік') || s.includes('перевитр') || s.includes('карант')) badgeClass = 'status-warning';
+          if (s.includes('ок') || s.includes('дозв') || s.includes('підпис') || s.includes('прийн') || s.includes('зареєст') || s.includes('передано') || s.includes('норм') || s.includes('звірен') || s.includes('авто') || s.includes('aaa') || s.includes('факт')) badgeClass = 'status-ok';
+          else if (s.includes('потр') || s.includes('очік') || s.includes('перевитр') || s.includes('карант') || s.includes('увага') || s.includes('ризик')) badgeClass = 'status-warning';
           displayVal = `<span class="status-badge ${badgeClass}">${esc(val)}</span>`;
         } else {
           displayVal = esc(val);
@@ -1167,13 +1339,13 @@
                       ondblclick="window.__editCell(this, '${esc(row.id)}', '${esc(col.key)}', ${rIdx})">${displayVal}</td>`;
       });
 
-      const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.id;
+      const rowLabel = row.name || row.sub || row.article || row.item || row.mat || row.product || row.client || row.bank || row.dept || row.doc || row.contract || row.desc || row.month || row.chain || row.line || row.id;
       tbody += `
         <td style="text-align:right;">
           <div class="row-actions">
             <button class="btn-row-action" onclick="window.__openHandoff('${esc(meta.subtype.title)}: ${esc(rowLabel)}', '${esc(row.id)}')">Передати</button>
             <button class="btn-row-action" onclick="window.__openDocViewer('${esc(row.id)}', '${esc(rowLabel)}')">Док</button>
-            <button class="btn-row-action btn-row-del" onclick="window.__deleteRow('${esc(row.id)}')" title="Видалити рядок">&times;</button>
+            <button class="btn-row-action btn-row-del" onclick="window.__deleteRow('${esc(row.id)}')" title="Видалити">&times;</button>
           </div>
         </td>
       </tr>`;
@@ -1253,7 +1425,7 @@
         row[colKey] = newVal;
         if (dataset.recalcRow) dataset.recalcRow(row);
         updateAuditRadar();
-        showToast(`Оновлено (${col.label}) — підсумки та Аудит-Радар перераховано`);
+        showToast(`Оновлено (${col.label}) — підсумки перераховано`);
       }
       renderActiveView(rIdx);
     }
@@ -1282,7 +1454,7 @@
       const col = dataset.columns.find(c => c.key === colKey);
       const row = dataset.rows.find(r => r.id === rowId);
       if (!row || !col || !col.editable) {
-        showToast('Розрахункова клітинка — редагуйте базові значення');
+        showToast('Розрахункова клітинка');
         return;
       }
       let raw = e.target.value.trim();
@@ -1300,7 +1472,7 @@
       if (dataset.recalcRow) dataset.recalcRow(row);
       updateAuditRadar();
       renderActiveView(rIdx);
-      showToast('Формулу / значення застосовано');
+      showToast('Значення через fx застосовано');
     }
   });
 
@@ -1337,54 +1509,34 @@
         const amt = Math.abs(parseFloat((parts[3] || '0').replace(/[^\d.-]/g, ''))) || 0;
         const purpose = parts[4] || 'Оплата по банку';
 
-        // Credit Bank 311
         const pb = DATASETS['treasury-stmt'].rows[0];
-        if (pb && amt > 0) {
-          pb.inc += amt;
-          DATASETS['treasury-stmt'].recalcRow(pb);
-        }
-        // Match sales-recon
+        if (pb && amt > 0) { pb.inc += amt; DATASETS['treasury-stmt'].recalcRow(pb); }
         if (partner.includes('АНЦ')) {
           const anc = DATASETS['sales-recon'].rows.find(r => r.id === 'REC-ANC');
-          if (anc) {
-            anc.paid += amt;
-            anc.status = 'Звірено автоматично (Банк OK)';
-            DATASETS['sales-recon'].recalcRow(anc);
-          }
+          if (anc) { anc.paid += amt; anc.status = 'Звірено автоматично (Банк OK)'; DATASETS['sales-recon'].recalcRow(anc); }
         } else if (partner.includes('Подорожник')) {
           const pod = DATASETS['sales-recon'].rows.find(r => r.id === 'REC-POD');
-          if (pod) {
-            pod.paid += amt;
-            DATASETS['sales-recon'].recalcRow(pod);
-          }
+          if (pod) { pod.paid += amt; DATASETS['sales-recon'].recalcRow(pod); }
         }
-        // Add live double-entry posting
         DATASETS['ledger'].rows.unshift({
           id: 'JRN-' + Math.floor(100 + Math.random() * 899),
-          time: '16.11 Щойно',
-          doc: 'БВ-AUTO',
-          dt: '311',
-          ct: '361',
-          sum: amt,
-          desc: `${partner}: ${purpose}`,
-          status: 'Імпорт Банк-Клієнт'
+          time: '16.11 Щойно', doc: 'БВ-AUTO', dt: '311', ct: '361', sum: amt,
+          desc: `${partner}: ${purpose}`, status: 'Імпорт Банк-Клієнт'
         });
 
-        logBox.innerHTML += `<div class="auto-log-line"><span class="auto-log-ok">[Дт311 Кт361]</span><span>${esc(partner)}: +${fmt(amt)} грн проведено автоматично</span></div>`;
+        logBox.innerHTML += `<div class="auto-log-line"><span class="auto-log-ok">[Дт311 Кт361]</span><span>${esc(partner)}: +${fmt(amt)} грн проведено</span></div>`;
         if (idx === lines.length - 1) {
           updateAuditRadar();
           if (state.activeMode === 'TABLE') renderActiveView();
           else renderCEOCockpit();
-          showToast(`Імпортовано та проведено ${lines.length} банківських платежі`);
+          showToast(`Імпортовано та проведено ${lines.length} платежі`);
         }
       }, (idx + 1) * 350);
     });
   });
 
   // ================= AUTOMATION ENGINE =================
-  window.__openAutomationModal = function() {
-    document.getElementById('modal-automation').classList.add('open');
-  };
+  window.__openAutomationModal = function() { document.getElementById('modal-automation').classList.add('open'); };
 
   function appendAutoLog(tag, msg) {
     const box = document.getElementById('auto-log-box');
@@ -1479,8 +1631,7 @@
 
     state.tasks.unshift({
       id: 'TSK-' + Math.floor(105 + Math.random() * 890),
-      title: docName,
-      sender: `${senderProfile.name} (${senderProfile.title})`,
+      title: docName, sender: `${senderProfile.name} (${senderProfile.title})`,
       recipient, priority, date: timeStr,
       view: state.handoffContext ? state.handoffContext.view : state.activeView,
       rowId: state.handoffContext ? state.handoffContext.rowId : null,
@@ -1557,13 +1708,11 @@
     document.getElementById('tasks-drawer').classList.remove('open');
   }
 
-  // ================= PRIMARY DOCUMENT VIEWER =================
   window.__openDocViewer = function(docId, docLabel) {
     state.docContext = { docId, docLabel };
     const paper = document.getElementById('doc-paper-content');
     if (!paper) return;
     const sumVal = state.noNumbersMode ? '—' : '1 004 000.00 грн (в т.ч. ПДВ 7%: 65 682.24 грн)';
-
     paper.innerHTML = `
       <div class="doc-barcode-row">
         <div><strong>Електронний первинний документ</strong></div>
@@ -1582,9 +1731,7 @@
         <thead><tr><th>№</th><th>Найменування позиції / Партія (LOT)</th><th>Од.</th><th>Кількість</th><th>Сума (грн)</th></tr></thead>
         <tbody>
           <tr>
-            <td>1</td>
-            <td>${esc(docLabel)} (Партія LOT-2026-TC112, ISO 13485)</td>
-            <td>шт/пар</td>
+            <td>1</td><td>${esc(docLabel)} (Партія LOT-2026-TC112, ISO 13485)</td><td>шт/пар</td>
             <td style="text-align:right;">${state.noNumbersMode ? '—' : '1 200'}</td>
             <td style="text-align:right;">${sumVal}</td>
           </tr>
@@ -1619,7 +1766,6 @@
     showToast(`Експортовано в Excel: ${meta.subtype.title}`);
   }
 
-  // ================= INIT =================
   document.addEventListener('DOMContentLoaded', () => {
     initLoginGate();
     renderSidebar();
@@ -1630,8 +1776,13 @@
     document.getElementById('tree-search')?.addEventListener('input', renderSidebar);
     document.getElementById('btn-undo')?.addEventListener('click', performUndo);
 
-    ['sim-price', 'sim-cost', 'sim-days'].forEach(id => {
-      document.getElementById(id)?.addEventListener('input', updateSimulator);
+    document.querySelectorAll('#chart-metric-tabs .chart-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#chart-metric-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        state.chartMetric = tab.dataset.metric;
+        renderAnalyticsChart();
+      });
     });
 
     document.getElementById('btn-audit-radar')?.addEventListener('click', () => {
