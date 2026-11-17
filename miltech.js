@@ -108,37 +108,39 @@
       ]
     },
     {
-      id: 'MES',
-      title: 'Виробництво та Собівартість',
-      open: false,
+      id: 'SALES',
+      title: 'CRM, Держконтракти (АОЗ / ВЧ) та Дебіторка',
+      open: true,
       subtypes: [
-        { id: 'mes-cost', code: 'СВ', title: 'РКМ та Калькуляція (КМУ №1275)', tag: 'Прямі + ЗВВ' },
-        { id: 'mes-m29', code: 'М-29', title: 'Списання комплектуючих (М-29 / BOM)' },
-        { id: 'mes-orders', code: 'ВЗ', title: 'Виробничі замовлення', tag: 'Канбан / Цех', hasKanban: true },
+        { id: 'crm-pipeline', code: 'CRM', title: 'Воронка контрактів (АОЗ / МО / БФ)', tag: 'Канбан / Угоди', hasKanban: true },
+        { id: 'sales-orders', code: 'ЗП', title: 'Реєстр відвантажень у ВЧ', tag: 'Канбан / Акти', hasKanban: true },
+        { id: 'sales-recon', code: 'АЗВ', title: 'Акт звірки взаєморозрахунків', tag: 'Замовники МО' },
+        { id: 'sales-aging', code: 'AGE', title: 'Старіння дебіторки (Aging)', tag: 'Контроль траншів' },
+        { id: 'sales-margin', code: 'РКМ', title: 'Маржинальність по виробах', tag: 'Ліміт КМУ №1275' }
+      ]
+    },
+    {
+      id: 'MES',
+      title: 'Виробництво БпЛА / РЕБ (MES) та РКМ',
+      open: true,
+      subtypes: [
+        { id: 'mes-orders', code: 'ВЗ', title: 'Наряди на збірку БпЛА / РЕБ', tag: 'Канбан / Цех', hasKanban: true },
         { id: 'mes-boms', code: 'BOM', title: 'BOM-специфікації дронів і РЕБ', tag: 'Конструкторська' },
-        { id: 'mes-scrap', code: 'ВТК', title: 'Протоколи стендового тесту та ВТК', tag: 'ОТК / Полігон' }
+        { id: 'mes-cost', code: 'РКМ', title: 'РКМ та Калькуляція (КМУ №1275)', tag: 'Прямі + ЗВВ' },
+        { id: 'mes-m29', code: 'М-29', title: 'Списання комплектуючих (М-29)', tag: 'Норма / Факт' },
+        { id: 'mes-scrap', code: 'ВТК', title: 'Протоколи стендового тесту та полігону', tag: 'ОТК / Обліт' }
       ]
     },
     {
       id: 'WMS',
-      title: 'Склад та Партії (WMS)',
-      open: false,
+      title: 'Склад QR, Серійні № (S/N) та Імпорт',
+      open: true,
       subtypes: [
+        { id: 'wms-import', code: 'IMP', title: 'Імпорт в дорозі (Шеньчжень / ЄС)', tag: 'Митниця / ETA' },
+        { id: 'wms-batch', code: 'S/N', title: 'Серійний облік (S/N) та QR-паспорт', tag: 'Traceability' },
         { id: 'wms-m19', code: 'М-19', title: 'Матеріальний звіт (М-19)', tag: 'Прихід / Розхід' },
-        { id: 'wms-batch', code: 'LOT', title: 'Партійний облік та терміни', tag: 'Серії LOT' },
-        { id: 'wms-reserves', code: 'РЕЗ', title: 'Залишки та резерви', tag: 'Доступність SKU' },
+        { id: 'wms-reserves', code: 'РЕЗ', title: 'Резерви під контракти АОЗ', tag: 'Доступність вузлів' },
         { id: 'wms-inv19', code: 'Інв-19', title: 'Інвентаризація складу', tag: 'Ревізія' }
-      ]
-    },
-    {
-      id: 'SALES',
-      title: 'Продажі, Мережі та Дебіторка',
-      open: false,
-      subtypes: [
-        { id: 'sales-recon', code: 'АЗВ', title: 'Акт звірки взаєморозрахунків', tag: 'Мережі' },
-        { id: 'sales-aging', code: 'AGE', title: 'Старіння дебіторки (Aging)', tag: 'Прострочення' },
-        { id: 'sales-orders', code: 'ЗП', title: 'Реєстр замовлень (EDI)', tag: 'Канбан / EDI', hasKanban: true },
-        { id: 'sales-margin', code: 'МРЖ', title: 'Маржинальність продажів', tag: 'SKU / Канали' }
       ]
     },
     {
@@ -673,6 +675,66 @@
         { id: 'JRN-4', time: '15.11 14:10', doc: 'НВ-4411', dt: '26', ct: '23', sum: 1170000, desc: 'Оприбуткування гольфів КЛ-1 на склад ГП', status: 'Цех Лінія збірки БпЛА' }
       ],
       summary: (rows) => `<div>Проводок: <strong>${rows.length}</strong></div><div class="summary-checksum"><span class="checksum-badge">Сума: ${fmt(rows.reduce((s, r) => s + Number(r.sum), 0))}</span></div>`
+    },
+
+    'crm-pipeline': {
+      columns: [
+        { key: 'id', label: '№ Контракту', editable: true },
+        { key: 'client', label: 'Замовник (АОЗ / ВЧ / БФ)', editable: true },
+        { key: 'product', label: 'Виріб та Кількість', editable: true },
+        { key: 'deadline', label: 'Дедлайн поставки', editable: true },
+        { key: 'sum', label: 'Сума контракту (грн)', num: true, editable: true },
+        { key: 'rkmPct', label: 'Рентабельність РКМ %', num: true, editable: true },
+        { key: 'status', label: 'Етап угоди', editable: true }
+      ],
+      kanbanStages: ['Перемовини / Тендер', 'Погодження РКМ (КМУ №1275)', 'Підписано / Аванс', 'Відвантаження у ВЧ'],
+      rows: [
+        { id: 'AOZ-114/26', client: 'Агенція оборонних закупівель (АОЗ)', product: '450 × БпЛА «Трідент-10» FPV (Тепловіз.)', deadline: '25.11.2026', sum: 14200000, rkmPct: 22.4, status: 'Підписано / Аванс' },
+        { id: 'DSS-089/26', client: 'Держспецзв’язок (Армія Дронів)', product: '120 × РЕБ «Купол-М4» (Окопний)', deadline: '30.11.2026', sum: 9600000, rkmPct: 24.1, status: 'Погодження РКМ (КМУ №1275)' },
+        { id: 'VCH-4007/9', client: 'ВЧ А4007 (Прямий контракт)', product: '85 × Ударне крило «Трідент-Х» (45 км)', deadline: '05.12.2026', sum: 6850000, rkmPct: 21.8, status: 'Відвантаження у ВЧ' },
+        { id: 'BF-2026-44', client: 'БФ «Повернись живим»', product: '200 × Трідент-10 + 10 × НСК-2', deadline: '10.12.2026', sum: 4400000, rkmPct: 18.5, status: 'Перемовини / Тендер' }
+      ],
+      kpis: (rows) => {
+        const tot = rows.reduce((s, r) => s + Number(r.sum || 0), 0);
+        const avgRkm = rows.length ? rows.reduce((s, r) => s + Number(r.rkmPct || 0), 0) / rows.length : 0;
+        return [
+          { title: 'Портфель держконтрактів', val: fmt(tot) + ' грн' },
+          { title: 'Активних угод', val: rows.length + ' контракти' },
+          { title: 'Середня рентаб. РКМ', val: fmtPct(avgRkm) + ' (ліміт 25%)' },
+          { title: 'ПДВ-режим', val: 'Пільга 0% (п.32 ПКУ)' }
+        ];
+      },
+      summary: (rows) => `<div>Портфель контрактів: <strong>${fmt(rows.reduce((s, r) => s + Number(r.sum || 0), 0))} грн</strong></div><div class="summary-checksum"><span class="checksum-badge">КМУ №1275 РКМ Valid</span></div>`
+    },
+
+    'wms-import': {
+      columns: [
+        { key: 'id', label: 'МД / Контракт', editable: true },
+        { key: 'supplier', label: 'Постачальник (Імпорт)', editable: true },
+        { key: 'item', label: 'Комплектуючі (HS Code)', editable: true },
+        { key: 'qty', label: 'Кількість', num: true, editable: true },
+        { key: 'location', label: 'Локація / Кордон', editable: true },
+        { key: 'eta', label: 'ETA (План)', editable: true },
+        { key: 'usd', label: 'Вартість (USD)', num: true, editable: true },
+        { key: 'status', label: 'Статус митниці', editable: true }
+      ],
+      rows: [
+        { id: 'IMP-402', supplier: 'Shenzhen SkyTech (CN)', item: 'Тепловізійний модуль 640×512', qty: 600, location: 'Польський кордон (Ягодин)', eta: '21.11.2026', usd: 168000, status: 'Увага: Затримка 2 дн.' },
+        { id: 'IMP-403', supplier: 'Foxeer / SpeedyBee (CN)', item: 'Польотний контролер H743 + ESC 60A', qty: 2000, location: 'Авіа Шеньчжень → Варшава', eta: '24.11.2026', usd: 94000, status: 'В дорозі (Графік OK)' },
+        { id: 'IMP-404', supplier: 'T-Motor Aerospace (CN)', item: 'Безколекторний мотор 3115 900KV', qty: 4800, location: 'Митний пост «Львів»', eta: '18.11.2026', usd: 112000, status: 'Розмитнено (0% МКУ п.9-24)' },
+        { id: 'IMP-405', supplier: 'EuroCarbon Sp. z o.o. (PL)', item: 'Карбон 3K + Рами 10" CNC', qty: 1200, location: 'Склад №1 (Трідент)', eta: '16.11.2026', usd: 42000, status: 'Прийнято ВТК' }
+      ],
+      kpis: (rows) => {
+        const totUsd = rows.reduce((s, r) => s + Number(r.usd || 0), 0);
+        const delayed = rows.filter(r => String(r.status).includes('Увага')).length;
+        return [
+          { title: 'Імпорт у дорозі / на митниці', val: '$ ' + fmtInt(totUsd) },
+          { title: 'Активних поставок', val: rows.length + ' партії' },
+          { title: 'Критичних затримок', val: delayed + ' (Тепловізори)' },
+          { title: 'Пільга МКУ п.9-24', val: '0% мито / 0% ПДВ' }
+        ];
+      },
+      summary: (rows) => `<div>Загальний імпорт комплектуючих: <strong>$ ${fmtInt(rows.reduce((s, r) => s + Number(r.usd || 0), 0))}</strong></div><div class="summary-checksum"><span class="checksum-badge">Контроль кордону Live</span></div>`
     },
 
     'osv-acc': {
@@ -1664,7 +1726,7 @@
       { id: 'balance', title: 'Баланс (Форма №1)', sub: `Актив = Пасив (${(balTot / 1000000).toFixed(2)}M)` },
       { id: 'pnl-stat', title: 'Фін. результати (Форма №2)', sub: `P&L / Прибуток ${(netProf / 1000000).toFixed(2)}M` },
       { id: 'vat-decl', title: 'Декларація ПДВ та ЄРПН', sub: 'Зобов’язання та кредит' },
-      { id: 'mes-cost', title: 'РКМ та Калькуляція (КМУ №1275)', sub: 'Матеріали + ЗП + ЗВВ' },
+      { id: 'mes-cost', title: 'Калькуляція собівартості', sub: 'Матеріали + ЗП + ЗВВ' },
       { id: 'coa', title: 'План рахунків (Live)', sub: 'Всі залишки в реальному часі' }
     ];
     document.getElementById('acc-reports-shortcut-grid').innerHTML = shortcuts.map(s => `
@@ -1912,8 +1974,8 @@
     `;
 
     document.getElementById('ceo-predictions-list').innerHTML = `
-      <div class="pred-card good" onclick="window.__switchToTable('an-sku')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Пріоритет Контракту АОЗ №114: Поставка 450 бортів «Трідент-10» до 25.11</div><div style="font-size:11px; color:#334155;">Прогноз на грудень: 5 400 пар/міс. Рекомендація: збільшити завантаження Лінія збірки БпЛА.</div></div><span class="status-badge status-ok">94.2%</span></div>
-      <div class="pred-card warn" onclick="window.__switchToTable('an-prod')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Ризик затримки імпорту: Тепловізори 640×512 (Шеньчжень → Польща, запас 9 дн.)</div><div style="font-size:11px; color:#334155;">Критичний шлях: прискорити митне оформлення МД №402 (пільга МКУ п.9-24).</div></div><span class="status-badge status-warning">Критично</span></div>
+      <div class="pred-card good" onclick="window.__switchToTable('an-sku')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Пріоритет Контракту АОЗ №114: Поставка 450 бортів «Трідент-10» до 25.11</div><div style="font-size:11px; color:#334155;">Графік полігонного обльоту: 38 бортів/день. Контроль РКМ рентабельності: 22.4% (ліміт 25%).</div></div><span class="status-badge status-ok">94.2%</span></div>
+      <div class="pred-card warn" onclick="window.__switchToTable('an-prod')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Ризик дефіциту: Пряжа Lycra 70 DEN вистачить на 11 днів</div><div style="font-size:11px; color:#334155;">Критичний шлях: прискорити митне оформлення МД №402 (пільга МКУ п.9-24).</div></div><span class="status-badge status-warning">Критично</span></div>
       <div class="pred-card" onclick="window.__switchToTable('an-chains')" style="cursor:pointer;"><div><div style="font-weight:700; font-size:12px;">Очікувані транші Держказначейства до 25.11: +14 200 000 грн</div><div style="font-size:11px; color:#334155;">АНЦ (1.95M), Армія Дронів (1.60M), ВЧ А4007 (0.85M), ВЧ А1920 (Сили БпС) (0.90M).</div></div><span class="status-badge status-info">Cash-In</span></div>
     `;
 
@@ -2800,6 +2862,27 @@
     const previewSrc = row.previewUrl || generateScanSvg(row.id, meta.subtype.title, row.partner || row.client || 'ТОВ «Трідент Технолоджіс»', row.sum || row.amount || 0, row.date || '16.11.2026');
     const isLedgerStornable = state.activeView === 'ledger' && !String(row.status || '').includes('Сторно');
 
+    let serialPassportHtml = '';
+    if (state.activeView === 'wms-batch' || state.activeView === 'mes-orders' || state.activeView === 'crm-pipeline') {
+      const sn = row.id || 'SN-TRD10-08401';
+      serialPassportHtml = `
+        <div class="inspector-section">
+          <div class="inspector-sec-title">Цифровий QR-паспорт борта та Серійний облік (S/N)</div>
+          <div style="background:#0F172A; color:#F8FAFC; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+            <div>
+              <div style="font-family:var(--font-mono); font-size:12px; font-weight:800; color:#34D399;">${esc(sn)} • VERIFIED MILTECH</div>
+              <div style="font-size:11px; color:#CBD5E1; margin-top:4px;">FC: H743 #FC-9921 • Тепловізор: #TH-4410 • Мотори: #MT-3115</div>
+              <div style="font-size:11px; color:#94A3B8; margin-top:2px;">Стенд: 4.8 кг тяга • Полігон: 18.5 км / 42 хв • ВТК: Допущено</div>
+            </div>
+            <svg width="56" height="56" viewBox="0 0 24 24" style="background:#FFFFFF; padding:4px; border-radius:6px; flex-shrink:0;">
+              <rect x="2" y="2" width="7" height="7" fill="#0F172A"/><rect x="15" y="2" width="7" height="7" fill="#0F172A"/>
+              <rect x="2" y="15" width="7" height="7" fill="#0F172A"/><rect x="11" y="11" width="4" height="4" fill="#0F172A"/>
+              <rect x="17" y="15" width="5" height="2" fill="#0F172A"/><rect x="15" y="19" width="7" height="3" fill="#0F172A"/>
+            </svg>
+          </div>
+        </div>
+      `;
+    }
     let crossLinksHtml = '';
     if (state.activeView === 'sales-orders' || state.activeView === 'wms-batch') {
       const linkedMes = DATASETS['mes-orders']?.rows.slice(0, 2) || [];
@@ -2833,6 +2916,7 @@
         </div>
       </div>
 
+      ${serialPassportHtml}
       ${hasScanPreview ? `
         <div class="inspector-section">
           <div class="inspector-sec-title">Скан-копія / Первинний документ</div>
