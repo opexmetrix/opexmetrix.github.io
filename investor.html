@@ -94,9 +94,72 @@
     padding-top: 6px; border-top: 1px solid rgba(148,163,184,0.15);
     font-size: 8.5pt; color: #64748B;
   }
+
+  @media screen {
+    body {
+      background: #03060C;
+      padding: 66px 0 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+    .slide {
+      border-radius: 16px;
+      border: 1px solid rgba(96, 165, 250, 0.28);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    body.deck-mode .slide {
+      display: none;
+    }
+    body.deck-mode .slide.active-slide {
+      display: flex;
+    }
+  }
+  @media print {
+    .deck-nav-bar, .angel-calc-bar { display: none !important; }
+  }
+  .deck-nav-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 54px;
+    background: rgba(7, 11, 20, 0.92); backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(96, 165, 250, 0.3);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 24px; z-index: 9999;
+  }
+  .nav-btn {
+    background: rgba(37, 99, 235, 0.22); border: 1px solid rgba(96, 165, 250, 0.45);
+    color: #F8FAFC; font-weight: 700; font-size: 13px;
+    padding: 7px 14px; border-radius: 8px; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-btn:hover { background: #2563EB; }
+  .nav-btn-green {
+    background: rgba(16, 185, 129, 0.22); border-color: rgba(52, 211, 153, 0.5); color: #A7F3D0;
+  }
+  .nav-btn-green:hover { background: #059669; color: #FFFFFF; }
 </style>
+
 </head>
 <body>
+<div class="deck-nav-bar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <strong style="font-size:15px;color:#F8FAFC;letter-spacing:-0.01em;">OPEXMETRIX • INVESTOR PITCH DECK</strong>
+    <span style="font-size:12px;color:#6EE7B7;background:rgba(16,185,129,0.16);padding:3px 10px;border-radius:999px;border:1px solid rgba(16,185,129,0.4);">$500k Angel Round (10% @ $5M)</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button type="button" class="nav-btn" onclick="prevSlide()">← Назад</button>
+    <span id="slide-counter" style="font-family:'Consolas',monospace;font-size:13px;color:#93C5FD;min-width:95px;text-align:center;">Всі 12 слайдів</span>
+    <button type="button" class="nav-btn" onclick="nextSlide()">Далі →</button>
+    <button type="button" class="nav-btn" id="btn-mode-toggle" onclick="toggleDeckMode()">🖥️ Послайдово (Клавіші ←/→)</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a class="nav-btn" href="./index.html" target="_blank">⚡ Жива ERP</a>
+    <a class="nav-btn" href="./pitch.html" target="_blank">🧮 Калькулятор ROI</a>
+    <a class="nav-btn nav-btn-green" href="./OpexMetrix_Investor_Pitch_Deck_2026.pdf" download>📥 Завантажити PDF</a>
+  </div>
+</div>
+
 
 <!-- SLIDE 1: HERO COVER -->
 <section class="slide">
@@ -572,5 +635,48 @@
   <div class="foot"><span>OpexMetrix • Seed / Angel Round 2026</span><span>All Rights Reserved • Confidential</span></div>
 </section>
 
+
+<script>
+  let curSlide = 0;
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  function updateSlides() {
+    const isDeck = document.body.classList.contains('deck-mode');
+    const counter = document.getElementById('slide-counter');
+    if (!isDeck) {
+      counter.textContent = 'Всі 12 слайдів';
+      return;
+    }
+    slides.forEach((s, i) => s.classList.toggle('active-slide', i === curSlide));
+    counter.textContent = `Слайд ${curSlide + 1} / ${slides.length}`;
+  }
+  function toggleDeckMode() {
+    const isDeck = document.body.classList.toggle('deck-mode');
+    document.getElementById('btn-mode-toggle').textContent = isDeck ? '📜 Показати всі слайди' : '🖥️ Послайдово (Клавіші ←/→)';
+    updateSlides();
+  }
+  function nextSlide() {
+    if (!document.body.classList.contains('deck-mode')) {
+      document.body.classList.add('deck-mode');
+      document.getElementById('btn-mode-toggle').textContent = '📜 Показати всі слайди';
+    } else {
+      curSlide = (curSlide + 1) % slides.length;
+    }
+    updateSlides();
+  }
+  function prevSlide() {
+    if (!document.body.classList.contains('deck-mode')) {
+      document.body.classList.add('deck-mode');
+      document.getElementById('btn-mode-toggle').textContent = '📜 Показати всі слайди';
+    } else {
+      curSlide = (curSlide - 1 + slides.length) % slides.length;
+    }
+    updateSlides();
+  }
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+  });
+</script>
 </body>
+
 </html>
