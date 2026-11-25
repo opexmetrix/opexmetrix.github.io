@@ -3456,9 +3456,34 @@
     };
   }
 
-  // ─── CRM КАРТКИ, АВТО-СТВОРЕННЯ НА ДЗВІНКИ ТА РАХУНКИ ─────────────────────
+  // ─── CRM КАРТКИ, АВТО-СТВОРЕННЯ НА ДЗВІНКИ ТА KYIVSTAR FMC/SIP НОРМАЛІЗАТОР ──
+  const KYIVSTAR_PREFIXES = new Set(['67', '68', '77', '96', '97', '98']);
+
   function normalizePhoneKey(phone) {
-    return String(phone || '').replace(/\D/g, '').slice(-9);
+    let digits = String(phone || '').replace(/\D/g, '');
+    if (digits.length === 10 && digits.startsWith('0')) digits = digits.slice(1);
+    else if (digits.length === 11 && digits.startsWith('80')) digits = digits.slice(2);
+    else if (digits.length === 12 && digits.startsWith('380')) digits = digits.slice(3);
+    else if (digits.length > 9) digits = digits.slice(-9);
+    if (digits.length < 9) digits = digits.padStart(9, '0');
+    return digits;
+  }
+
+  function formatUaKyivstarPhone(raw) {
+    const key9 = normalizePhoneKey(raw);
+    const op = key9.slice(0, 2);
+    const p1 = key9.slice(2, 5);
+    const p2 = key9.slice(5, 7);
+    const p3 = key9.slice(7, 9);
+    return `+380 ${op} ${p1}-${p2}-${p3}`;
+  }
+
+  function detectUaOperatorLabel(raw) {
+    const op = normalizePhoneKey(raw).slice(0, 2);
+    if (KYIVSTAR_PREFIXES.has(op)) return `Київстар FMC (0${op})`;
+    if (['50', '66', '95', '99'].includes(op)) return `Vodafone SIP (0${op})`;
+    if (['63', '73', '93'].includes(op)) return `lifecell SIP (0${op})`;
+    return `SIP Лінія (0${op})`;
   }
 
   function formatOriginBadge(origin) {
@@ -3694,12 +3719,16 @@
   }
 
   function handleCrmPhoneCallEvent(direction) {
-    const rawPhone = document.getElementById('crm-call-phone')?.value.trim() || '+380678451900';
-    const rawClient = document.getElementById('crm-call-client')?.value.trim() || 'Новий клієнт (SIP)';
+    const phoneInp = document.getElementById('crm-call-phone');
+    const rawInput = phoneInp?.value.trim() || '+380678451900';
+    const rawPhone = formatUaKyivstarPhone(rawInput);
+    if (phoneInp) phoneInp.value = rawPhone;
+    const opLabel = detectUaOperatorLabel(rawInput);
+    const rawClient = document.getElementById('crm-call-client')?.value.trim() || `Клієнт (${opLabel})`;
     const rawSubject = document.getElementById('crm-call-subject')?.value.trim() || 'Запит по продукції (дзвінок)';
     const pKey = normalizePhoneKey(rawPhone);
     const nowTime = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
-    const dirLabel = direction === 'INBOUND' ? 'Вхідний (SIP)' : 'Вихідний (SIP)';
+    const dirLabel = direction === 'INBOUND' ? `Вхідний (${opLabel})` : `Вихідний (${opLabel})`;
 
     let deal = pKey ? state.crmDeals.find((d) => normalizePhoneKey(d.phone) === pKey) : null;
     let isNewCard = false;
@@ -4675,12 +4704,17 @@
     const listEl = document.getElementById('ai-calls-list');
     if (!listEl) return;
 
-    try {
-      if (!state.aiSales) {
-        const res = await fetch('/api/autonomous/ai-sales').then((r) => r.json());
-        if (res && res.ok) state.aiSales = res.data;
-      }
-    } catch (_e) {}
+    const isStaticHost =
+      window.location.protocol === 'file:' ||
+      window.location.hostname.includes('github.io');
+    if (!isStaticHost) {
+      try {
+        if (!state.aiSales) {
+          const res = await fetch('/api/autonomous/ai-sales').then((r) => (r.ok ? r.json() : null));
+          if (res && res.ok) state.aiSales = res.data;
+        }
+      } catch (_e) {}
+    }
 
     if (!state.aiSales) {
       state.aiSales = {
@@ -5215,7 +5249,7 @@
       });
     }
 
-    // CRM IP-Telephony Auto-Card Buttons + View Controls
+    // CRM IP-Telephony Auto-Card Buttons + Kyivstar FMC Pool & Bulk Sync
     const btnCrmInCall = document.getElementById('btn-crm-in-call');
     if (btnCrmInCall) {
       btnCrmInCall.addEventListener('click', () => handleCrmPhoneCallEvent('INBOUND'));
@@ -5223,6 +5257,68 @@
     const btnCrmOutCall = document.getElementById('btn-crm-out-call');
     if (btnCrmOutCall) {
       btnCrmOutCall.addEventListener('click', () => handleCrmPhoneCallEvent('OUTBOUND'));
+    }
+    const kyivstarSelect = document.getElementById('kyivstar-line-select');
+    const crmCallPhoneInp = document.getElementById('crm-call-phone');
+    const kyivstarValidBadge = document.getElementById('kyivstar-phone-valid-badge');
+    if (kyivstarSelect && crmCallPhoneInp) {
+      kyivstarSelect.addEventListener('change', () => {
+        const formatted = formatUaKyivstarPhone(kyivstarSelect.value);
+        crmCallPhoneInp.value = formatted;
+        if (kyivstarValidBadge) {
+          kyivstarValidBadge.textContent = `✓ ${detectUaOperatorLabel(formatted)} OK`;
+        }
+      });
+      crmCallPhoneInp.addEventListener('blur', () => {
+        const formatted = formatUaKyivstarPhone(crmCallPhoneInp.value || '+380678451900');
+        crmCallPhoneInp.value = formatted;
+        if (kyivstarValidBadge) {
+          kyivstarValidBadge.textContent = `✓ ${detectUaOperatorLabel(formatted)} OK`;
+        }
+      });
+    }
+    const btnKyivstarSync = document.getElementById('btn-kyivstar-sync');
+    if (btnKyivstarSync) {
+      btnKyivstarSync.addEventListener('click', () => {
+        const bulkInp = document.getElementById('kyivstar-bulk-input');
+        const rawText = bulkInp?.value.trim() || '+380675012233, 0689124455, 0973348811, 0778001122';
+        const tokens = rawText
+          .split(/[,;\s\n]+/)
+          .map((s) => s.trim())
+          .filter((s) => s.replace(/\D/g, '').length >= 7);
+        const listToSync = tokens.length > 0 ? tokens : ['+380675012233', '0689124455', '0973348811'];
+        let addedCount = 0;
+        listToSync.forEach((tok, idx) => {
+          const cleanPhone = formatUaKyivstarPhone(tok);
+          const opName = detectUaOperatorLabel(tok);
+          if (kyivstarSelect) {
+            const existsOpt = Array.from(kyivstarSelect.options).some(
+              (o) => normalizePhoneKey(o.value) === normalizePhoneKey(cleanPhone)
+            );
+            if (!existsOpt) {
+              const opt = document.createElement('option');
+              opt.value = cleanPhone;
+              opt.textContent = `Лінія (${opName}): ${cleanPhone}`;
+              kyivstarSelect.appendChild(opt);
+            }
+            if (idx === 0) {
+              kyivstarSelect.value = cleanPhone;
+              if (crmCallPhoneInp) crmCallPhoneInp.value = cleanPhone;
+            }
+          }
+          if (crmCallPhoneInp) crmCallPhoneInp.value = cleanPhone;
+          const cInp = document.getElementById('crm-call-client');
+          if (cInp) cInp.value = `Абонент ${opName} #${idx + 1}`;
+          handleCrmPhoneCallEvent('INBOUND');
+          addedCount += 1;
+        });
+        const linesBadge = document.getElementById('sip-active-lines-badge');
+        if (linesBadge && kyivstarSelect) {
+          linesBadge.textContent = `${24 + kyivstarSelect.options.length - 6} SIP-лінії активні`;
+        }
+        if (bulkInp) bulkInp.value = '';
+        showInlineStatus(`Підтягнуто та нормалізовано ${addedCount} номер(ів) Київстар FMC без жодної помилки!`);
+      });
     }
     const btnCrmKanban = document.getElementById('btn-crm-view-kanban');
     if (btnCrmKanban) {

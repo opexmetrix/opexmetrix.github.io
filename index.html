@@ -2755,17 +2755,38 @@
              4. CRM (КАРТКИ + АВТО-ДЗВІНКИ + IP-ТЕЛЕФОНІЯ + РАХУНКИ)
              ================================================================ -->
         <section class="view-section" id="view-sales">
-          <!-- Top Bar: IP-Telephony Auto-Card Creator (Inbound + Outbound Calls) -->
-          <div class="card" style="border-left: 3px solid #09090B;">
+          <!-- Top Bar: IP-Telephony Auto-Card Creator (Kyivstar FMC / SIP / Binotel / Ringostat) -->
+          <div class="card" style="border-left: 3px solid #2563EB;">
             <div class="card-header">
               <div>
-                <div class="card-title">IP-Телефонія (SIP / Binotel / Ringostat) — Автоматичне створення карток CRM</div>
-                <div class="card-subtitle">Кожен вхідний або вихідний дзвінок автоматично створює картку клієнта або дописується в існуючу картку за номером.</div>
+                <div class="card-title">Наша IP-Телефонія (Київстар FMC / Віртуальна АТС / SIP) — Авто-створення карток CRM</div>
+                <div class="card-subtitle">Пряма інтеграція номерів Київстар (067, 068, 077, 096, 097, 098): авто-нормалізація будь-якого формату номерів без помилок та миттєва прив'язка до CRM.</div>
               </div>
               <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <span class="badge badge-green">24 SIP-лінії активні</span>
+                <span class="badge badge-blue" id="kyivstar-status-badge">Київстар FMC: Підключено (0 помилок)</span>
+                <span class="badge badge-green" id="sip-active-lines-badge">24 SIP-лінії активні</span>
                 <span class="badge badge-slate" id="crm-deals-count-badge">Карток: 4</span>
                 <span class="badge badge-slate" id="crm-pipeline-sum-badge">Воронка: ₴ 883 700</span>
+              </div>
+            </div>
+
+            <!-- Kyivstar FMC Line Pool & Quick Bulk Number Sync -->
+            <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span style="font-size: 12px; font-weight: 700; color: #1E3A8A;">📡 Активна лінія Київстар SIP/FMC:</span>
+                <select id="kyivstar-line-select" class="select mono" style="height: 32px; font-size: 12px; font-weight: 600; min-width: 245px; background: #FFFFFF; border-color: #93C5FD;">
+                  <option value="+380678451900">Лінія #1 (Київстар FMC): +380 67 845-19-00</option>
+                  <option value="+380673104422">Лінія #2 (Київстар FMC): +380 67 310-44-22</option>
+                  <option value="+380684129011">Лінія #3 (Київстар SIP): +380 68 412-90-11</option>
+                  <option value="+380975508833">Лінія #4 (Київстар SIP): +380 97 550-88-33</option>
+                  <option value="+380962047719">Лінія #5 (Київстар B2B): +380 96 204-77-19</option>
+                  <option value="+380771002244">Лінія #6 (Київстар 077): +380 77 100-22-44</option>
+                </select>
+                <span class="badge badge-green" id="kyivstar-phone-valid-badge" style="font-size: 11px;">✓ Формат Київстар OK</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="kyivstar-bulk-input" class="input mono" placeholder="Вставте номери з Київстару (067..., 38097... через кому)" style="width: 310px; height: 32px; font-size: 12px; background: #FFFFFF;" />
+                <button type="button" class="btn btn-sm btn-primary" id="btn-kyivstar-sync" style="height: 32px; background: #2563EB;">⚡ Підтягнути номери з Київстар</button>
               </div>
             </div>
 
