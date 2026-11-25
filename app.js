@@ -7417,6 +7417,84 @@
     `;
   }
 
+  // ─── AI Pre-Call Company Intelligence & Pitch Generator (Diana's Idea) ─────
+  window.runAiPreCallLookup = function (presetQuery) {
+    const inputEl = document.getElementById('ai-precall-query');
+    if (presetQuery && inputEl) {
+      inputEl.value = presetQuery;
+    }
+    const rawQuery = (inputEl ? inputEl.value : presetQuery || '').trim();
+    const q = rawQuery.toLowerCase();
+
+    let dossier = {
+      clientName: rawQuery || 'ПрАТ "Поділля-Метал ЧПК"',
+      callSubject: 'Заміна 1С/Excel: зв’язка Цех (ЧПК) + Склад WMS + AI-накладні',
+      scale: 'Виробництво • ~75 осіб • Оборот ~₴9.2 млн/міс (ТОВ з ПДВ + 2 ФОП)',
+      infra: '✓ 2 Склади (сировина + ГП) • ✓ Цех ЧПК (14 верстатів) • ✓ Відділ B2B (5 сейлзів)',
+      pain: '1С 8.3 УТП + Excel у цеху. Втрати на обрізках, ручних ТТН і знижках ~₴285,000/міс',
+      tier: 'ENTERPRISE / INDUSTRIAL ($12,500 – $24,000)',
+      script: '«Доброго дня! Бачу, у вас власний парк верстатів ЧПК і два склади сировини та готової продукції. Ми зараз для таких виробництв ставимо пряму зв’язку Цех ↔ Склад + AI-розпізнавання накладних із телефону комірника без 1С-програмістів — прибирає пересортицю й обрізки за 14 днів. Давайте покажу на вашій техкарті за 10 хвилин?»'
+    };
+
+    if (q.includes('гео') || q.includes('кадастр') || q.includes('антонін') || q.includes('земл')) {
+      dossier = {
+        clientName: rawQuery || 'ГеоКадастр Сервіс (Антоніна)',
+        callSubject: 'Облік виїзних бригад, GPS-приладів (GNSS/тахеометри) та маржі по кадастрових справах',
+        scale: 'Інженерно-геодезичний сервіс • ~18–25 інженерів • ~140 ділянок/міс (ТОВ + ФОП 3 гр.)',
+        infra: '✓ 6 виїзних геодезичних бригад • ✓ Парк GNSS-приймачів і тахеометрів • ✓ Архів XML обмінних файлів',
+        pain: 'Облік виїздів, пального, амортизації приладів та етапів погодження в Excel/Telegram. Не видно чистої маржі по кожній ділянці',
+        tier: 'CORE / GROWTH ($3,500 – $7,500)',
+        script: '«Доброго дня! Ми для геодезичних та землевпорядних компаній зробили готовий контур: трекінг статусу кожної кадастрової справи від виїзду бригади з GNSS-приймачем до видачі XML-файлу й підписання акту в Вчасно, плюс автоматичний розрахунок чистої маржі кожного виїзду за мінусом пального й геодезиста. Покажу за 7 хвилин на живому прикладі?»'
+      };
+    } else if (
+      q.includes('slovak') ||
+      q.includes('слова') ||
+      q.includes('košic') ||
+      q.includes('bratislav') ||
+      q.includes('s.r.o') ||
+      q.includes('hungar') ||
+      q.includes('угор') ||
+      q.includes('kft') ||
+      q.includes('kovo')
+    ) {
+      dossier = {
+        clientName: rawQuery || 'KOVO-Tech Manufacturing s.r.o. (Košice, SK)',
+        callSubject: 'CEE Industrial MES + WMS + AI OCR Digital Twin Layer (EU VAT / Pohoda & Helios Bridge)',
+        scale: 'CEE Industrial SME (Slovakia / Hungary) • ~60 працівників • Оборот ~€420,000/міс',
+        infra: '✓ Склад комплектуючих (WMS штрихкоди) • ✓ 11 ліній металообробки / збірки • ✓ Експорт в ЄС (EUR)',
+        pain: 'Локальна бухгалтерія в Pohoda / Money S3 / Kulcs-Soft відірвана від реального цеху (Excel). Втрати часу на ручне зведення партій та інвойсів ~€6,500/міс',
+        tier: 'CEE INDUSTRIAL MES+WMS ($14,000 – $26,000 / €13k–€24k)',
+        script: '«Hi! I noticed your production facility in Slovakia operates both assembly lines and component warehouses. Most plants we talk to in Košice and Bratislava use Pohoda or Helios for tax reporting, while the actual shop floor and warehouse run on Excel. We deploy an AI-powered MES + WMS & Digital Twin layer in 14 days that tracks real-time batch margins and scans supplier invoices automatically without touching your tax software. Open to a 10-minute live demo this week?»'
+      };
+    } else if (rawQuery) {
+      dossier = {
+        clientName: rawQuery,
+        callSubject: `Автоматизація складу, цеху та фінансів для ${rawQuery} (без 1С/Excel)`,
+        scale: `B2B Компанія («${rawQuery}») • ~45–90 працівників • Оборот ~₴6.5–12 млн/міс`,
+        infra: '✓ Складський контур WMS • ✓ Виробнича/операційна ділянка • ✓ B2B відділ продажів + ТТН',
+        pain: 'Ручне перенесення первинних накладних у 1С/BAS + розрив між складом і фінансами (~25–40 год/тиждень втрат)',
+        tier: 'GROWTH / ENTERPRISE ($7,500 – $18,000)',
+        script: `«Доброго дня! Перед дзвінком проаналізували профіль "${rawQuery}" — бачимо активну складську та B2B-логістику. Ми зараз допомагаємо таким компаніям за 14 днів прибрати ручне вбивання накладних через AI-сканер і зв'язати склад, виробництво та P&L власника в одному вікні замість 1С та Excel. Маєте 7 хвилин цього тижня глянути живий демо-стенд під вашу специфіку?»`
+      };
+    }
+
+    const elScale = document.getElementById('ai-dos-scale');
+    const elInfra = document.getElementById('ai-dos-infra');
+    const elPain = document.getElementById('ai-dos-pain');
+    const elTier = document.getElementById('ai-dos-tier');
+    const elScript = document.getElementById('ai-dos-script');
+    if (elScale) elScale.textContent = dossier.scale;
+    if (elInfra) elInfra.textContent = dossier.infra;
+    if (elPain) elPain.textContent = dossier.pain;
+    if (elTier) elTier.textContent = dossier.tier;
+    if (elScript) elScript.textContent = dossier.script;
+
+    const clientInput = document.getElementById('crm-call-client');
+    const subjectInput = document.getElementById('crm-call-subject');
+    if (clientInput) clientInput.value = dossier.clientName;
+    if (subjectInput) subjectInput.value = dossier.callSubject;
+  };
+
   // ─── Boot ──────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     bindEvents();

@@ -2785,8 +2785,39 @@
                 <span class="badge badge-green" id="kyivstar-phone-valid-badge" style="font-size: 11px;">✓ Формат Київстар OK</span>
               </div>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="kyivstar-bulk-input" class="input mono" placeholder="Вставте номери з Київстару (067..., 38097... через кому)" style="width: 310px; height: 32px; font-size: 12px; background: #FFFFFF;" />
-                <button type="button" class="btn btn-sm btn-primary" id="btn-kyivstar-sync" style="height: 32px; background: #2563EB;">⚡ Підтягнути номери з Київстар</button>
+                <input type="text" id="kyivstar-bulk-input" class="input mono" placeholder="Вставте номери з Київстару (067..., 38097... через кому)" style="width: 280px; height: 32px; font-size: 12px; background: #FFFFFF;" />
+                <button type="button" class="btn btn-sm btn-primary" id="btn-kyivstar-sync" style="height: 32px; background: #2563EB;">⚡ Підтягнути номери</button>
+              </div>
+            </div>
+
+            <!-- NEW (Diana's Idea): AI Pre-Call Company Intelligence & Pitch Generator -->
+            <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 6px; padding: 12px 14px; margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
+                <div>
+                  <div style="font-size: 13px; font-weight: 800; color: #14532D;">🧠 AI-Розвідка Компанії перед Дзвінком (Масштаб • Склади • Верстати • Що пропонувати)</div>
+                  <div style="font-size: 11.5px; color: #166534;">Введіть назву компанії, ЄДРПОУ або сайт — AI за 2 секунди визначить наявність цеху/складів і згенерує персональний скрипт дзвінка:</div>
+                </div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-sm btn-subtle" style="font-size: 11px; height: 28px;" onclick="runAiPreCallLookup('ПрАТ Поділля-Метал ЧПК (38192044)')">🏭 Завод ЧПК</button>
+                  <button type="button" class="btn btn-sm btn-subtle" style="font-size: 11px; height: 28px;" onclick="runAiPreCallLookup('ГеоКадастр Сервіс Антоніна')">📐 Геодезія / Кадастр</button>
+                  <button type="button" class="btn btn-sm btn-subtle" style="font-size: 11px; height: 28px;" onclick="runAiPreCallLookup('KOVO-Tech Manufacturing s.r.o. (Košice, Slovakia)')">🇸🇰 Завод Словаччина</button>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="ai-precall-query" class="input" value="ПрАТ Поділля-Метал ЧПК (ЄДРПОУ 38192044)" placeholder="Назва компанії, ЄДРПОУ, домен або країна (UA / SK / PL)..." style="flex: 1; min-width: 240px; height: 36px; background: #FFFFFF;" />
+                <button type="button" class="btn btn-primary" id="btn-ai-precall-scan" style="height: 36px; background: #15803D;" onclick="runAiPreCallLookup()">🔍 Зібрати AI-Досьє та Скрипт</button>
+              </div>
+              <div id="ai-precall-result" style="margin-top: 10px; background: #FFFFFF; border: 1px solid #86EFAC; border-radius: 6px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-bottom: 8px;">
+                  <div><strong style="color:#1E3A8A;">🏢 Масштаб та Оборот:</strong><br><span id="ai-dos-scale">Виробництво • ~75 осіб • Оборот ~₴9.2 млн/міс (ТОВ з ПДВ + 2 ФОП)</span></div>
+                  <div><strong style="color:#15803D;">🏭 Виявлена Інфраструктура:</strong><br><span id="ai-dos-infra">✓ 2 Склади (сировина + ГП) • ✓ Цех ЧПК (14 верстатів) • ✓ Відділ B2B (5 сейлзів)</span></div>
+                  <div><strong style="color:#B45309;">⚠️ Вузьке місце / Старий софт:</strong><br><span id="ai-dos-pain">1С 8.3 УТП + Excel у цеху. Втрати на обрізках, ручних ТТН і знижках ~₴285,000/міс</span></div>
+                  <div><strong style="color:#7C3AED;">💰 Рекомендований Пакет:</strong><br><span id="ai-dos-tier" class="mono">ENTERPRISE / INDUSTRIAL ($12,500 – $24,000)</span></div>
+                </div>
+                <div style="background: #EFF6FF; border-left: 3px solid #2563EB; padding: 8px 12px; border-radius: 4px; color: #1E3A8A;">
+                  <strong>🎙️ Готовий персональний хук для дзвінка (перші 20 секунд):</strong>
+                  <div id="ai-dos-script" style="margin-top: 3px; color: #0F172A; font-style: italic;">«Доброго дня! Бачу, у вас власний парк верстатів ЧПК і два склади сировини та готової продукції. Ми зараз для таких виробництв ставимо пряму зв'язку Цех ↔ Склад + AI-розпізнавання накладних із телефону комірника без 1С-програмістів — прибирає пересортицю й обрізки за 14 днів. Давайте покажу на вашій техкарті за 10 хвилин?»</div>
+                </div>
               </div>
             </div>
 
