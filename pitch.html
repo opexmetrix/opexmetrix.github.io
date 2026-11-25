@@ -413,14 +413,19 @@
       </div>
     </section>
 
-    <!-- Section 2: Interactive ROI Calculator (Realistic Turnover Scale: Default 4.5M UAH/month) -->
+    <!-- Section 2: Interactive ROI Calculator (Upgraded V2 with Presets & Dynamic Tier Payback) -->
     <section class="section-card">
       <div class="section-header">
         <div>
-          <div class="section-title">2. Інтерактивний Калькулятор Окупності (Налаштований на реальний оборот українського бізнесу)</div>
-          <div class="section-sub">Пересуньте повзунки під ваш щомісячний оборот (від ₴ 500 тис. для МСБ до ₴ 50 млн для великого виробництва):</div>
+          <div class="section-title">2. Інтерактивний Калькулятор Окупності та Підбору Тарифу</div>
+          <div class="section-sub">Оберіть масштаб або пересуньте повзунки під ваш щомісячний оборот (від ₴ 500 тис. до ₴ 50 млн):</div>
         </div>
-        <span class="badge badge-green" id="pitch-payback-badge">Повна окупність: 14 днів</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="setPitchPreset(1500000, 2.8, 35000)">🏪 МСБ (₴1.5 млн)</button>
+          <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="setPitchPreset(4500000, 3.5, 65000)">🏭 Цех / Середній (₴4.5 млн)</button>
+          <button type="button" class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="setPitchPreset(25000000, 4.2, 180000)">🏢 Холдинг / Завод (₴25 млн)</button>
+          <span class="badge badge-green" id="pitch-payback-badge">Повна окупність: 18 днів</span>
+        </div>
       </div>
 
       <div class="grid-2" style="align-items: stretch;">
@@ -490,12 +495,19 @@
                 <span>📄 AI-Розпізнавання накладних з телефону/ПК та авто-облік:</span>
                 <strong class="mono" id="out-break-staff">+₴ 55 250 / міс</strong>
               </div>
+              <div style="display: flex; justify-content: space-between; margin-top: 4px; padding-top: 8px; border-top: 1px dashed #86EFAC;">
+                <span>🎯 Рекомендований контур під ваш масштаб:</span>
+                <strong class="mono" id="out-rec-tier" style="color: var(--primary);">BUSINESS ECOSYSTEM ($3,500)</strong>
+              </div>
             </div>
           </div>
 
           <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #BBF7D0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <span style="font-size: 12.5px; font-weight: 600; color: #166534;">Перевірте розпізнавання документів, цех і склад наживо:</span>
-            <a href="./index.html" class="btn btn-primary" style="padding: 7px 14px; font-size: 12.5px;">Відкрити Інтерактивне Демо →</a>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="./index.html" class="btn btn-primary" style="padding: 7px 14px; font-size: 12.5px;">⚡ Демо: Пульс &amp; Цех →</a>
+              <a href="./systems.html" class="btn btn-outline" style="padding: 7px 14px; font-size: 12.5px;">📊 Демо: Облік &amp; What-If →</a>
+            </div>
           </div>
         </div>
       </div>
@@ -616,17 +628,17 @@
           </div>
         </div>
 
-        <!-- Enterprise Flagship ($32,000 On-Premise) -->
+        <!-- Enterprise Flagship ($12,000 – $32,000 On-Premise) -->
         <div class="tier-box featured">
           <div>
             <span class="badge badge-blue">★ ENTERPRISE ON-PREMISE • ХОЛДИНГИ, ЗАВОДИ, ДЕВЕЛОПМЕНТ &amp; MILTECH</span>
-            <h3 style="font-size: 20px; margin: 10px 0 4px;">ENTERPRISE &amp; DEFENSE AXIOM CORE</h3>
+            <h3 style="font-size: 20px; margin: 10px 0 4px;">ENTERPRISE &amp; MES AXIOM CORE</h3>
             <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 14px;">
               Автономний промисловий та фінансовий контур на власних серверах клієнта (On-Premise / Air-Gapped) із передачею прав.
             </p>
-            <div class="price-big">$32,000 <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">повне впровадження (поетапно: $2k + 3×$10k)</span></div>
+            <div class="price-big">$12,000 – $32,000 <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">під ключ (Shadow Mode 14 днів)</span></div>
             <div style="font-size: 14.5px; font-weight: 700; color: var(--text-main); margin-top: 4px;">
-              Безстрокова ліцензія On-Premise • Виділений інженер SLA 24/7
+              + $1,200 / міс (Dedicated Server / On-Premise + SLA 24/7)
             </div>
             <hr style="border: none; border-top: 1px solid var(--border); margin: 14px 0;" />
             <ul style="font-size: 13.5px; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; color: var(--text-main);">
@@ -664,6 +676,13 @@
       return '₴ ' + Math.round(Number(n) || 0).toLocaleString('uk-UA');
     }
 
+    function setPitchPreset(rev, leak, accCost) {
+      document.getElementById('rng-rev').value = rev;
+      document.getElementById('rng-leak').value = leak;
+      document.getElementById('rng-acc-cost').value = accCost;
+      recalcEnterprisePitchRoi();
+    }
+
     function recalcEnterprisePitchRoi() {
       const rev = Number(document.getElementById('rng-rev').value || 4500000);
       const leakPct = Number(document.getElementById('rng-leak').value || 3.5);
@@ -680,15 +699,27 @@
 
       const monthlyTotal = marginAndProc + mesSaved + staffSaved;
       const annualTotal = monthlyTotal * 12;
-      const paybackDays = Math.max(5, Math.min(28, Math.round((95000 / Math.max(1, monthlyTotal)) * 30)));
+
+      let tierName = 'SMB FAST-START ($950)';
+      let setupUah = 40000;
+      if (rev >= 15000000) {
+        tierName = 'ENTERPRISE AXIOM CORE ($12k–$32k)';
+        setupUah = 700000;
+      } else if (rev >= 2500000) {
+        tierName = 'INDUSTRIAL & BUILD ($3,500–$12,500)';
+        setupUah = 145000;
+      }
+      const paybackDays = Math.max(5, Math.min(45, Math.round((setupUah / Math.max(1, monthlyTotal)) * 30)));
 
       document.getElementById('out-yearly-save').textContent = '+' + fmtUahPitch(annualTotal) + ' / рік';
       document.getElementById('out-monthly-save').innerHTML = 'або <strong>+' + fmtUahPitch(monthlyTotal) + ' щомісяця</strong> збереженого грошового потоку';
       document.getElementById('out-break-margin').textContent = '+' + fmtUahPitch(marginAndProc) + ' / міс';
       document.getElementById('out-break-mes').textContent = '+' + fmtUahPitch(mesSaved) + ' / міс';
       document.getElementById('out-break-staff').textContent = '+' + fmtUahPitch(staffSaved) + ' / міс';
+      document.getElementById('out-rec-tier').textContent = tierName;
       document.getElementById('pitch-payback-badge').textContent = 'Повна окупність: ' + paybackDays + ' днів';
     }
+    window.addEventListener('DOMContentLoaded', recalcEnterprisePitchRoi);
   </script>
 </body>
 </html>
